@@ -1,0 +1,46 @@
+formatVersion: 1
+inputs: {}
+resources:
+  Cloud_Ansible_1:
+    type: Cloud.Ansible
+    properties:
+      host: '${resource.Cloud_Machine_1.*}'
+      osType: linux
+      account: ahugla-ansible
+      username: root
+      inventoryFile: /etc/ansible/hosts
+      playbooks:
+        provision:
+          - /etc/ansible/playbooks/playbook_vim.yml
+      privateKeyFile: /root/.ssh/id_rsa
+      maxConnectionRetries: 10
+      groups:
+        - myservers
+  Cloud_Machine_1:
+    type: Cloud.Machine
+    properties:
+      image: ahugla-Linux
+      flavor: ahugla-small
+      folderName: FromCAS
+      customizationSpec: Linux
+      networks:
+        - name: '${resource.Cloud_Network_1.name}'
+          assignment: static
+          network: '${resource.Cloud_Network_1.id}'
+      constraints:
+        - tag: 'Cluster:Compute'
+      cloudConfig: |
+        packages: 
+          - python
+        runcmd:
+          - touch /etc/cloud/cloud-init.disabled
+        users:
+          - name: root
+            lock-passwd: false
+            ssh-authorized-keys: 
+              - ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDXmuNQOOQvtxuoV9lznGJvGGi8wsmph/0WYX6I66b1s287dOGRTbevTtYNw7pXHInyEDNLevwIg1LmRD2nyHEUpREeJawZue/7KX6YX/x4yVJpU2WRkFOS/niBREPc7hkKRYgMPPh+rS07elfnt8ppIU/QO2rOInbzem3v1OP4F+3Q21jJWx6RnqOOPI7og639RfmWUxN870jr+QOz2R4s5Ehy1g1JcIqyKZtoOCEqpkTRTee4stTKBHJNiTBGrA+wsLsI5IxEgeQArlELo06wz//+0iUaAR1HEeVaFdlLuu8DtgJiBVyzX5PZKgCNKObMZkkGxyaxTsbUad+QTcGj root@vra-vmm-0022
+  Cloud_Network_1:
+    type: Cloud.Network
+    properties:
+      name: mynet01
+      networkType: existing
