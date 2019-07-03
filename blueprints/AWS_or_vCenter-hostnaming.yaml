@@ -1,0 +1,41 @@
+formatVersion: 1
+inputs:
+  VMname:
+    title: Nom de la VM
+    type: string
+    default: vm-num-1
+  Location:
+    title: Choisir la destination
+    type: string
+    default: 'Zone:LaDefense'
+    enum:
+      - 'Zone:LaDefense'
+      - 'Zone:AWS-Paris'
+resources:
+  Cloud_Machine_1:
+    type: Cloud.Machine
+    properties:
+      image: ahugla-Linux
+      flavor: ahugla-small
+      customizationSpec: Linux
+      folderName: FromCAS
+      newName: '${input.VMname}'
+      sshKeyName: aws_pro_paris
+      networks:
+        - name: '${resource.Cloud_Network_1.name}'
+          assignment: static
+          assignPublicIpAddress: true
+          network: '${resource.Cloud_Network_1.id}'
+      constraints:
+        - tag: '${input.Location}'
+      cloudConfig: |
+        packages: 
+          - vim
+        runcmd:
+          - echo "runcmd fonctionne" > /tmp/OK.log
+          - touch /etc/cloud/cloud-init.disabled
+  Cloud_Network_1:
+    type: Cloud.Network
+    properties:
+      name: mynet01
+      networkType: existing
