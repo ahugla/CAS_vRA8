@@ -1,0 +1,30 @@
+formatVersion: 1
+inputs: {}
+resources:
+  Cloud_NSX_LoadBalancer_1:
+    type: Cloud.NSX.LoadBalancer
+    properties:
+      name: LB
+      network: '${resource.Cloud_NSX_Network_1.name}'
+      routes: []
+      instances: '${resource.Cloud_vSphere_Machine_1.id}'
+      internetFacing: false
+  Cloud_vSphere_Machine_1:
+    type: Cloud.vSphere.Machine
+    properties:
+      image: ahugla-Linux
+      flavor: ahugla-small
+      count: 2
+      folderName: FromCAS
+      customizationSpec: Linux
+      constraints:
+        - tag: 'Cluster:Compute'
+      networks:
+        - name: '${resource.Cloud_NSX_Network_1.id}'
+          network: '${resource.Cloud_NSX_Network_1.id}'
+          assignment: static
+  Cloud_NSX_Network_1:
+    type: Cloud.NSX.Network
+    properties:
+      name: my network
+      networkType: existing
