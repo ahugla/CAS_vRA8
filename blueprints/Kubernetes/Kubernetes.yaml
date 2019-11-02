@@ -1,0 +1,81 @@
+formatVersion: 1
+inputs:
+  NbreNode:
+    description: Nombre de kubernetes nodes
+    type: number
+    default: 2
+    minimum: 1
+    maximum: 4
+  rootPasswd:
+    description: Password root de la VM master K8S.
+    type: string
+resources:
+  K8S_Master:
+    type: Cloud.Machine
+    metadata:
+      layoutPosition:
+        - 0
+        - 0
+    properties:
+      image: CentOS7
+      flavor: moyen
+      customizationSpec: Linux
+      networks:
+        - network: '${resource.Cloud_Network_1.id}'
+          assignPublicIpAddress: static
+      cloudConfig: |
+        #cloud-config
+        runcmd:
+          - sleep 30
+          - touch /etc/cloud/cloud-init.disabled
+          - cd /tmp
+          - curl -O https://raw.githubusercontent.com/ahugla/vRA/master/SoftwareComponents/Kubernetes-kubeadm/K8S-prepare.sh
+          - curl -O https://raw.githubusercontent.com/ahugla/vRA/master/SoftwareComponents/Kubernetes-kubeadm/K8S-MasterConfig.sh
+          - chmod 755 K8S-prepare.sh
+          - chmod 755 K8S-MasterConfig.sh
+          - /tmp/K8S-prepare.sh
+          - /tmp/K8S-MasterConfig.sh
+          - rm -f K8S-prepare.sh
+          - rm -f K8S-MasterConfig.sh
+  K8S_Nodes:
+    type: Cloud.Machine
+    dependsOn:
+      - K8S_Master
+    metadata:
+      layoutPosition:
+        - 0
+        - 1
+    properties:
+      image: CentOS7
+      flavor: petit
+      count: '${input.NbreNode}'
+      customizationSpec: Linux
+      networks:
+        - network: '${resource.Cloud_Network_1.id}'
+          assignPublicIpAddress: static
+      cloudConfig: |
+        #cloud-config
+        runcmd:
+          - sleep 300
+          - touch /etc/cloud/cloud-init.disabled  # evite d'executer cloud-init au reboot
+          - cd /tmp
+          - curl -O https://raw.githubusercontent.com/ahugla/vRA/master/SoftwareComponents/Kubernetes-kubeadm/K8S-prepare.sh
+          - curl -O https://raw.githubusercontent.com/ahugla/vRA/master/SoftwareComponents/Kubernetes-kubeadm/K8S-JoinCluster.sh
+          - chmod 755 K8S-prepare.sh
+          - chmod 755 K8S-JoinCluster.sh
+          - /tmp/K8S-prepare.sh
+          - yum install -y sshpass
+          - sshpass -p ${input.rootPasswd} scp -o StrictHostKeyChecking=no -r root@${resource.K8S_Master.address}:/tmp/k8stoken /tmp/k8stoken
+          - varTokenToJoin=`cat /tmp/k8stoken`
+          - /tmp/K8S-JoinCluster.sh $varTokenToJoin  ${resource.K8S_Master.address}
+          - rm -f K8S-prepare.sh
+          - rm -f K8S-JoinCluster.sh
+          
+  Cloud_Network_1:
+    type: Cloud.Network
+    metadata:
+      layoutPosition:
+        - 1
+        - 0
+    properties:
+      networkType: existing
