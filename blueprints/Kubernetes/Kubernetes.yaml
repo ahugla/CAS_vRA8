@@ -22,7 +22,7 @@ resources:
       customizationSpec: Linux
       networks:
         - network: '${resource.Cloud_Network_1.id}'
-          assignPublicIpAddress: static
+          assignment: static
       cloudConfig: |
         #cloud-config
         runcmd:
@@ -52,7 +52,7 @@ resources:
       customizationSpec: Linux
       networks:
         - network: '${resource.Cloud_Network_1.id}'
-          assignPublicIpAddress: static
+          assignment: static
       cloudConfig: |
         #cloud-config
         runcmd:
