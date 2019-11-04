@@ -37,6 +37,8 @@ resources:
           - /tmp/K8S-MasterConfig.sh
           - rm -f K8S-prepare.sh
           - rm -f K8S-MasterConfig.sh
+          
+          
   K8S_Nodes:
     type: Cloud.Machine
     dependsOn:
@@ -56,7 +58,11 @@ resources:
       cloudConfig: |
         #cloud-config
         runcmd:
-          - sleep 300
+          - echo "SLEEP STARTING ..."
+          - sleep 300     # Donne le temps au master d'installer Kubernetes
+          - echo "resource.K8S_Master.address = " ${resource.K8S_Master.address}      # Recupere souvent l'IP flannel =>  NO OK
+          - echo "resource.K8S_Master.networks.address = " ${resource.K8S_Master.networks.address}      # Tableau des IPs des vnics  =>  NO OK
+          - echo "resource.K8S_Master.networks.address[0] = " ${resource.K8S_Master.networks.address[0]}   # Premiere IP  =>  OK
           - touch /etc/cloud/cloud-init.disabled  # evite d'executer cloud-init au reboot
           - cd /tmp
           - curl -O https://raw.githubusercontent.com/ahugla/vRA/master/SoftwareComponents/Kubernetes-kubeadm/K8S-prepare.sh
@@ -65,9 +71,9 @@ resources:
           - chmod 755 K8S-JoinCluster.sh
           - /tmp/K8S-prepare.sh
           - yum install -y sshpass
-          - sshpass -p ${input.rootPasswd} scp -o StrictHostKeyChecking=no -r root@${resource.K8S_Master.address}:/tmp/k8stoken /tmp/k8stoken
+          - sshpass -p ${input.rootPasswd} scp -o StrictHostKeyChecking=no -r root@${resource.K8S_Master.networks.address[0]}:/tmp/k8stoken /tmp/k8stoken
           - varTokenToJoin=`cat /tmp/k8stoken`
-          - /tmp/K8S-JoinCluster.sh $varTokenToJoin  ${resource.K8S_Master.address}
+          - /tmp/K8S-JoinCluster.sh $varTokenToJoin ${resource.K8S_Master.networks.address[0]}
           - rm -f K8S-prepare.sh
           - rm -f K8S-JoinCluster.sh
           
