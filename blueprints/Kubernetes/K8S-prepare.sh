@@ -2,8 +2,8 @@
 #SOURCE : https://mapr.com/blog/making-data-actionable-at-scale-part-2-of-3/
 
 # ALEX H.
-# 10 Octobre 2019
-# v1.8
+# 9 Decembre 2019
+# v1.9
 
 # USAGE
 # -----
@@ -15,6 +15,18 @@
 # chmod 755 $fichierSRC
 # ./$fichierSRC
 # rm -f $fichierSRC
+
+
+# Test nombre vCPU
+echo "Test nombre vCPU"
+nbre_vCPU=`cat /proc/cpuinfo | grep processor | wc -l`
+if [ $nbre_vCPU -ge 2 ]
+then
+  echo "Nombre de cpu superieur ou egal a 2 => OK"
+else
+  echo "ERROR : PAS ASSEZ DE vCPU (2 minimum)"
+  exit
+fi
 
 
 # Log $PATH
@@ -89,8 +101,13 @@ EOF
 
 # Install Kubernetes and start it
 yum install -y kubelet kubeadm kubectl --disableexcludes=kubernetes
+
+kubeadm init # Verifie des pre-requis (comme le nombre de cpu) et cree le fichier de config de kubelet: /var/lib/kubelet/config.yaml
+
 systemctl start kubelet
 systemctl enable kubelet
+
+
 
 
 # CONFIGURER LE REBOOT DANS LE SOFTWARE COMPONENT
