@@ -17,8 +17,8 @@ resources:
         - 0
         - 0
     properties:
-      image: CentOS7
-      flavor: moyen
+      image: CentOS
+      flavor: Medium # 2 vCPU
       customizationSpec: Linux
       networks:
         - network: '${resource.Cloud_Network_1.id}'
@@ -48,8 +48,8 @@ resources:
         - 0
         - 1
     properties:
-      image: CentOS7
-      flavor: petit
+      image: CentOS
+      flavor: Medium # 2 vCPU
       count: '${input.NbreNode}'
       customizationSpec: Linux
       networks:
@@ -58,6 +58,7 @@ resources:
       cloudConfig: |
         #cloud-config
         runcmd:
+          - touch /etc/cloud/cloud-init.disabled
           - echo "SLEEP STARTING ..."
           - sleep 300     # Donne le temps au master d'installer Kubernetes
           - echo "resource.K8S_Master.address = " ${resource.K8S_Master.address}      # Recupere souvent l'IP flannel =>  NO OK
