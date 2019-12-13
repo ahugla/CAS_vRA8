@@ -1,0 +1,40 @@
+formatVersion: 1
+inputs:
+  Wavefront_Key:
+    title: wavefront key
+    type: string
+    description: User Key required to send data to wavefront
+resources:
+  VM:
+    type: Cloud.Machine
+    metadata:
+      layoutPosition:
+        - 0
+        - 0
+    properties:
+      image: CentOS
+      flavor: Small
+      cloudConfig: |
+        #cloud-config
+        packages:
+          - git
+        runcmd:
+          - touch /etc/cloud/cloud-init.disabled
+          - cd /tmp 
+          - curl -O https://raw.githubusercontent.com/ahugla/Wavefront/master/distributed_tracing/beachshirts_demo/beachshirt_app.sh
+          - chmod 755 beachshirt_app.sh
+          - /tmp/beachshirt_app.sh ${input.Wavefront_Key}
+          - rm -f /tmp/beachshirt_app.sh
+      networks:
+        - name: '${Cloud_Network_1.name}'
+          network: '${resource.Cloud_Network_1.id}'
+          assignment: static
+  Cloud_Network_1:
+    type: Cloud.Network
+    metadata:
+      layoutPosition:
+        - 1
+        - 0
+    properties:
+      name: MonReseau
+      networkType: existing
