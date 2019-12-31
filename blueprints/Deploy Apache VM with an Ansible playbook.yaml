@@ -1,0 +1,61 @@
+formatVersion: 1
+inputs:
+  Application:
+    type: string
+    title: Que voulez vous installer ?
+    enum:
+      - apache
+      - tomcat
+resources:
+  Cloud_Ansible_1:
+    type: Cloud.Ansible
+    metadata:
+      layoutPosition:
+        - 0
+        - 0
+    properties:
+      host: '${resource.Cloud_Machine_1.*}'
+      osType: linux
+      account: Ansible Controller
+      username: root
+      privateKeyFile: /root/.ssh/id_rsa
+      inventoryFile: /etc/ansible/hosts
+      playbooks:
+        provision:
+          - '/etc/ansible/playbooks/playbook_${input.Application}.yml'
+      maxConnectionRetries: 10
+      groups:
+        - '${input.Application}'
+  Cloud_Machine_1:
+    type: Cloud.Machine
+    metadata:
+      layoutPosition:
+        - 1
+        - 0
+    properties:
+      image: CentOS
+      flavor: Small
+      customizationSpec: Linux
+      networks:
+        - network: '${resource.Cloud_Network_1.id}'
+          assignment: static
+      cloudConfig: |
+        packages:
+          - python
+        runcmd:
+          - touch /etc/cloud/cloud-init.disabled
+        users:
+          - name: root
+            lock-passwd: false
+            ssh-authorized-keys: 
+              - ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC4w233TdMY+gvxgDI1pBWKRzixxpsn9OXbzWHjKxEKCw5wq2JNya7oZy4ac6MkHRWYTrmEmhJetShW6DO9FQJqtB8XaPvuim48x0Tprou8K3tcivCOOprvrUx1gAFz183aGjeHg+7nevwNAwxMfZNG3yJGA3uKnLNRJNnm7uC8JGZW1Zi8NJR1oiq+T8B9o/x1d/dpYmsdk4HXwsDMFKcN2i8nznzRlHaHhHoMOsJeBBnLIyrHRyrYrmr6eHn9PGHV2R69SjjfXilT/1ZQ5RL5tYX6nlLpFGqJzFUIlWaCrmOnGcwNnL8SQKh0l8B7/5LEgO3y7oOoXIlGldABvMNP root@vra-000263
+  Cloud_Network_1:
+    type: Cloud.Network
+    metadata:
+      layoutPosition:
+        - 2
+        - 0
+    properties:
+      networkType: existing
+      constraints:
+        - tag: 'netprofile:nsx'
