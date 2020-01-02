@@ -1,0 +1,83 @@
+inputs:
+  nbre_Nodes:
+    title: Nombre de noeuds ?
+    type: integer
+    default: 2
+    minimum: 1
+    maximum: 3
+  titoVersion:
+    title: Version de Tito ?
+    type: string
+    description: Version de code de Tito
+    default: V1.9.6
+    enum:
+      - V1.9.6
+      - V1.9.4
+      - V1.8.9
+      - V1.7.1
+      - v1.55
+resources:
+  LB_front:
+    type: Cloud.LoadBalancer
+    metadata:
+      layoutPosition:
+        - 0
+        - 0
+    properties:
+      routes:
+        - protocol: HTTP
+          port: '80'
+          instanceProtocol: HTTP
+          instancePort: '80'
+          healthCheckConfiguration:
+            protocol: HTTP
+            port: '80'
+            urlPath: /
+            intervalSeconds: 60
+            timeoutSeconds: 30
+            unhealthyThreshold: 10
+            healthyThreshold: 1
+      network: '${resource.Cloud_Network_1.id}'
+      instances:
+        - '${resource.VM_web.id}'
+      internetFacing: false
+  VM_web:
+    type: Cloud.Machine
+    metadata:
+      layoutPosition:
+        - 0
+        - 1
+    properties:
+      count: '${input.nbre_Nodes}'
+      image: CentOS
+      flavor: Small
+      cloudConfig: |
+        #cloud-config
+        packages:
+          - git
+        runcmd:
+          - touch /etc/cloud/cloud-init.disabled
+          - rpm -Uvh https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
+          - rpm -Uvh http://rpms.famillecollet.com/enterprise/remi-release-7.rpm
+          - yum --enablerepo=remi,remi-php72 install -y httpd php php-common
+          - systemctl start httpd
+          - systemctl enable httpd
+          - cd /tmp
+          - git clone https://github.com/vmeoc/Tito.git  /var/www/html           
+          - cd /var/www/html
+          - git checkout ${input.titoVersion}
+      networks:
+        - name: '${Cloud_Network_1.name}'
+          network: '${resource.Cloud_Network_1.id}'
+          assignment: static
+  Cloud_Network_1:
+    type: Cloud.Network
+    metadata:
+      layoutPosition:
+        - 1
+        - 0
+    properties:
+      name: MonReseau
+      networkType: existing
+      constraints:
+        - tag: 'netprofile:nsx'
