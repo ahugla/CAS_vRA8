@@ -16,6 +16,14 @@ inputs:
       - V1.8.9
       - V1.7.1
       - v1.55
+  wavefront_proxy:
+    title: Proxy Wavefront
+    type: string
+    default: wvfp.cpod-vrealizesuite.az-demo.shwrfr.com
+  wavefront_port:
+    title: Port Wavefront
+    type: string
+    default: 2878
 resources:
   LB_front:
     type: Cloud.LoadBalancer
@@ -57,15 +65,11 @@ resources:
           - git
         runcmd:
           - touch /etc/cloud/cloud-init.disabled
-          - rpm -Uvh https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
-          - rpm -Uvh http://rpms.famillecollet.com/enterprise/remi-release-7.rpm
-          - yum --enablerepo=remi,remi-php72 install -y httpd php php-common
-          - systemctl start httpd
-          - systemctl enable httpd
           - cd /tmp
-          - git clone https://github.com/vmeoc/Tito.git  /var/www/html           
-          - cd /var/www/html
-          - git checkout ${input.titoVersion}
+          - curl -O https://raw.githubusercontent.com/ahugla/CAS_vRA8/master/blueprints/Tito/Install_Tito_LIagent_WavefrontConfig.sh
+          - chmod 755 Install_Tito_LIagent_WavefrontConfig.sh
+          - /tmp/Install_Tito_LIagent_WavefrontConfig.sh ${input.wavefront_proxy} ${input.wavefront_port}
+          - rm -f /tmp/Install_Tito_LIagent_WavefrontConfig.sh
       networks:
         - name: '${Cloud_Network_1.name}'
           network: '${resource.Cloud_Network_1.id}'
