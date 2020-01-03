@@ -18,13 +18,12 @@ WAVEFRONT_PORT=$2
 echo WAVEFRONT_PROXY=$WAVEFRONT_PROXY
 echo WAVEFRONT_PORT=$WAVEFRONT_PORT
 
-
 # TITO INSTALL
 cd /tmp
 rpm -Uvh https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
 rpm -Uvh http://rpms.famillecollet.com/enterprise/remi-release-7.rpm
 yum --enablerepo=remi,remi-php72 install -y httpd php php-common
-git clone https://github.com/vmeoc/Tito.git  /var/www/html           
+git clone https://github.com/vmeoc/Tito.git  /var/www/html
 cd /var/www/html
 git checkout V1.9.6
 
@@ -48,3 +47,5 @@ sed -i -e "s/getenv('PROXY_PORT')/$WAVEFRONT_PORT/g"   /var/www/html/getTraffic
 # Start Web Server
 systemctl start httpd
 systemctl enable httpd
+
+
