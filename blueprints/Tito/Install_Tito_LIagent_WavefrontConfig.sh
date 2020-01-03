@@ -1,24 +1,24 @@
 #!/bin/bash
 
 # INSTALL TITO SUR CentOS7.x
-#-----------------------------------------------------------------------------
+#----------------------------------------------------------------------------------
 # alex
 # 3/01/2020
 #
 # V1.0
 #
-#------------------------------------------------------------------------------
+#----------------------------------------------------------------------------------
 # USAGE
 #
-# Install_Tito_LIagent_WavefrontConfig.sh  [WAVEFRONT_PROXY]  [WAVEFRONT_PORT]
+# Install_Tito_LIagent_WavefrontConfig.sh  [WAVEFRONT PROXY FQDN]  [WAVEFRONT PORT]
 #
-#------------------------------------------------------------------------------
+#----------------------------------------------------------------------------------
 
 # Get and display parameters
-WAVEFRONT_PROXY=$1
-WAVEFRONT_PORT=$2
-echo "WAVEFRONT_PROXY=$WAVEFRONT_PROXY"
-echo "WAVEFRONT_PORT=$WAVEFRONT_PORT"
+PROXY_NAME=$1
+PROXY_PORT=$2
+echo "PROXY_NAME=$PROXY_NAME"
+echo "PROXY_PORT=$PROXY_PORT"
 
 # TITO INSTALL
 cd /tmp
@@ -40,10 +40,9 @@ systemctl enable liagentd
 rm -rf /tmp/li
   
 
-# WAVEFRONT CONFIG
-cd /tmp
-sed -i -e "s/getenv('PROXY_NAME')/"\"$WAVEFRONT_PROXY\""/g"   /var/www/html/getTrafficData.php
-sed -i -e "s/getenv('PROXY_PORT')/$WAVEFRONT_PORT/g"   /var/www/html/getTrafficData.php
+# WAVEFRONT CONFIG - set variable for apache in "/etc/sysconfig/httpd"
+echo "PROXY_NAME=%PROXY_NAME" >> /etc/sysconfig/httpd
+echo "PROXY_PORT=%PROXY_PORT" >> /etc/sysconfig/httpd
 
 
 # Start Web Server
