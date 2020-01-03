@@ -41,8 +41,8 @@ rm -rf /tmp/li
   
 
 # WAVEFRONT CONFIG - set variable for apache in "/etc/sysconfig/httpd"
-echo "PROXY_NAME=%PROXY_NAME" >> /etc/sysconfig/httpd
-echo "PROXY_PORT=%PROXY_PORT" >> /etc/sysconfig/httpd
+echo "PROXY_NAME=$PROXY_NAME" >> /etc/sysconfig/httpd
+echo "PROXY_PORT=$PROXY_PORT" >> /etc/sysconfig/httpd
 
 
 # Start Web Server
