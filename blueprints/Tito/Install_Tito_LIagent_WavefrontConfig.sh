@@ -1,3 +1,5 @@
+#!/bin/bash
+
 # INSTALL TITO SUR CentOS7.x
 #-----------------------------------------------------------------------------
 # alex
@@ -15,8 +17,8 @@
 # Get and display parameters
 WAVEFRONT_PROXY=$1
 WAVEFRONT_PORT=2878
-echo WAVEFRONT_PROXY=$WAVEFRONT_PROXY
-echo WAVEFRONT_PORT=$WAVEFRONT_PORT
+echo "WAVEFRONT_PROXY=$WAVEFRONT_PROXY"
+echo "WAVEFRONT_PORT=$WAVEFRONT_PORT"
 
 # TITO INSTALL
 cd /tmp
