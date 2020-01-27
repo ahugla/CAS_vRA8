@@ -1,0 +1,88 @@
+inputs:
+  nbre_Nodes:
+    title: Nombre de noeuds ?
+    type: integer
+    default: 2
+    minimum: 1
+    maximum: 3
+  titoVersion:
+    title: Version de Tito ?
+    type: string
+    description: Version de code de Tito
+    default: V2.2
+    enum:
+      - V2.2
+      - V1.9.6
+      - V1.9.4
+      - V1.8.9
+      - V1.7.1
+      - v1.55
+  wavefront_proxy:
+    title: Proxy Wavefront
+    type: string
+    default: wvfp.cpod-vrealizesuite.az-demo.shwrfr.com
+  wavefront_port:
+    title: Port Wavefront
+    type: string
+    default: 2878
+resources:
+  LB_front:
+    type: Cloud.LoadBalancer
+    metadata:
+      layoutPosition:
+        - 0
+        - 0
+    properties:
+      routes:
+        - protocol: HTTP
+          port: '80'
+          instanceProtocol: HTTP
+          instancePort: '80'
+          healthCheckConfiguration:
+            protocol: HTTP
+            port: '80'
+            urlPath: /
+            intervalSeconds: 60
+            timeoutSeconds: 30
+            unhealthyThreshold: 10
+            healthyThreshold: 1
+      network: '${resource.Cloud_Network_1.id}'
+      instances:
+        - '${resource.VM_web.id}'
+      internetFacing: false
+  VM_web:
+    type: Cloud.Machine
+    metadata:
+      layoutPosition:
+        - 0
+        - 1
+    properties:
+      count: '${input.nbre_Nodes}'
+      image: CentOS
+      flavor: Small
+      cloudConfig: |
+        #cloud-config
+        packages:
+          - git
+        runcmd:
+          - touch /etc/cloud/cloud-init.disabled
+          - cd /tmp
+          - curl -O https://raw.githubusercontent.com/ahugla/CAS_vRA8/master/blueprints/Tito/Install_Tito_LIagent_WavefrontConfig_Tracing.sh
+          - chmod 755 Install_Tito_LIagent_WavefrontConfig_Tracing.sh
+          - /tmp/Install_Tito_LIagent_WavefrontConfig_Tracing.sh ${input.wavefront_proxy} ${input.wavefront_port} ${input.titoVersion}
+          - rm -f /tmp/Install_Tito_LIagent_WavefrontConfig_Tracing.sh
+      networks:
+        - name: '${Cloud_Network_1.name}'
+          network: '${resource.Cloud_Network_1.id}'
+          assignment: static
+  Cloud_Network_1:
+    type: Cloud.Network
+    metadata:
+      layoutPosition:
+        - 1
+        - 0
+    properties:
+      name: MonReseau
+      networkType: existing
+      constraints:
+        - tag: 'netprofile:nsx'
