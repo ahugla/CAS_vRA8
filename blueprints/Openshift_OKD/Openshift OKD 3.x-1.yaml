@@ -1,0 +1,32 @@
+formatVersion: 1
+inputs: {}
+resources:
+  Cloud_Machine_1:
+    type: Cloud.Machine
+    metadata:
+      layoutPosition:
+        - 0
+        - 0
+    properties:
+      image: CentOS
+      flavor: Huge - OKD
+      customizationSpec: Linux
+      networks:
+        - network: '${resource.Cloud_Network_1.id}'
+          assignment: static
+      cloudConfig: |
+        runcmd:
+          - touch /etc/cloud/cloud-init.disabled
+          - curl https://raw.githubusercontent.com/ahugla/Openshift-OKD/master/script-install-OKD-3.11.sh -o /tmp/script-install-OKD-3.11.sh
+          - chmod 755 /tmp/script-install-OKD-3.11.sh
+          - /tmp/script-install-OKD-3.11.sh
+  Cloud_Network_1:
+    type: Cloud.Network
+    metadata:
+      layoutPosition:
+        - 1
+        - 0
+    properties:
+      networkType: existing
+      constraints:
+        - tag: 'netprofile:nsx'
