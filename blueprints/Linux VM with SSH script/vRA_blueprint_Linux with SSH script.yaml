@@ -1,0 +1,29 @@
+formatVersion: 1
+inputs:
+  rootPassword:
+    type: string
+    title: password root
+  myScript:
+    type: string
+    title: put script here
+resources:
+  Custom_ExecuteSSHscript_1:
+    type: Custom.ExecuteSSHscript
+    metadata:
+      layoutPosition:
+        - 0
+        - 0
+    properties:
+      SSHcmd: '${input.myScript}'
+      password: '${input.rootPassword}'
+      username: root
+      hostNameOrIP: '${resource.Cloud_Machine_1.address}'
+  Cloud_Machine_1:
+    type: Cloud.Machine
+    metadata:
+      layoutPosition:
+        - 1
+        - 0
+    properties:
+      image: CentOS
+      flavor: Small
