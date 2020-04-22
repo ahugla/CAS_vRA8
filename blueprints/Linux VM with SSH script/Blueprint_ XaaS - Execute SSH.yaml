@@ -1,0 +1,48 @@
+formatVersion: 1
+inputs:
+  SSHcommand:
+    type: string
+    title: Entrez le script SSH a executer
+  VMpass:
+    type: string
+    title: password de root
+    default: changeme
+    encrypted: true
+resources:
+  Custom_Bidon_ExecuteSSH_1:
+    type: Custom.Bidon.ExecuteSSH
+    dependsOn:
+      - Cloud_Machine_1
+    metadata:
+      layoutPosition:
+        - 0
+        - 0
+    properties:
+      SSHcmd: '${input.SSHcommand}'
+      password: '${input.VMpass}'
+      username: root
+      #hostNameOrIP: 172.19.2.102
+      hostNameOrIP: '${resource.Cloud_Machine_1.address}'
+  Cloud_Machine_1:
+    type: Cloud.Machine
+    metadata:
+      layoutPosition:
+        - 1
+        - 0
+    properties:
+      image: CentOS
+      flavor: Small
+      customizationSpec: Linux
+      networks:
+        - network: '${resource.Cloud_Network_1.id}'
+          assignPublicIpAddress: static
+  Cloud_Network_1:
+    type: Cloud.Network
+    metadata:
+      layoutPosition:
+        - 2
+        - 0
+    properties:
+      networkType: existing
+      constraints:
+        - tag: 'netprofile:nsx'
