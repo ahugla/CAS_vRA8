@@ -1,0 +1,24 @@
+formatVersion: 1
+inputs:
+  password:
+    title: password du compte root
+    type: string
+    encrypted: true
+  yaml_url:
+    title: URL vers le yaml kubernetes
+    type: string
+    default: 'https://raw.githubusercontent.com/ahugla/K8S_yaml/master/TITO/NodePort/tito_svc_rc_Template.yaml'
+resources:
+  Custom_alex_k8s_deploy_1:
+    type: Custom.alex.k8s.deploy
+    metadata:
+      layoutPosition:
+        - 0
+        - 0
+    properties:
+      hostNameOrIP: 172.19.2.111
+      username: root
+      password: '${input.password}'
+      clearBefore: true #true or false
+      k8s_action: create #create or apply
+      yaml_URL: '${input.yaml_url}'
