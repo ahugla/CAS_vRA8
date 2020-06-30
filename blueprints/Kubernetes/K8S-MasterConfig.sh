@@ -2,12 +2,11 @@
 #SOURCE : https://mapr.com/blog/making-data-actionable-at-scale-part-2-of-3/
 
 # ALEX H.
-# 9 Decembre 2019
-# v1.9
+# 30 Juin 2020
+# v1.10
 
 # USAGE
 # -----
-# Necessite d'avoir dans le software component une property 'varTokenToJoin' de type 'Computed'.
 # 
 # fichierSRC=K8S-MasterConfig.sh
 # cd /tmp
@@ -15,16 +14,7 @@
 # chmod 755 $fichierSRC
 # ./$fichierSRC
 # rm -f $fichierSRC
-# varTokenToJoin=`cat /tmp/k8stoken`
 #
-
-# Log pour Debugging
-echo "Shell utilise: $0"
-echo "parametre1: $1"
-echo "parametre2: $2"
-echo "parametre3: $3"
-echo "parametre4: $4"
-echo "parametre5: $5"
 
 # Log $PATH
 echo "Initial PATH = $PATH"
@@ -94,18 +84,16 @@ kubectl get pods --all-namespaces
 # kube-system   kube-proxy-trfcx                      1/1     Running   0          87s
 # kube-system   kube-scheduler-vra-vm-0878            1/1     Running   0          2m24s
 
-
-# ATTENDRE QUE TOUT SOIT UP :  on considere qu'il y a 10 pods a demarrer
-sleep 5
+# ATTENDRE QUE TOUT SOIT UP :  il y a 8 pods a demarrer, mais on attend que tous les pods soient up
+nbTarget=`kubectl get pods --all-namespaces | grep / | wc -l`
 nbRunning=`kubectl get pods --all-namespaces | grep Running | wc -l`
-echo "nbRunning = $nbRunning"
-while [[ "$nbRunning" -lt "8" ]]; do
+echo "nbRunning = $nbRunning sur $nbTarget"
+while [[ "$nbRunning" -lt "$nbTarget" ]]; do
 	sleep 5
 	nbRunning=`kubectl get pods --all-namespaces | grep Running | wc -l`
-	echo "nbRunning = $nbRunning"
+	echo "nbRunning = $nbRunning sur $nbTarget"
 done
 echo "Kubernetes Master is ready"
-
 
 # on recupere le token necessaire pour que les nodes puissent rejoindre
 # Necessite d'avoir dans le software component une property varTokenToJoin de type Computed
@@ -113,7 +101,6 @@ varTokenToJoin=`kubeadm token list | grep token | awk '{print $1}'`
 echo "varTokenToJoin in 'K8S-MasterConfig.sh' = $varTokenToJoin"
 rm -f /tmp/k8stoken
 echo $varTokenToJoin > /tmp/k8stoken
-
 
 # creation de l'alias 'kk'
 echo "alias kk='kubectl'" >> /root/.bash_profile

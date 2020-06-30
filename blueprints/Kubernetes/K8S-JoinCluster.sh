@@ -2,21 +2,23 @@
 #SOURCE : https://mapr.com/blog/making-data-actionable-at-scale-part-2-of-3/
 
 # ALEX H.
-# 9 Decembre 2019
-# v1.9
+# 30 Juin 2020
+# v1.10
 
 # USAGE
 # -----
-# Necessite d'avoir dans le software component une property 'varTokenToJoin' de type 'String' mappé sur 'varTokenToJoin' de 'config master'.
-# Ainsi qu'une property 'MasterNode' mappé sur l'ip du master
 #
 # fichierSRC=K8S-JoinCluster.sh
 # cd /tmp
 # curl -O https://raw.githubusercontent.com/ahugla/vRA/master/SoftwareComponents/Kubernetes-kubeadm/$fichierSRC
 # chmod 755 $fichierSRC
-# ./$fichierSRC $varTokenToJoin $MasterNode
+# ./$fichierSRC  $MasterNode  $MasterPassword
 # rm -f $fichierSRC
 
+# Set and display paramaters
+MasterNode=$1
+MasterPassword=$2
+echo "MasterNode in 'K8S-JoinCluster.sh' : $MasterNode"
 
 # Log $PATH
 echo "Intial PATH = $PATH"
@@ -25,13 +27,22 @@ echo "Intial PATH = $PATH"
 export PATH=$PATH:/usr/local/sbin:/usr/sbin:/root/bin
 echo "New PATH = $PATH"
 
+# On attend que le Master soit pret (c est a dire qu'il existe un fichier /tmp/k8stoken sur le master)
+isMasterReady=`sshpass -p $MasterPassword ssh root@172.19.2.203 'ls /tmp' | grep k8stoken | wc -l`
+echo "isMasterReady = $isMasterReady"
+while [[ "$isMasterReady" -ne 1 ]]; do
+  sleep 5
+  isMasterReady=`sshpass -p $MasterPassword ssh root@172.19.2.203 'ls /tmp' | grep k8stoken | wc -l`
+  echo "isMasterReady = $isMasterReady"
+done
+
+# On  recupere le Token dans le fichier /tmp/k8stoken sur le master
+varTokenToJoin=`sshpass -p $MasterPassword ssh root@172.19.2.203 'cat /tmp/k8stoken'`
+echo "varTokenToJoin = $varTokenToJoin"
+
 
 #A FAIRE SUR LES NODES:  
 # Necessite d'avoir dans le software component une property varTokenToJoin
-varTokenToJoin=$1
-echo "Token to join in 'K8S-JoinCluster.sh' : $varTokenToJoin"
-MasterNode=$2
-echo "MasterNode in 'K8S-JoinCluster.sh' : $MasterNode"
 kubeadm join $MasterNode:6443 --discovery-token-unsafe-skip-ca-verification --token $varTokenToJoin
 
 

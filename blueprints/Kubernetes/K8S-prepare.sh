@@ -2,12 +2,11 @@
 #SOURCE : https://mapr.com/blog/making-data-actionable-at-scale-part-2-of-3/
 
 # ALEX H.
-# 9 Decembre 2019
-# v1.9
+# 30 Juin 2020
+# v1.10
 
 # USAGE
 # -----
-# CONFIGURER LE REBOOT DANS LE SOFTWARE COMPONENT
 #
 # fichierSRC=K8S-prepare.sh
 # cd /tmp
@@ -108,6 +107,3 @@ systemctl start kubelet
 systemctl enable kubelet
 
 
-
-
-# CONFIGURER LE REBOOT DANS LE SOFTWARE COMPONENT
