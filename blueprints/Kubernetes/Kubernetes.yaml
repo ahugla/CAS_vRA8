@@ -40,8 +40,6 @@ resources:
           
   K8S_Nodes:
     type: Cloud.Machine
-    dependsOn:
-      - K8S_Master
     metadata:
       layoutPosition:
         - 1
