@@ -9,6 +9,7 @@ inputs:
   rootPasswd:
     description: Password root de la VM master K8S.
     type: string
+    encrypted: true
 resources:
   K8S_Master:
     type: Cloud.Machine
