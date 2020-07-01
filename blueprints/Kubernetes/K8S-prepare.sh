@@ -8,9 +8,8 @@
 # USAGE
 # -----
 #
-# fichierSRC=K8S-prepare.sh
 # cd /tmp
-# curl -O https://raw.githubusercontent.com/ahugla/vRA/master/SoftwareComponents/Kubernetes-kubeadm/$fichierSRC
+# curl -O https://raw.githubusercontent.com/ahugla/CAS_vRA8/master/blueprints/Kubernetes/K8S-prepare.sh
 # chmod 755 $fichierSRC
 # ./$fichierSRC
 # rm -f $fichierSRC

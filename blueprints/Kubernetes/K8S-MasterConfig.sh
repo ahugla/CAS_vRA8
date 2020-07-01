@@ -8,9 +8,8 @@
 # USAGE
 # -----
 # 
-# fichierSRC=K8S-MasterConfig.sh
 # cd /tmp
-# curl -O https://raw.githubusercontent.com/ahugla/vRA/master/SoftwareComponents/Kubernetes-kubeadm/$fichierSRC
+# curl -O https://raw.githubusercontent.com/ahugla/CAS_vRA8/master/blueprints/Kubernetes/K8S-MasterConfig.sh
 # chmod 755 $fichierSRC
 # ./$fichierSRC
 # rm -f $fichierSRC
@@ -56,11 +55,7 @@ kubeadm init --pod-network-cidr=10.244.0.0/16 --apiserver-advertise-address=$(ho
 
 
 # start  your cluster
-# Attention : $HOME n'existe pas (shell application director)  =>   indispensable
-echo "Initial HOME = $HOME"
-export HOME=/root
-echo "New HOME = $HOME"
-
+sleep 1
 mkdir -p $HOME/.kube
 sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
 sudo chown $(id -u):$(id -g) $HOME/.kube/config
@@ -68,9 +63,11 @@ sudo chown $(id -u):$(id -g) $HOME/.kube/config
 
 # Install Flannel for network
 # Doc: https://kubernetes.io/docs/setup/independent/create-cluster-kubeadm/#before-you-begin
+sleep 1
 kubectl apply -f  https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml
 
 # Validate all pods are running
+sleep 1
 echo "CHECK PODS STATUS (Must be running)"
 kubectl get pods --all-namespaces
 # EXEMPLE D'OUTPUT:
@@ -85,8 +82,9 @@ kubectl get pods --all-namespaces
 # kube-system   kube-scheduler-vra-vm-0878            1/1     Running   0          2m24s
 
 # ATTENDRE QUE TOUT SOIT UP :  il y a 8 pods a demarrer, mais on attend que tous les pods soient up
-nbTarget=`kubectl get pods --all-namespaces | grep / | wc -l`
+sleep 5  #  sinon aucun pods n'a le temps de se creer
 nbRunning=`kubectl get pods --all-namespaces | grep Running | wc -l`
+nbTarget=`kubectl get pods --all-namespaces | grep / | wc -l`
 echo "nbRunning = $nbRunning sur $nbTarget"
 while [[ "$nbRunning" -lt "$nbTarget" ]]; do
 	sleep 5

@@ -8,9 +8,8 @@
 # USAGE
 # -----
 #
-# fichierSRC=K8S-JoinCluster.sh
 # cd /tmp
-# curl -O https://raw.githubusercontent.com/ahugla/vRA/master/SoftwareComponents/Kubernetes-kubeadm/$fichierSRC
+# curl -O https://raw.githubusercontent.com/ahugla/CAS_vRA8/master/blueprints/Kubernetes/K8S-JoinCluster.sh
 # chmod 755 $fichierSRC
 # ./$fichierSRC  $MasterNode  $MasterPassword
 # rm -f $fichierSRC
@@ -28,16 +27,16 @@ export PATH=$PATH:/usr/local/sbin:/usr/sbin:/root/bin
 echo "New PATH = $PATH"
 
 # On attend que le Master soit pret (c est a dire qu'il existe un fichier /tmp/k8stoken sur le master)
-isMasterReady=`sshpass -p $MasterPassword ssh root@172.19.2.203 'ls /tmp' | grep k8stoken | wc -l`
+isMasterReady=`sshpass -p $MasterPassword ssh -o StrictHostKeyChecking=no root@172.19.2.203 'ls /tmp' | grep k8stoken | wc -l`
 echo "isMasterReady = $isMasterReady"
 while [[ "$isMasterReady" -ne 1 ]]; do
   sleep 5
-  isMasterReady=`sshpass -p $MasterPassword ssh root@172.19.2.203 'ls /tmp' | grep k8stoken | wc -l`
+  isMasterReady=`sshpass -p $MasterPassword ssh -o StrictHostKeyChecking=no root@172.19.2.203 'ls /tmp' | grep k8stoken | wc -l`
   echo "isMasterReady = $isMasterReady"
 done
 
 # On  recupere le Token dans le fichier /tmp/k8stoken sur le master
-varTokenToJoin=`sshpass -p $MasterPassword ssh root@172.19.2.203 'cat /tmp/k8stoken'`
+varTokenToJoin=`sshpass -p $MasterPassword ssh -o StrictHostKeyChecking=no root@172.19.2.203 'cat /tmp/k8stoken'`
 echo "varTokenToJoin = $varTokenToJoin"
 
 
