@@ -27,16 +27,16 @@ export PATH=$PATH:/usr/local/sbin:/usr/sbin:/root/bin
 echo "New PATH = $PATH"
 
 # On attend que le Master soit pret (c est a dire qu'il existe un fichier /tmp/k8stoken sur le master)
-isMasterReady=`sshpass -p $MasterPassword ssh -o StrictHostKeyChecking=no root@172.19.2.203 'ls /tmp' | grep k8stoken | wc -l`
+isMasterReady=`sshpass -p $MasterPassword ssh -o StrictHostKeyChecking=no root@$MasterNode 'ls /tmp' | grep k8stoken | wc -l`
 echo "isMasterReady = $isMasterReady"
 while [[ "$isMasterReady" -ne 1 ]]; do
   sleep 5
-  isMasterReady=`sshpass -p $MasterPassword ssh -o StrictHostKeyChecking=no root@172.19.2.203 'ls /tmp' | grep k8stoken | wc -l`
+  isMasterReady=`sshpass -p $MasterPassword ssh -o StrictHostKeyChecking=no root@$MasterNode 'ls /tmp' | grep k8stoken | wc -l`
   echo "isMasterReady = $isMasterReady"
 done
 
 # On  recupere le Token dans le fichier /tmp/k8stoken sur le master
-varTokenToJoin=`sshpass -p $MasterPassword ssh -o StrictHostKeyChecking=no root@172.19.2.203 'cat /tmp/k8stoken'`
+varTokenToJoin=`sshpass -p $MasterPassword ssh -o StrictHostKeyChecking=no root@$MasterNode 'cat /tmp/k8stoken'`
 echo "varTokenToJoin = $varTokenToJoin"
 
 
