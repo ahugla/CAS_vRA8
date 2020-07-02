@@ -82,11 +82,15 @@ kubectl get pods --all-namespaces
 # ATTENDRE QUE TOUT SOIT UP :  il y a 8 pods a demarrer, mais on attend que tous les pods soient up
 sleep 5  #  sinon aucun pods n'a le temps de se creer
 nbRunning=`kubectl get pods --all-namespaces | grep Running | wc -l`
-nbTarget=`kubectl get pods --all-namespaces | grep / | wc -l`
+nbLigne=`kubectl get pods --all-namespaces | wc -l`
+nbTarget=`echo $(($nbLigne-1))`
 echo "nbRunning = $nbRunning sur $nbTarget"
-while [[ "$nbRunning" -lt "$nbTarget" ]]; do
+while [ $nbRunning -lt $nbTarget ] || [ $nbRunning -eq 0 ]
+do
 	sleep 5
 	nbRunning=`kubectl get pods --all-namespaces | grep Running | wc -l`
+	nbLigne=`kubectl get pods --all-namespaces | wc -l`
+	nbTarget=`echo $(($nbLigne-1))`
 	echo "nbRunning = $nbRunning sur $nbTarget"
 done
 echo "Kubernetes Master is ready"
