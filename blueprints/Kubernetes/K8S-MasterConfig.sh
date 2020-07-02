@@ -22,7 +22,6 @@ echo "Initial PATH = $PATH"
 export PATH=$PATH:/usr/local/sbin:/usr/sbin:/root/bin
 echo "New PATH = $PATH"
 
-
 # Validate the ip-address:
 echo "CHECK: hostname --ip-address"
 hostname --ip-address
@@ -56,9 +55,9 @@ kubeadm init --pod-network-cidr=10.244.0.0/16 --apiserver-advertise-address=$(ho
 
 
 # start  your cluster
-mkdir -p $HOME/.kube
-sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
-sudo chown $(id -u):$(id -g) $HOME/.kube/config
+mkdir -p /root/.kube
+sudo cp -i /etc/kubernetes/admin.conf /root/.kube/config
+sudo chown $(id -u):$(id -g) /root/.kube/config
 
 
 # Install Flannel for network
