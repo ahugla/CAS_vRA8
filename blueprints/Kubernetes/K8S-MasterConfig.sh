@@ -19,8 +19,8 @@
 echo "Initial PATH = $PATH"
 
 # Update PATH
-export PATH=$PATH:/usr/local/sbin:/usr/sbin:/root/bin
-echo "New PATH = $PATH"
+#export PATH=$PATH:/usr/local/sbin:/usr/sbin:/root/bin
+#echo "New PATH = $PATH"
 
 
 # Validate the ip-address:
