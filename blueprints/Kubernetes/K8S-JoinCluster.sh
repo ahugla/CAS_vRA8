@@ -26,6 +26,9 @@ echo "Intial PATH = $PATH"
 export PATH=$PATH:/usr/local/sbin:/usr/sbin:/root/bin
 echo "New PATH = $PATH"
 
+#install sshpass
+yum install -y sshpass
+
 # On attend que le Master soit pret (c est a dire qu'il existe un fichier /tmp/k8stoken sur le master)
 isMasterReady=`sshpass -p $MasterPassword ssh -o StrictHostKeyChecking=no root@$MasterNode 'ls /tmp' | grep k8stoken | wc -l`
 echo "isMasterReady = $isMasterReady"
