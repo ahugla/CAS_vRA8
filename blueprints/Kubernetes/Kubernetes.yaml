@@ -7,7 +7,8 @@ inputs:
     minimum: 1
     maximum: 4
   rootPasswd:
-    title: Password root de la VM master K8S.
+    description: Password root (deja configuré dans le template) de la VM master K8S.
+    title: Password configuré
     type: string
     encrypted: true
 resources:
