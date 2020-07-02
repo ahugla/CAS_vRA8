@@ -11,9 +11,13 @@
 # cd /tmp
 # curl -O https://raw.githubusercontent.com/ahugla/CAS_vRA8/master/blueprints/Kubernetes/K8S-MasterConfig.sh
 # chmod 755 $fichierSRC
-# ./$fichierSRC
+# ./$fichierSRC $LB_IPrange
 # rm -f $fichierSRC
 #
+
+# display input parameters
+LB_IPrange=$1
+echo "LB_IPrange = $LB_IPrange"
 
 # Log $PATH
 echo "Initial PATH = $PATH"
@@ -103,4 +107,40 @@ echo $varTokenToJoin > /tmp/k8stoken
 
 # creation de l'alias 'kk'
 echo "alias kk='kubectl'" >> /root/.bash_profile
+
+
+
+# MetalLB install and config in Layer 2 Mode
+#-------------------------------------------
+echo "Creation du LB metalLB (en mode Layer 2) dans le namespace metallb-system"
+kubectl apply -f https://raw.githubusercontent.com/metallb/metallb/v0.9.3/manifests/namespace.yaml    # create metallb-system namespace
+kubectl apply -f https://raw.githubusercontent.com/metallb/metallb/v0.9.3/manifests/metallb.yaml      # deploy MetalLB
+
+# On first install only
+kubectl create secret generic -n metallb-system memberlist --from-literal=secretkey="$(openssl rand -base64 128)"
+# The components in the manifest are:
+# The metallb-system/controller deployment. This is the cluster-wide controller that handles IP address assignments.
+# The metallb-system/speaker daemonset. This is the component that speaks the protocol(s) of your choice to make the services reachable.
+# Service accounts for the controller and speaker, along with the RBAC permissions that the components need to function.
+# The installation manifest does not include a configuration file. MetalLB’s components will still start, but will remain idle until 
+# you define and deploy a configmap. 
+# The memberlist secret contains the secretkey to encrypt the communication between speakers for the fast dead node detection.
+
+# create config file (ConfigMap)
+cat <<EOF > /tmp/metalLBconfig.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  namespace: metallb-system
+  name: config
+data:
+  config: |
+    address-pools:
+      - name: my-ip-space
+        protocol: layer2
+        addresses:
+          - $LB_IPrange
+EOF
+
+kubectl apply -f /tmp/metalLBconfig.yaml
 
