@@ -44,12 +44,6 @@ echo "varTokenToJoin = $varTokenToJoin"
 
 
 #A FAIRE SUR LES NODES:  
-
-kubeadm init # Verifie des pre-requis (comme le nombre de cpu) et cree le fichier de config de kubelet: /var/lib/kubelet/config.yaml
-systemctl start kubelet
-systemctl enable kubelet
-
-
 # Necessite d'avoir dans le software component une property varTokenToJoin
 kubeadm join $MasterNode:6443 --discovery-token-unsafe-skip-ca-verification --token $varTokenToJoin
 
