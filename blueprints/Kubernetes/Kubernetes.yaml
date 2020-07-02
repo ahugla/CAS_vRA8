@@ -11,6 +11,11 @@ inputs:
     title: Password configuré
     type: string
     encrypted: true
+  RangeIP:
+    type: string
+    description: Range IP qui sera utilisé dans Kubernetes avec le mode de service de type LoadBalancer
+    title: IP range
+    default: 172.19.2.226-172.19.2.239
 resources:
   K8S_Master:
     type: Cloud.Machine
@@ -37,7 +42,7 @@ resources:
           - cp /tmp/CAS_vRA8/blueprints/Kubernetes/K8S-MasterConfig.sh /tmp/K8S-MasterConfig.sh
           - chmod 755 K8S-prepare.sh K8S-MasterConfig.sh
           - /tmp/K8S-prepare.sh
-          - /tmp/K8S-MasterConfig.sh
+          - /tmp/K8S-MasterConfig.sh ${input.RangeIP}
           - rm -f K8S-prepare.sh
           - rm -f K8S-MasterConfig.sh
   K8S_Nodes:
