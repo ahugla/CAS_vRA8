@@ -28,6 +28,7 @@ echo "CHECK: hostname --ip-address"
 hostname --ip-address
 
 # Initialize Kubernetes master : https://kubernetes.io/docs/setup/independent/create-cluster-kubeadm/#before-you-begin
+# "init" verifie des pre-requis (comme le nombre de cpu) et cree le fichier de config de kubelet: /var/lib/kubelet/config.yaml
 kubeadm init --pod-network-cidr=10.244.0.0/16 --apiserver-advertise-address=$(hostname --ip-address) --token-ttl 0 #--ignore-preflight-errors=NumCPU
 
 # The kubeadm command will take a few minutes and it will print a 'kubeadm join'
@@ -55,7 +56,6 @@ kubeadm init --pod-network-cidr=10.244.0.0/16 --apiserver-advertise-address=$(ho
 
 
 # start  your cluster
-sleep 1
 mkdir -p $HOME/.kube
 sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
 sudo chown $(id -u):$(id -g) $HOME/.kube/config
@@ -63,11 +63,9 @@ sudo chown $(id -u):$(id -g) $HOME/.kube/config
 
 # Install Flannel for network
 # Doc: https://kubernetes.io/docs/setup/independent/create-cluster-kubeadm/#before-you-begin
-sleep 1
 kubectl apply -f  https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml
 
 # Validate all pods are running
-sleep 1
 echo "CHECK PODS STATUS (Must be running)"
 kubectl get pods --all-namespaces
 # EXEMPLE D'OUTPUT:
