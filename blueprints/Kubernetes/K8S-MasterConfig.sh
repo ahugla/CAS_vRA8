@@ -91,20 +91,27 @@ do
 
 
 	myIP=`hostname --ip-address`
-	echo "TEST : kubectl --server=$myIP:8080 get pods --all-namespaces"
-	kubectl --server=$myIP:8080 get pods --all-namespaces
+	#echo "TEST : kubectl --server=$myIP:8080 get pods --all-namespaces"
+	#kubectl --server=$myIP:8080 get pods --all-namespaces
+	#echo "TEST FIN"
+
+	echo "TEST : kubectl --server=$myIP:6443 get pods --all-namespaces"
+	kubectl --server=$myIP:6443 get pods --all-namespaces
 	echo "TEST FIN"
 
-	echo "TEST : kubectl get pods --all-namespaces"
-	kubectl get pods --all-namespaces
+
+	#echo "TEST : kubectl get pods --all-namespaces"
+	#kubectl get pods --all-namespaces
+	#echo "TEST FIN"  
+
+
+	#echo "TEST : nc $myIP 8080"
+	#nc $myIP 8080
+	#echo "TEST FIN"  
+
+	echo "TEST : nc $myIP 6443"
+	nc $myIP 6443
 	echo "TEST FIN"  
-
-
-	echo "TEST : nc $myIP 8080"
-	nc $myIP 8080
-	echo "TEST FIN"  
-
-
 
 
 
