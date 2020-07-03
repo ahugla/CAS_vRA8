@@ -17,8 +17,8 @@
 
 
 echo "#####################################################################"
-echo "#                           TEST 3                                  #"
-echo "#                           sans SVC restart                        #"
+echo "#                           TEST 4                                  #"
+echo "#                          sans 30 sec wait                         #"
 echo "#####################################################################"
 sleep 10
 
@@ -27,7 +27,7 @@ sleep 10
 LB_IPrange=$1
 echo "LB_IPrange = $LB_IPrange"
 
-#set $HOME   INDISPENSABLE
+#set $HOME   INDISPENSABLE CAR UTILISATION DE LA COMMANDE kubectl
 echo "avant HOME = $HOME"
 HOME=/root
 export HOME=$HOME
@@ -83,23 +83,19 @@ sudo cp -i /etc/kubernetes/admin.conf /root/.kube/config
 sudo chown $(id -u):$(id -g) /root/.kube/config
 
 
-#systemctl enable kubelet
-#systemctl restart kubelet
-
-
-echo "WAIT 30 Sec"
-sleep 30
+#echo "WAIT 30 Sec"
+#sleep 30
 # MUST wait for K8S to start
 # errormsg : The connection to the server localhost:8080 was refused: 
-#kubectl get pods --all-namespaces 
-#isRunning=`kubectl get pods --all-namespaces | grep Running | wc -l`
-#while [ $isRunning -lt 1 ]
-#do
-#	echo "On attend 2s que Kubernetes demarre ..."
-#	sleep 2
-#	kubectl get pods --all-namespaces
-#	isRunning=`kubectl get pods --all-namespaces | grep Running | wc -l`
-#done
+kubectl get pods --all-namespaces 
+isRunning=`kubectl get pods --all-namespaces | grep Running | wc -l`
+while [ $isRunning -lt 1 ]
+do
+	echo "On attend 2s que Kubernetes demarre ..."
+	sleep 2
+	kubectl get pods --all-namespaces
+	isRunning=`kubectl get pods --all-namespaces | grep Running | wc -l`
+done
 
 
 
