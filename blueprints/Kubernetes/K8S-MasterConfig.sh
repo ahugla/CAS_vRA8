@@ -79,6 +79,9 @@ whoami
 echo "WAIT 30 Sec"
 sleep 30
 
+echo "etat kubelet"
+systemctl status kubelet
+
 
 # MUST wait for K8S to start
 # errormsg : The connection to the server localhost:8080 was refused: 
@@ -96,7 +99,10 @@ sleep 30
 
 # Install Flannel for network
 # Doc: https://kubernetes.io/docs/setup/independent/create-cluster-kubeadm/#before-you-begin
+echo "APPLY FLANNEL - DEBUT"
 kubectl apply -f  https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml
+echo "APPLY FLANNEL - FIN"
+
 
 # Validate all pods are running
 echo "CHECK PODS STATUS (Must be running)"
