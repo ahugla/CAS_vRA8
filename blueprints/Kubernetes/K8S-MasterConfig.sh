@@ -15,6 +15,14 @@
 # rm -f $fichierSRC
 #
 
+
+echo "#####################################################################"
+echo "#                           TEST  1                                 #"
+echo "#                                                                   #"
+echo "#####################################################################"
+wait 10
+
+
 # display input parameters
 LB_IPrange=$1
 echo "LB_IPrange = $LB_IPrange"
