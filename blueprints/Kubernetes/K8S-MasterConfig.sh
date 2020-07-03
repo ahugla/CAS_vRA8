@@ -76,46 +76,22 @@ sudo chown $(id -u):$(id -g) /root/.kube/config
 env
 whoami
 
+echo "WAIT 30 Sec"
+sleep 30
+
 
 # MUST wait for K8S to start
 # errormsg : The connection to the server localhost:8080 was refused: 
-kubectl get pods --all-namespaces 
-isRunning=`kubectl get pods --all-namespaces | grep Running | wc -l`
-while [ $isRunning -lt 1 ]
-do
-	echo "On attend 2s que Kubernetes demarre ..."
-	sleep 2
-	#kubectl get pods --all-namespaces
-	#isRunning=`kubectl get pods --all-namespaces | grep Running | wc -l`
+#kubectl get pods --all-namespaces 
+#isRunning=`kubectl get pods --all-namespaces | grep Running | wc -l`
+#while [ $isRunning -lt 1 ]
+#do
+#	echo "On attend 2s que Kubernetes demarre ..."
+#	sleep 2
+#	kubectl get pods --all-namespaces
+#	isRunning=`kubectl get pods --all-namespaces | grep Running | wc -l`
+#done
 
-
-
-	myIP=`hostname --ip-address`
-	#echo "TEST : kubectl --server=$myIP:8080 get pods --all-namespaces"
-	#kubectl --server=$myIP:8080 get pods --all-namespaces
-	#echo "TEST FIN"
-
-	echo "TEST : kubectl --server=$myIP:6443 get pods --all-namespaces"
-	kubectl --server=$myIP:6443 get pods --all-namespaces
-	echo "TEST FIN"
-
-
-	#echo "TEST : kubectl get pods --all-namespaces"
-	#kubectl get pods --all-namespaces
-	#echo "TEST FIN"  
-
-
-	#echo "TEST : nc $myIP 8080"
-	#nc $myIP 8080
-	#echo "TEST FIN"  
-
-	echo "TEST : nc $myIP 6443"
-	nc $myIP 6443
-	echo "TEST FIN"  
-
-
-
-done
 
 
 # Install Flannel for network
