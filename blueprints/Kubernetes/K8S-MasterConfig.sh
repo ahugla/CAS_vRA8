@@ -105,11 +105,11 @@ nbTarget=`echo $(($nbLigne-1))`
 echo "nbRunning = $nbRunning sur $nbTarget"
 while [ $nbRunning -lt $nbTarget ] || [ $nbRunning -eq 0 ]
 do
-	sleep 5
+	echo "nbRunning = $nbRunning sur $nbTarget"
+	sleep 2
 	nbRunning=`kubectl get pods --all-namespaces | grep Running | wc -l`
 	nbLigne=`kubectl get pods --all-namespaces | wc -l`
 	nbTarget=`echo $(($nbLigne-1))`
-	echo "nbRunning = $nbRunning sur $nbTarget"
 done
 echo "Kubernetes Master is ready"
 # EXEMPLE D'OUTPUT:
