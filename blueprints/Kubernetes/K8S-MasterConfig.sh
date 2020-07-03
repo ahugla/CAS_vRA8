@@ -81,6 +81,8 @@ sleep 30
 
 echo "etat kubelet"
 systemctl status kubelet
+echo "test access aux pods"
+kubectl get pods --all-namespaces 
 
 
 # MUST wait for K8S to start
