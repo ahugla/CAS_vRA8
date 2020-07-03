@@ -30,8 +30,18 @@ echo "New PATH = $PATH"
 echo "CHECK: hostname --ip-address"
 hostname --ip-address
 
+
+# Prerequis à l'init
+ip_forward=`cat /proc/sys/net/ipv4/ip_forward`
+echo "Avant : ip_forward = $ip_forward"
+sysctl net.ipv4.ip_forward=1 
+ip_forward=`cat /proc/sys/net/ipv4/ip_forward`
+echo "Apres : ip_forward = $ip_forward"
+
+
 # Initialize Kubernetes master : https://kubernetes.io/docs/setup/independent/create-cluster-kubeadm/#before-you-begin
 # "init" verifie des pre-requis (comme le nombre de cpu) et cree le fichier de config de kubelet: /var/lib/kubelet/config.yaml
+echo "kubeadm init ... starting ..."
 kubeadm init --pod-network-cidr=10.244.0.0/16 --apiserver-advertise-address=$(hostname --ip-address) --token-ttl 0 #--ignore-preflight-errors=NumCPU
 
 # The kubeadm command will take a few minutes and it will print a 'kubeadm join'
@@ -41,7 +51,7 @@ kubeadm init --pod-network-cidr=10.244.0.0/16 --apiserver-advertise-address=$(ho
 # peut tj faire des add nodes sans avoir a recreer un token)
 
 # EXEMPLE D'OUTPUT:
-# Your Kubernetes master has initialized successfully!
+# Your Kubernetes control-plane has initialized successfully!
 # To start using your cluster, you need to run the following as a regular user:
 #    mkdir -p $HOME/.kube
 #    sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
@@ -53,15 +63,23 @@ kubeadm init --pod-network-cidr=10.244.0.0/16 --apiserver-advertise-address=$(ho
 # kubeadm join 172.18.4.155:6443 --token 0aq3yj.1nbjbntmhxajnmte --discovery-token-ca-cert-hash sha256:71a4a3c5dc0fec1230dbdbb3a95d7a83763e91331911d3aa55d9b06e19d73d00
 #
 
-
 # Log du process
 # echo PROCESS=`ps -p $$`
 
 
-# start  your cluster
+# start the cluster (On a remplacé $HOME par /root)
 mkdir -p /root/.kube
 sudo cp -i /etc/kubernetes/admin.conf /root/.kube/config
 sudo chown $(id -u):$(id -g) /root/.kube/config
+
+# MUST wait for K8S to start
+isRunning=`kubectl get pods --all-namespaces | grep Running | wc -l`
+while [ $isRunning -lt 1 ]
+do
+	echo "On attend 2s que Kubernetes demarre ..."
+	sleep 2
+	isRunning=`kubectl get pods --all-namespaces | grep Running | wc -l`
+done
 
 
 # Install Flannel for network
@@ -81,6 +99,7 @@ kubectl get pods --all-namespaces
 # kube-system   kube-flannel-ds-amd64-h5s48           1/1     Running   0          87s
 # kube-system   kube-proxy-trfcx                      1/1     Running   0          87s
 # kube-system   kube-scheduler-vra-vm-0878            1/1     Running   0          2m24s
+
 
 # ATTENDRE QUE TOUT SOIT UP :  il y a 8 pods a demarrer, mais on attend que tous les pods soient up
 sleep 5  #  sinon aucun pods n'a le temps de se creer
