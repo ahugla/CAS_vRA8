@@ -17,8 +17,8 @@
 
 
 echo "#####################################################################"
-echo "#                           TEST 2                                  #"
-echo "#                           sans home                               #"
+echo "#                           TEST 3                                  #"
+echo "#                           sans SVC restart                        #"
 echo "#####################################################################"
 sleep 10
 
@@ -27,11 +27,11 @@ sleep 10
 LB_IPrange=$1
 echo "LB_IPrange = $LB_IPrange"
 
-#set $HOME
-#echo "avant HOME = $HOME"
-#HOME=/root
-#export HOME=$HOME
-#echo "apres HOME = $HOME"
+#set $HOME   INDISPENSABLE
+echo "avant HOME = $HOME"
+HOME=/root
+export HOME=$HOME
+echo "apres HOME = $HOME"
 
 # Log $PATH
 echo "PATH = $PATH"
@@ -83,8 +83,8 @@ sudo cp -i /etc/kubernetes/admin.conf /root/.kube/config
 sudo chown $(id -u):$(id -g) /root/.kube/config
 
 
-systemctl enable kubelet
-systemctl restart kubelet
+#systemctl enable kubelet
+#systemctl restart kubelet
 
 
 echo "WAIT 30 Sec"
