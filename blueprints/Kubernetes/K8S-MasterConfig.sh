@@ -98,24 +98,7 @@ done
 
 # Install Flannel for network
 # Doc: https://kubernetes.io/docs/setup/independent/create-cluster-kubeadm/#before-you-begin
-echo "APPLY FLANNEL - DEBUT"
 kubectl apply -f  https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml
-echo "APPLY FLANNEL - FIN"
-
-
-# Validate all pods are running
-echo "CHECK PODS STATUS (Must be running)"
-kubectl get pods --all-namespaces
-# EXEMPLE D'OUTPUT:
-# [root@vRA-VM-0878 ~]# kubectl get pods --all-namespaces
-# kube-system   coredns-86c58d9df4-dxzfz              1/1     Running   0          3m23s
-# kube-system   coredns-86c58d9df4-hjzjv              1/1     Running   0          3m23s
-# kube-system   etcd-vra-vm-0878                      1/1     Running   0          2m17s
-# kube-system   kube-apiserver-vra-vm-0878            1/1     Running   0          2m31s
-# kube-system   kube-controller-manager-vra-vm-0878   1/1     Running   0          2m18s
-# kube-system   kube-flannel-ds-amd64-h5s48           1/1     Running   0          87s
-# kube-system   kube-proxy-trfcx                      1/1     Running   0          87s
-# kube-system   kube-scheduler-vra-vm-0878            1/1     Running   0          2m24s
 
 
 # ATTENDRE QUE TOUT SOIT UP :  il y a 8 pods a demarrer, mais on attend que tous les pods soient up
@@ -133,6 +116,17 @@ do
 	echo "nbRunning = $nbRunning sur $nbTarget"
 done
 echo "Kubernetes Master is ready"
+# EXEMPLE D'OUTPUT:
+# [root@vRA-VM-0878 ~]# kubectl get pods --all-namespaces
+# kube-system   coredns-86c58d9df4-dxzfz              1/1     Running   0          3m23s
+# kube-system   coredns-86c58d9df4-hjzjv              1/1     Running   0          3m23s
+# kube-system   etcd-vra-vm-0878                      1/1     Running   0          2m17s
+# kube-system   kube-apiserver-vra-vm-0878            1/1     Running   0          2m31s
+# kube-system   kube-controller-manager-vra-vm-0878   1/1     Running   0          2m18s
+# kube-system   kube-flannel-ds-amd64-h5s48           1/1     Running   0          87s
+# kube-system   kube-proxy-trfcx                      1/1     Running   0          87s
+# kube-system   kube-scheduler-vra-vm-0878            1/1     Running   0          2m24s
+
 
 # on recupere le token necessaire pour que les nodes puissent rejoindre
 # Necessite d'avoir dans le software component une property varTokenToJoin de type Computed
