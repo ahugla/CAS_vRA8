@@ -13,7 +13,7 @@ inputs:
     encrypted: true
   RangeIP:
     type: string
-    description: Range IP qui sera utilisé dans Kubernetes avec le mode de service de type LoadBalancer
+    description: DOIT ETRE UNIQUE - Range IP qui sera utilisé dans Kubernetes avec le mode de service de type LoadBalancer
     title: IP range
     default: 172.19.2.226-172.19.2.239
 resources:

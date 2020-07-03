@@ -163,3 +163,5 @@ EOF
 
 kubectl apply -f /tmp/metalLBconfig.yaml
 
+# Role controller reste pending tant qu'il n'y a pas au moins un node raccroché au cluster
+
