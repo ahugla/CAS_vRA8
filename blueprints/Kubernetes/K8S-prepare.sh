@@ -101,10 +101,3 @@ EOF
 yum install -y kubelet kubeadm kubectl --disableexcludes=kubernetes
 
 
-
-# EN PLUS
-kubeadm init # Verifie des pre-requis (comme le nombre de cpu) et cree le fichier de config de kubelet: /var/lib/kubelet/config.yaml
-systemctl start kubelet
-systemctl enable kubelet
-
-

@@ -19,6 +19,12 @@
 LB_IPrange=$1
 echo "LB_IPrange = $LB_IPrange"
 
+#set $HOME
+echo "avant HOME = $HOME"
+HOME=/root
+export HOME=$HOME
+echo "apres HOME = $HOME"
+
 # Log $PATH
 echo "Initial PATH = $PATH"
 
@@ -43,7 +49,6 @@ echo "Apres : ip_forward = $ip_forward"
 # "init" verifie des pre-requis (comme le nombre de cpu) et cree le fichier de config de kubelet: /var/lib/kubelet/config.yaml
 echo "kubeadm init ... starting ..."
 kubeadm init --pod-network-cidr=10.244.0.0/16 --apiserver-advertise-address=$(hostname --ip-address) --token-ttl 0 #--ignore-preflight-errors=NumCPU
-
 # The kubeadm command will take a few minutes and it will print a 'kubeadm join'
 # command once completed. Make sure to capture and store this 'kubeadm join'
 # command as it is required to add other nodes to the Kubernetes cluster.
@@ -71,6 +76,11 @@ kubeadm init --pod-network-cidr=10.244.0.0/16 --apiserver-advertise-address=$(ho
 mkdir -p /root/.kube
 sudo cp -i /etc/kubernetes/admin.conf /root/.kube/config
 sudo chown $(id -u):$(id -g) /root/.kube/config
+
+
+systemctl enable kubelet
+systemctl restart kubelet
+
 
 
 env
