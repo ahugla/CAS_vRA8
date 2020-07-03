@@ -17,8 +17,8 @@
 
 
 echo "#####################################################################"
-echo "#                           TEST 4                                  #"
-echo "#                          sans 30 sec wait                         #"
+echo "#                           TEST 5                                  #"
+echo "#                                                                   #"
 echo "#####################################################################"
 sleep 10
 
@@ -83,11 +83,8 @@ sudo cp -i /etc/kubernetes/admin.conf /root/.kube/config
 sudo chown $(id -u):$(id -g) /root/.kube/config
 
 
-#echo "WAIT 30 Sec"
-#sleep 30
 # MUST wait for K8S to start
-# errormsg : The connection to the server localhost:8080 was refused: 
-kubectl get pods --all-namespaces 
+# Si pas de $HOME=/root  alors  errormsg : The connection to the server localhost:8080 was refused
 isRunning=`kubectl get pods --all-namespaces | grep Running | wc -l`
 while [ $isRunning -lt 1 ]
 do
@@ -122,7 +119,7 @@ kubectl get pods --all-namespaces
 
 
 # ATTENDRE QUE TOUT SOIT UP :  il y a 8 pods a demarrer, mais on attend que tous les pods soient up
-sleep 5  #  sinon aucun pods n'a le temps de se creer
+# Si pas de $HOME=/root  alors  errormsg : The connection to the server localhost:8080 was refused
 nbRunning=`kubectl get pods --all-namespaces | grep Running | wc -l`
 nbLigne=`kubectl get pods --all-namespaces | wc -l`
 nbTarget=`echo $(($nbLigne-1))`
