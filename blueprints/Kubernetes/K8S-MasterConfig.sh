@@ -17,10 +17,10 @@
 
 
 echo "#####################################################################"
-echo "#                           TEST  1                                 #"
-echo "#                                                                   #"
+echo "#                           TEST 2                                  #"
+echo "#                           sans home                               #"
 echo "#####################################################################"
-wait 10
+sleep 10
 
 
 # display input parameters
@@ -28,18 +28,14 @@ LB_IPrange=$1
 echo "LB_IPrange = $LB_IPrange"
 
 #set $HOME
-echo "avant HOME = $HOME"
-HOME=/root
-export HOME=$HOME
-echo "apres HOME = $HOME"
+#echo "avant HOME = $HOME"
+#HOME=/root
+#export HOME=$HOME
+#echo "apres HOME = $HOME"
 
 # Log $PATH
 echo "PATH = $PATH"
 # initial PATH  /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin
-
-# Update PATH
-#export PATH=$PATH:/root/bin
-#echo "New PATH = $PATH"
 
 # Validate the ip-address:
 echo "CHECK: hostname --ip-address"
