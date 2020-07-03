@@ -72,13 +72,17 @@ mkdir -p /root/.kube
 sudo cp -i /etc/kubernetes/admin.conf /root/.kube/config
 sudo chown $(id -u):$(id -g) /root/.kube/config
 
+
+env
+whoami
 # MUST wait for K8S to start
-isRunning=`kubectl get pods --all-namespaces | grep Running | wc -l`
+# errormsg : The connection to the server localhost:8080 was refused: 
+isRunning=`sudo kubectl get pods --all-namespaces | grep Running | wc -l`
 while [ $isRunning -lt 1 ]
 do
 	echo "On attend 2s que Kubernetes demarre ..."
 	sleep 2
-	isRunning=`kubectl get pods --all-namespaces | grep Running | wc -l`
+	isRunning=`sudo kubectl get pods --all-namespaces | grep Running | wc -l`
 done
 
 
