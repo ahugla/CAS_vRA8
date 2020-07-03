@@ -26,11 +26,12 @@ export HOME=$HOME
 echo "apres HOME = $HOME"
 
 # Log $PATH
-echo "Initial PATH = $PATH"
+echo "PATH = $PATH"
+# initial PATH  /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin
 
 # Update PATH
-export PATH=$PATH:/usr/local/sbin:/usr/sbin:/root/bin
-echo "New PATH = $PATH"
+#export PATH=$PATH:/root/bin
+#echo "New PATH = $PATH"
 
 # Validate the ip-address:
 echo "CHECK: hostname --ip-address"
@@ -82,19 +83,8 @@ systemctl enable kubelet
 systemctl restart kubelet
 
 
-
-env
-whoami
-
 echo "WAIT 30 Sec"
 sleep 30
-
-echo "etat kubelet"
-systemctl status kubelet
-echo "test access aux pods"
-kubectl get pods --all-namespaces 
-
-
 # MUST wait for K8S to start
 # errormsg : The connection to the server localhost:8080 was refused: 
 #kubectl get pods --all-namespaces 
