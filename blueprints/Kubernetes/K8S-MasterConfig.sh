@@ -100,6 +100,10 @@ do
 	echo "TEST FIN"  
 
 
+	echo "TEST : nc $myIP 8080"
+	nc $myIP 8080
+	echo "TEST FIN"  
+
 
 
 
