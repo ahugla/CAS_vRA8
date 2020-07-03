@@ -17,7 +17,7 @@
 
 
 echo "#####################################################################"
-echo "#                           TEST 5                                  #"
+echo "#                           TEST 6                                  #"
 echo "#                                                                   #"
 echo "#####################################################################"
 sleep 10
@@ -43,11 +43,7 @@ hostname --ip-address
 
 
 # Prerequis à l'init
-ip_forward=`cat /proc/sys/net/ipv4/ip_forward`
-echo "Avant : ip_forward = $ip_forward"
 sysctl net.ipv4.ip_forward=1 
-ip_forward=`cat /proc/sys/net/ipv4/ip_forward`
-echo "Apres : ip_forward = $ip_forward"
 
 
 # Initialize Kubernetes master : https://kubernetes.io/docs/setup/independent/create-cluster-kubeadm/#before-you-begin
@@ -77,10 +73,10 @@ kubeadm init --pod-network-cidr=10.244.0.0/16 --apiserver-advertise-address=$(ho
 # echo PROCESS=`ps -p $$`
 
 
-# start the cluster (On a remplacé $HOME par /root)
-mkdir -p /root/.kube
-sudo cp -i /etc/kubernetes/admin.conf /root/.kube/config
-sudo chown $(id -u):$(id -g) /root/.kube/config
+# start the cluster 
+mkdir -p $HOME/.kube
+sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
+sudo chown $(id -u):$(id -g) $HOME/.kube/config
 
 
 # MUST wait for K8S to start
