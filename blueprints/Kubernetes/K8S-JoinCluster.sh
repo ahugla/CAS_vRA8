@@ -10,14 +10,20 @@
 #
 # cd /tmp
 # curl -O https://raw.githubusercontent.com/ahugla/CAS_vRA8/master/blueprints/Kubernetes/K8S-JoinCluster.sh
-# chmod 755 $fichierSRC
-# ./$fichierSRC  $MasterNode  $MasterPassword
-# rm -f $fichierSRC
+# chmod 755 K8S-JoinCluster.sh
+# ./$K8S-JoinCluster.sh  $MasterNode  $MasterPassword  $LIserver  $versionLI
+# ex : ./K8S-JoinCluster.sh  172.19.5.4  my_pass!  vrli.cpod-vrealizesuite.az-demo.shwrfr.com  v8.1.0
+# rm -f K8S-JoinCluster.sh
 
 # Set and display paramaters
 MasterNode=$1
 MasterPassword=$2
+LIserver=$3
+versionLI=$4
 echo "MasterNode in 'K8S-JoinCluster.sh' : $MasterNode"
+echo "LIserver : $LIserver"
+echo "versionLI : $versionLI"
+
 
 # Log $PATH
 echo "Intial PATH = $PATH"
@@ -46,11 +52,7 @@ echo "varTokenToJoin = $varTokenToJoin"
 #A FAIRE SUR LES NODES:  
 # Necessite d'avoir dans le software component une property varTokenToJoin
 kubeadm join $MasterNode:6443 --discovery-token-unsafe-skip-ca-verification --token $varTokenToJoin
-
-
-
-# FIN
-#  c est a ce moment qu'on fait la commande "kubeadm join" sur les nodes : CA PREND 20 s pour apparaitre 
+# CA PREND 20 s pour apparaitre 
 # In case the token to join has expired, create a new token:
 # On Master, list the existing tokens:
 #  kubeadm token list
@@ -59,3 +61,44 @@ kubeadm join $MasterNode:6443 --discovery-token-unsafe-skip-ca-verification --to
 #   kubeadm token list
 # Join additional nodes in the cluster with the newly created token, e.g.,:
 #   kubeadm join 172.16.1.125:6443 --discovery-token-unsafe-skip-ca-verification --token 5d4164.15b01d9af2e64824
+
+
+
+
+# Installation et configuration de Log Insight
+# --------------------------------------------
+
+# Installation de l'agent Log Insight
+git clone https://github.com/ahugla/LogInsight.git  /tmp/li
+rpmLI=`ls /tmp/li/$versionLI`
+rpm -iv /tmp/li/$versionLI/$rpmLI
+
+
+# config agent hostname + no ssl
+#-------------------------------
+liconfig=/var/lib/loginsight-agent/liagent.ini
+# suppression de toutes les lignes contenant hostname=
+sed -i '/hostname=/d' $liconfig
+# ajout de la conf server apres la ligne [server]
+ligne1="hostname=$LIserver"
+sed -i '/\[server\]/a '$ligne1'' $liconfig
+#suppression de toutes les lignes contenant ssl=yes
+sed -i '/ssl=yes/d' $liconfig
+# ajout de la conf ssl apres 'SSL usage'
+sed -i '/SSL usage/a ssl=no' $liconfig
+
+
+# restart et reboot persistence
+systemctl restart liagentd
+systemctl enable liagentd
+
+
+# reste a aller sur le serveur LI et l'associer avec l'agent linux.
+
+
+
+
+
+
+
+
