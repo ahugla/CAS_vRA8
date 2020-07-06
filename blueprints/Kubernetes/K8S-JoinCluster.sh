@@ -69,9 +69,10 @@ kubeadm join $MasterNode:6443 --discovery-token-unsafe-skip-ca-verification --to
 # --------------------------------------------
 
 # Installation de l'agent Log Insight
+cd /tmp
 git clone https://github.com/ahugla/LogInsight.git  /tmp/li
-rpmLI=`ls /tmp/li/$versionLI`
-rpm -iv /tmp/li/$versionLI/$rpmLI
+rpmLI=`ls /tmp/li/$versionLI/*.rpm`
+rpm -iv $rpmLI
 
 
 # config agent hostname + no ssl
