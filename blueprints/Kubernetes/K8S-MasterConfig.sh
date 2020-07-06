@@ -10,9 +10,9 @@
 # 
 # cd /tmp
 # curl -O https://raw.githubusercontent.com/ahugla/CAS_vRA8/master/blueprints/Kubernetes/K8S-MasterConfig.sh
-# chmod 755 $fichierSRC
-# ./$fichierSRC $LB_IPrange
-# rm -f $fichierSRC
+# chmod 755 K8S-MasterConfig.sh
+# ./K8S-MasterConfig.sh $LB_IPrange
+# rm -f K8S-MasterConfig.sh
 #
 
 
