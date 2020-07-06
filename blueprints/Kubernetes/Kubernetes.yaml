@@ -16,13 +16,21 @@ inputs:
     description: DOIT ETRE UNIQUE - Range IP qui sera utilisé dans Kubernetes avec le mode de service de type LoadBalancer
     title: IP range
     default: 172.19.2.226-172.19.2.239
+  LIserver:
+    type: string
+    title: Log Insight Server
+    default: vrli.cpod-vrealizesuite.az-demo.shwrfr.com
+  LIversion:
+    type: string
+    title: Version de Log Insight
+    default: v8.1.0
 resources:
   K8S_Master:
     type: Cloud.Machine
     metadata:
       layoutPosition:
         - 0
-        - 1
+        - 0
     properties:
       image: CentOS
       flavor: Medium # 2 vCPU
@@ -50,7 +58,7 @@ resources:
     metadata:
       layoutPosition:
         - 0
-        - 2
+        - 1
     properties:
       image: CentOS
       flavor: Medium # 2 vCPU
@@ -74,7 +82,7 @@ resources:
           - cp /tmp/CAS_vRA8/blueprints/Kubernetes/K8S-JoinCluster.sh /tmp/K8S-JoinCluster.sh
           - chmod 755 K8S-prepare.sh K8S-JoinCluster.sh
           - /tmp/K8S-prepare.sh
-          - /tmp/K8S-JoinCluster.sh ${resource.K8S_Master.networks.address[0]}  ${input.rootPasswd}
+          - /tmp/K8S-JoinCluster.sh ${resource.K8S_Master.networks.address[0]}  ${input.rootPasswd}   ${input.LIserver}   ${input.LIversion}
           - rm -f K8S-prepare.sh
           - rm -f K8S-JoinCluster.sh
   Cloud_Network:
