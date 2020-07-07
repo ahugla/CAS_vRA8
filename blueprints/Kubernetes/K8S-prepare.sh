@@ -11,8 +11,14 @@
 # cd /tmp
 # curl -O https://raw.githubusercontent.com/ahugla/CAS_vRA8/master/blueprints/Kubernetes/K8S-prepare.sh
 # chmod 755 K8S-prepare.sh
-# ./K8S-prepare.sh
+# ./K8S-prepare.sh  $kubeVersion
 # rm -f K8S-prepare.sh
+
+
+# get parameter
+# yum --showduplicates list 'kube*'   pour voir toutes les versions dispos
+kubeVersion=$1
+echo "kubeVersion = $kubeVersion"
 
 
 # Test nombre vCPU
@@ -98,6 +104,20 @@ EOF
 
 
 # Install Kubernetes and start it
-yum install -y kubelet kubeadm kubectl --disableexcludes=kubernetes
+
+#yum install -y kubelet kubeadm kubectl --disableexcludes=kubernetes
+# yum --showduplicates list 'kube*'    pour voir toutes les versions dispos
+# kubeVersion=1.17.8   # 1.16.12, 1.17.8, 1.18.5
+yum install -y kubelet-$kubeVersion   kubeadm-$kubeVersion   kubectl-$kubeVersion  --disableexcludes=kubernetes
+
+
+
+
+
+
+
+
+
+
 
 
