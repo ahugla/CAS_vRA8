@@ -4,13 +4,24 @@ inputs:
     title: Nombre de kubernetes nodes
     type: integer
     default: 2
-    minimum: 1
+    minimum: 0
     maximum: 4
   rootPasswd:
     description: Password root (deja configuré dans le template) de la VM master K8S.
     title: Password configuré
     type: string
     encrypted: true
+  kubernetesVersion:
+    type: string
+    title: Kubernetes version
+    default: 1.17.8
+    oneOf:
+      - title: 1.16.12
+        const: 1.16.12
+      - title: 1.17.8
+        const: 1.17.8
+      - title: 1.18.5 incompatible avec codestream 8.1
+        const: 1.18.5
   RangeIP:
     type: string
     description: DOIT ETRE UNIQUE - Range IP qui sera utilisé dans Kubernetes avec le mode de service de type LoadBalancer
@@ -49,7 +60,7 @@ resources:
           - cp /tmp/CAS_vRA8/blueprints/Kubernetes/K8S-prepare.sh /tmp/K8S-prepare.sh
           - cp /tmp/CAS_vRA8/blueprints/Kubernetes/K8S-MasterConfig.sh /tmp/K8S-MasterConfig.sh
           - chmod 755 K8S-prepare.sh K8S-MasterConfig.sh
-          - /tmp/K8S-prepare.sh
+          - /tmp/K8S-prepare.sh ${input.kubernetesVersion}
           - /tmp/K8S-MasterConfig.sh ${input.RangeIP}
           - rm -f K8S-prepare.sh
           - rm -f K8S-MasterConfig.sh
@@ -81,7 +92,7 @@ resources:
           - cp /tmp/CAS_vRA8/blueprints/Kubernetes/K8S-prepare.sh /tmp/K8S-prepare.sh
           - cp /tmp/CAS_vRA8/blueprints/Kubernetes/K8S-JoinCluster.sh /tmp/K8S-JoinCluster.sh
           - chmod 755 K8S-prepare.sh K8S-JoinCluster.sh
-          - /tmp/K8S-prepare.sh
+          - /tmp/K8S-prepare.sh ${input.kubernetesVersion}
           - /tmp/K8S-JoinCluster.sh ${resource.K8S_Master.networks.address[0]}  ${input.rootPasswd}   ${input.LIserver}   ${input.LIversion}
           - rm -f K8S-prepare.sh
           - rm -f K8S-JoinCluster.sh
