@@ -1,0 +1,330 @@
+---
+project: CMP_SEs
+kind: PIPELINE
+name: Alex_CD_TITO
+icon: organization,left,  is-solid
+enabled: true
+description: K8S on Dev and VMs for Prod
+concurrency: 10
+input:
+  Disable_Approvals: 'No'
+  Execute_Perf_Test: 'No'
+  Full_Prod_Safety_Period: '30'
+  PROXY_NAME: wvfp.cpod-vrealizesuite.az-demo.shwrfr.com
+  Push_to_prod: 'No'
+  TITO_VERSION: V2.3
+_inputMeta:
+  TITO_VERSION:
+    description: Version du code Tito (V2.3, V1.9.6...)
+    mandatory: true
+  PROXY_NAME:
+    description: IP ou FQDN du wavefront Proxy
+    mandatory: true
+  Disable_Approvals:
+    description: '"Yes" to disable all approvals'
+    mandatory: true
+  Execute_Perf_Test:
+    description: '"Yes" pour excuter les tests de perfs'
+    mandatory: true
+  Push_to_prod:
+    description: '"Yes" pour pousser la version en production'
+    mandatory: true
+  Full_Prod_Safety_Period:
+    description: Temps en sec avant de passer la totalité de la prod en nouvelle version
+    mandatory: true
+workspace:
+  endpoint: ''
+  image: ''
+  registry: ''
+  path: ''
+  limits:
+    cpu: 1.0
+    memory: 512
+stageOrder:
+- Prepare Test Env
+- Deploy Test Env
+- Performance Testing
+- Mise en production
+stages:
+  Performance Testing:
+    taskOrder:
+    - Perf Loader
+    tasks:
+      Perf Loader:
+        type: vRO
+        preCondition: ${input.Execute_Perf_Test} == "Yes"
+        endpoints:
+          vroServer: vRO Embedded
+        input:
+          workflowName: TITO_Loader
+          workflowID: 4f4b27d4-2b92-4514-97f1-353f2d5f4ab1
+          parameters:
+            nbre_tests: '3'
+            Tito_URL: http://${Deploy Test Env.Deploy Tito.output.response.loadBalancers.tito-fe-svc.ingress[0].ip}
+  Mise en production:
+    taskOrder:
+    - Approbation to Production
+    - update prod - Sample
+    - Safety Period
+    - update prod - Full
+    tasks:
+      update prod - Sample:
+        type: SSH
+        preCondition: ${input.Push_to_prod} == "Yes"
+        input:
+          script: |2+
+
+
+            cd /tmp
+
+            curl -O https://raw.githubusercontent.com/ahugla/Pipelines_Code_Stream/master/Tito/8-avr-2020/vRCS_Tito_update.sh
+            chmod 755 vRCS_Tito_update.sh
+            ./vRCS_Tito_update.sh  $Tito_Version  $Proxy_Name  $Proxy_Port
+            rm -f vRCS_Tito_update.sh
+
+          username: root
+          password: changeme
+          passphrase: ''
+          privatekey: ''
+          host: 172.19.2.207
+          workingDirectory: ''
+          arguments: [
+            ]
+          environmentVariables:
+            Tito_Version: ${input.TITO_VERSION}
+            Proxy_Name: ${input.PROXY_NAME}
+            Proxy_Port: '2878'
+      Approbation to Production:
+        type: UserOperation
+        preCondition: |-
+          ${input.Push_to_prod} == "Yes"
+          && ${input.Disable_Approvals} == "No"
+        input:
+          approvers:
+          - ahugla@vmware.com
+          - ${requestBy}
+          approverGroups: [
+            ]
+          summary: Validation pour passage en prod de TITO version ${input.TITO_VERSION}
+          description: ''
+          sendemail: false
+          expirationInDays: 3
+          pipelineName: ${name}
+          cancelPreviousPendingUserOp: false
+      Safety Period:
+        type: SSH
+        preCondition: ${input.Push_to_prod} == "Yes"
+        input:
+          script: |2+
+
+
+            sleep $Full_Prod_Safety_Period
+
+          username: root
+          password: changeme
+          passphrase: ''
+          privatekey: ''
+          host: ${var.Alex_IP_server_scripts_SSH}
+          workingDirectory: ''
+          arguments: [
+            ]
+          environmentVariables:
+            Full_Prod_Safety_Period: ${input.Full_Prod_Safety_Period}
+      update prod - Full:
+        type: SSH
+        preCondition: ${input.Push_to_prod} == "Yes"
+        input:
+          script: |2+
+
+
+            cd /tmp
+
+            curl -O https://raw.githubusercontent.com/ahugla/Pipelines_Code_Stream/master/Tito/8-avr-2020/vRCS_Tito_update.sh
+            chmod 755 vRCS_Tito_update.sh
+            ./vRCS_Tito_update.sh  $Tito_Version  $Proxy_Name  $Proxy_Port
+            rm -f vRCS_Tito_update.sh
+
+          username: root
+          password: changeme
+          passphrase: ''
+          privatekey: ''
+          host: 172.19.2.209
+          workingDirectory: ''
+          arguments: [
+            ]
+          environmentVariables:
+            Tito_Version: ${input.TITO_VERSION}
+            Proxy_Name: ${input.PROXY_NAME}
+            Proxy_Port: '2878'
+  Deploy Test Env:
+    taskOrder:
+    - Deploy Tito
+    - Polling until Tito ready
+    - UI verification
+    tasks:
+      Polling until Tito ready:
+        type: SSH
+        input:
+          script: |-
+            #!/bin/bash
+
+            cd /tmp/SSH_scrips/isURLready
+            ./isURLready.sh $serviceIP $servicePort $maxRetry
+
+            #To see exit status of the script
+            exit $?
+          username: root
+          password: ${var.LinuxPassword}
+          passphrase: ''
+          privatekey: ''
+          host: ${var.Alex_IP_server_scripts_SSH}
+          workingDirectory: ''
+          arguments: [
+            ]
+          environmentVariables:
+            maxRetry: '30'
+            serviceIP: ${Deploy Test Env.Deploy Tito.output.response.loadBalancers.tito-fe-svc.ingress[0].ip}
+            servicePort: '80'
+      Deploy Tito:
+        type: K8S
+        endpoints:
+          scm: Alex github
+          kubernetesServer: Alex K8S LB
+        input:
+          action: CREATE
+          timeout: 5
+          continueOnConflict: false
+          filePath: TITO/LoadBalancer/var-for-CodeStream/Alex_CD_TITO/tito_svcLB_rc_07_juillet_2020.yaml
+          scmConstants:
+            TITO_VERSION: ${input.TITO_VERSION}
+            PROXY_NAME: ${input.PROXY_NAME}
+          yaml: ''
+      UI verification:
+        type: UserOperation
+        preCondition: ${input.Disable_Approvals} == "No"
+        input:
+          approvers:
+          - ahugla@vmware.com
+          - ${requestBy}
+          approverGroups: [
+            ]
+          summary: TEST - Verifier l'interface de Tito
+          description: |-
+            - Acces a l 'interface
+            - Requete d'un trajet
+            - Resultat d'une requete
+            - Metrique dans wavefront
+            - Logs dans Log Insight
+          sendemail: false
+          expirationInDays: 3
+          pipelineName: ${name}
+          cancelPreviousPendingUserOp: false
+  Prepare Test Env:
+    taskOrder:
+    - Clean K8S
+    - Deploiement scripts SSH
+    - Update Slack
+    tasks:
+      Deploiement scripts SSH:
+        type: SSH
+        input:
+          script: |
+            #!/bin/bash
+
+            cd /tmp/
+
+            DIR="/tmp/SSH_scrips"
+            if [ ! -d "$DIR" ]
+            then
+              # le repertoire n'existe pas
+              mkdir /tmp/SSH_scrips
+              mkdir /tmp/SSH_scrips/isURLready
+              cd /tmp/SSH_scrips/isURLready
+              curl -O https://raw.githubusercontent.com/ahugla/Script-SSH/master/isURLready/isURLready.sh
+              chmod 755 isURLready.sh
+            fi
+          username: root
+          password: ${var.LinuxPassword}
+          passphrase: ''
+          privatekey: ''
+          host: ${var.Alex_IP_server_scripts_SSH}
+          workingDirectory: ''
+          arguments: [
+            ]
+          environmentVariables: {
+            }
+      Update Slack:
+        type: REST
+        input:
+          action: post
+          url: ${var.Slack URL AH_team}
+          headers:
+            Accept: application/json
+            Content-Type: application/json
+          payload: '{"text":"Alex-CD TITO - ${input.TITO_VERSION} - Preparation de l''environnement de
+            test terminée"}'
+      Clean K8S:
+        type: SSH
+        input:
+          script: |2+
+
+            /root/K8S_My_Env/CLEAN_ALL.sh
+
+          username: root
+          password: ${var.LinuxPassword}
+          passphrase: ''
+          privatekey: ''
+          host: ${var.Alex_K8S_Master}
+          workingDirectory: ''
+          arguments: [
+            ]
+          environmentVariables: {
+            }
+notifications:
+  webhook:
+  - task: Perf Loader
+    event: STARTED
+    url: ${var.Slack URL AH_team}
+    action: post
+    payload: '{"text":"Alex-CD TITO - ${input.TITO_VERSION} - Test de performance - Debut"}'
+    headers:
+      Content-Type: ' application/json'
+      Accept: ' application/json'
+    stage: Performance Testing
+  - task: Perf Loader
+    event: SUCCESS
+    url: ${var.Slack URL AH_team}
+    action: post
+    payload: '{"text":"Alex-CD TITO - ${input.TITO_VERSION} - Test de performance - Terminés"}'
+    headers:
+      Content-Type: ' application/json'
+      Accept: ' application/json'
+    stage: Performance Testing
+  - task: update prod - Sample
+    event: STARTED
+    url: ${var.Slack URL AH_team}
+    action: post
+    payload: '{"text":"Alex-CD TITO - ${input.TITO_VERSION} - Mise en prod - Debut"}'
+    headers:
+      Content-Type: ' application/json'
+      Accept: ' application/json'
+    stage: Mise en production
+  - task: Safety Period
+    event: STARTED
+    url: ${var.Slack URL AH_team}
+    action: post
+    payload: '{"text":"Alex-CD TITO - ${input.TITO_VERSION} - Mise en prod - Safety Period: ${input.Full_Prod_Safety_Period}
+      sec"}'
+    headers:
+      Content-Type: ' application/json'
+      Accept: ' application/json'
+    stage: Mise en production
+  - task: update prod - Full
+    event: SUCCESS
+    url: ${var.Slack URL AH_team}
+    action: post
+    payload: '{"text":"Alex-CD TITO - ${input.TITO_VERSION} - Mise en prod - Terminé"}'
+    headers:
+      Content-Type: ' application/json'
+      Accept: ' application/json'
+    stage: Mise en production

@@ -1,0 +1,249 @@
+---
+project: CMP_SEs
+kind: PIPELINE
+name: Alex_Canary_on_Tito
+icon: organization,left,  is-solid
+enabled: true
+description: Update using Canary deployment on Tito
+concurrency: 10
+input:
+  Disable_Approvals: 'No'
+  Execute_Perf_Test: 'No'
+  PROXY_NAME: wvfp.cpod-vrealizesuite.az-demo.shwrfr.com
+  Preparation: 'Yes'
+  TITO_VERSION: V2.3
+_inputMeta:
+  TITO_VERSION:
+    description: Version du code Tito (V2.3, V1.9.6...)
+    mandatory: true
+  PROXY_NAME:
+    description: IP ou FQDN du wavefront Proxy
+    mandatory: true
+  Disable_Approvals:
+    description: '"Yes" to disable all approvals'
+    mandatory: true
+  Execute_Perf_Test:
+    description: '"Yes" pour excuter les tests de perfs'
+    mandatory: false
+  Preparation:
+    description: Preparer l'environnement initial (Yes/No)
+    mandatory: true
+workspace:
+  endpoint: ''
+  image: ''
+  registry: ''
+  path: ''
+  limits:
+    cpu: 1.0
+    memory: 512
+stageOrder:
+- Prepare Test Env
+- Deploy Canary
+- Put Canary in production
+stages:
+  Put Canary in production:
+    taskOrder:
+    - Approbation to Production
+    - Increase New Version pods,Decrease initial version
+    - Update Slack
+    tasks:
+      Approbation to Production:
+        type: UserOperation
+        preCondition: ${input.Disable_Approvals} == "No"
+        input:
+          approvers:
+          - ahugla@vmware.com
+          - ${requestBy}
+          approverGroups: [
+            ]
+          summary: Validation avant mise en prod de TITO version ${input.TITO_VERSION}
+          description: '- Validation du Canary'
+          sendemail: false
+          expirationInDays: 3
+          pipelineName: ${name}
+          cancelPreviousPendingUserOp: false
+      Increase New Version pods:
+        type: K8S
+        endpoints:
+          scm: Alex github
+          kubernetesServer: Alex K8S LB
+        input:
+          action: APPLY
+          timeout: 5
+          filePath: TITO/LoadBalancer/var-for-CodeStream/Alex_Canary_on_Tito/tito_rc_08_juillet_2020.yaml
+          scmConstants:
+            TITO_VERSION: ${input.TITO_VERSION}
+            PROXY_NAME: ${input.PROXY_NAME}
+            TITO_INSTANCE: newversion
+            TITO_REPLICA: '10'
+          yaml: ''
+      Decrease initial version:
+        type: K8S
+        preCondition: ${input.Preparation} == "Yes"
+        endpoints:
+          scm: Alex github
+          kubernetesServer: Alex K8S LB
+        input:
+          action: APPLY
+          timeout: 5
+          filePath: TITO/LoadBalancer/var-for-CodeStream/Alex_Canary_on_Tito/tito_rc_08_juillet_2020.yaml
+          scmConstants:
+            TITO_VERSION: V1.9.3
+            PROXY_NAME: ${input.PROXY_NAME}
+            TITO_INSTANCE: initial
+            TITO_REPLICA: '0'
+          yaml: ''
+      Update Slack:
+        type: REST
+        input:
+          action: post
+          url: ${var.Slack URL AH_team}
+          headers:
+            Accept: application/json
+            Content-Type: application/json
+          payload: '{"text":"Alex - Canary on Tito - ${input.TITO_VERSION} - 100% on production"}'
+  Prepare Test Env:
+    taskOrder:
+    - Clean K8S
+    - Deploiement scripts SSH,Deploy initial Tito RC,Deploy initiak Tito Service
+    - Update Slack
+    - Check Demo is ready
+    tasks:
+      Deploy initial Tito RC:
+        type: K8S
+        preCondition: ${input.Preparation} == "Yes"
+        endpoints:
+          scm: Alex github
+          kubernetesServer: Alex K8S LB
+        input:
+          action: CREATE
+          timeout: 5
+          continueOnConflict: false
+          filePath: TITO/LoadBalancer/var-for-CodeStream/Alex_Canary_on_Tito/tito_rc_08_juillet_2020.yaml
+          scmConstants:
+            TITO_VERSION: V1.9.3
+            PROXY_NAME: ${input.PROXY_NAME}
+            TITO_INSTANCE: initial
+            TITO_REPLICA: '10'
+          yaml: ''
+      Deploy initiak Tito Service:
+        type: K8S
+        preCondition: ${input.Preparation} == "Yes"
+        endpoints:
+          scm: Alex github
+          kubernetesServer: Alex K8S LB
+        input:
+          action: CREATE
+          timeout: 5
+          continueOnConflict: false
+          filePath: TITO/LoadBalancer/var-for-CodeStream/Alex_Canary_on_Tito/tito_svcLB_08_juillet_2020.yaml
+          scmConstants: {
+            }
+          yaml: ''
+      Check Demo is ready:
+        type: UserOperation
+        preCondition: |-
+          ${input.Disable_Approvals} == "No"
+          &&
+          ${input.Preparation} == "Yes"
+        input:
+          approvers:
+          - ahugla@vmware.com
+          - ${requestBy}
+          approverGroups: [
+            ]
+          summary: Check Demo is ready to start
+          description: ''
+          sendemail: false
+          expirationInDays: 3
+          pipelineName: ${name}
+          cancelPreviousPendingUserOp: false
+      Deploiement scripts SSH:
+        type: SSH
+        preCondition: ${input.Preparation} == "Yes"
+        input:
+          script: |
+            #!/bin/bash
+
+            cd /tmp/
+
+            DIR="/tmp/SSH_scrips"
+            if [ ! -d "$DIR" ]
+            then
+              # le repertoire n'existe pas
+              mkdir /tmp/SSH_scrips
+              mkdir /tmp/SSH_scrips/isURLready
+              cd /tmp/SSH_scrips/isURLready
+              curl -O https://raw.githubusercontent.com/ahugla/Script-SSH/master/isURLready/isURLready.sh
+              chmod 755 isURLready.sh
+            fi
+          username: root
+          password: ${var.LinuxPassword}
+          passphrase: ''
+          privatekey: ''
+          host: ${var.Alex_IP_server_scripts_SSH}
+          workingDirectory: ''
+          arguments: [
+            ]
+          environmentVariables: {
+            }
+      Update Slack:
+        type: REST
+        preCondition: ${input.Preparation} == "Yes"
+        input:
+          action: post
+          url: ${var.Slack URL AH_team}
+          headers:
+            Accept: application/json
+            Content-Type: application/json
+          payload: '{"text":"Alex - Canary on Tito - ${input.TITO_VERSION} - Preparation de l''environnement
+            initial terminée"}'
+      Clean K8S:
+        type: SSH
+        preCondition: ${input.Preparation} == "Yes"
+        input:
+          script: |2+
+
+            /root/K8S_My_Env/CLEAN_ALL.sh
+
+          username: root
+          password: ${var.LinuxPassword}
+          passphrase: ''
+          privatekey: ''
+          host: ${var.Alex_K8S_Master}
+          workingDirectory: ''
+          arguments: [
+            ]
+          environmentVariables: {
+            }
+  Deploy Canary:
+    taskOrder:
+    - Deploy Tito Canary
+    - Update Slack
+    tasks:
+      Deploy Tito Canary:
+        type: K8S
+        endpoints:
+          scm: Alex github
+          kubernetesServer: Alex K8S LB
+        input:
+          action: CREATE
+          timeout: 5
+          continueOnConflict: false
+          filePath: TITO/LoadBalancer/var-for-CodeStream/Alex_Canary_on_Tito/tito_rc_08_juillet_2020.yaml
+          scmConstants:
+            TITO_VERSION: ${input.TITO_VERSION}
+            PROXY_NAME: ${input.PROXY_NAME}
+            TITO_INSTANCE: newversion
+            TITO_REPLICA: '2'
+          yaml: ''
+      Update Slack:
+        type: REST
+        input:
+          action: post
+          url: ${var.Slack URL AH_team}
+          headers:
+            Accept: application/json
+            Content-Type: application/json
+          payload: '{"text":"Alex - Canary on Tito - ${input.TITO_VERSION} - Canary deployed - 20% on
+            production"}'
