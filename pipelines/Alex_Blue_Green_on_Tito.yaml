@@ -1,0 +1,213 @@
+---
+project: CMP_SEs
+kind: PIPELINE
+name: Alex_Blue_Green_on_Tito
+icon: organization,left,  is-solid
+enabled: true
+description: Update using Canary deployment on Tito
+concurrency: 10
+input:
+  Disable_Approvals: 'No'
+  PROXY_NAME: wvfp.cpod-vrealizesuite.az-demo.shwrfr.com
+  Preparation: 'Yes'
+  TITO_VERSION: V2.3
+_inputMeta:
+  TITO_VERSION:
+    description: Version du code Tito (V2.3, V1.9.6...)
+    mandatory: true
+  PROXY_NAME:
+    description: IP ou FQDN du wavefront Proxy
+    mandatory: false
+  Disable_Approvals:
+    description: '"Yes" to disable all approvals'
+    mandatory: true
+  Preparation:
+    description: Preparer l'environnement initial (Yes/No)
+    mandatory: true
+workspace:
+  endpoint: ''
+  image: ''
+  registry: ''
+  path: ''
+  limits:
+    cpu: 1.0
+    memory: 512
+stageOrder:
+- Prepare Blue Env
+- Deploy Green
+- Put Green in production
+stages:
+  Prepare Blue Env:
+    taskOrder:
+    - Clean K8S,input into lowercase
+    - Deploy Blue Tito,Deploy Service
+    - Update Slack
+    - Check Demo is ready
+    tasks:
+      Deploy Blue Tito:
+        type: K8S
+        preCondition: ${input.Preparation} == "Yes"
+        endpoints:
+          scm: Alex github
+          kubernetesServer: Alex K8S LB
+        input:
+          action: CREATE
+          timeout: 5
+          continueOnConflict: false
+          filePath: TITO/LoadBalancer/var-for-CodeStream/Alex_Blue_Green_on_Tito/initialDeployment-blue.yaml
+          scmConstants: {
+            }
+          yaml: ''
+      input into lowercase:
+        type: vRO
+        endpoints:
+          vroServer: vRO Embedded
+        input:
+          workflowName: Alex - String to Lowercase
+          workflowID: 8bb640ad-d4eb-490c-8a9c-19c02d9ffeb7
+          parameters:
+            inputSTR: ${input.TITO_VERSION}
+      Check Demo is ready:
+        type: UserOperation
+        preCondition: |-
+          ${input.Disable_Approvals} == "No"
+          &&
+          ${input.Preparation} == "Yes"
+        input:
+          approvers:
+          - ahugla@vmware.com
+          - ${requestBy}
+          approverGroups: [
+            ]
+          summary: Check Demo is ready to start
+          description: ''
+          sendemail: false
+          expirationInDays: 3
+          pipelineName: ${name}
+          cancelPreviousPendingUserOp: false
+      Update Slack:
+        type: REST
+        preCondition: ${input.Preparation} == "Yes"
+        input:
+          action: post
+          url: ${var.Slack URL AH_team}
+          headers:
+            Accept: application/json
+            Content-Type: application/json
+          payload: '{"text":"Alex - Blue/Green on Tito - V0.5 - Preparation de l''environnement initial
+            (Blue) terminée"}'
+      Deploy Service:
+        type: K8S
+        preCondition: ${input.Preparation} == "Yes"
+        endpoints:
+          scm: Alex github
+          kubernetesServer: Alex K8S LB
+        input:
+          action: CREATE
+          timeout: 5
+          continueOnConflict: false
+          filePath: TITO/LoadBalancer/var-for-CodeStream/Alex_Blue_Green_on_Tito/service.yaml
+          scmConstants:
+            TITO_VERSION_LOWER: v0.5
+          yaml: ''
+      Clean K8S:
+        type: SSH
+        preCondition: ${input.Preparation} == "Yes"
+        input:
+          script: |2+
+
+            /root/K8S_My_Env/CLEAN_ALL.sh
+
+          username: root
+          password: ${var.LinuxPassword}
+          passphrase: ''
+          privatekey: ''
+          host: ${var.Alex_K8S_Master}
+          workingDirectory: ''
+          arguments: [
+            ]
+          environmentVariables: {
+            }
+  Deploy Green:
+    taskOrder:
+    - Deploy Tito Green
+    - Update Slack
+    tasks:
+      Deploy Tito Green:
+        type: K8S
+        endpoints:
+          scm: Alex github
+          kubernetesServer: Alex K8S LB
+        input:
+          action: CREATE
+          timeout: 5
+          continueOnConflict: false
+          filePath: TITO/LoadBalancer/var-for-CodeStream/Alex_Blue_Green_on_Tito/newDeployment-green.yaml
+          scmConstants:
+            TITO_VERSION: ${input.TITO_VERSION}
+            TITO_VERSION_LOWER: ${Prepare Blue Env.input into lowercase.output.properties.outputSTR}
+          yaml: ''
+      Update Slack:
+        type: REST
+        input:
+          action: post
+          url: ${var.Slack URL AH_team}
+          headers:
+            Accept: application/json
+            Content-Type: application/json
+          payload: '{"text":"Alex - Blue/Green on Tito - ${input.TITO_VERSION} - Green deployed"}'
+  Put Green in production:
+    taskOrder:
+    - Approbation to Production
+    - service update to green
+    - Update Slack
+    - Delete Blue
+    tasks:
+      service update to green:
+        type: K8S
+        endpoints:
+          scm: Alex github
+          kubernetesServer: Alex K8S LB
+        input:
+          action: APPLY
+          timeout: 5
+          filePath: TITO/LoadBalancer/var-for-CodeStream/Alex_Blue_Green_on_Tito/service.yaml
+          scmConstants:
+            TITO_VERSION_LOWER: ${Prepare Blue Env.input into lowercase.output.properties.outputSTR}
+          yaml: ''
+      Delete Blue:
+        type: K8S
+        endpoints:
+          scm: Alex github
+          kubernetesServer: Alex K8S LB
+        input:
+          action: DELETE
+          timeout: 5
+          filePath: TITO/LoadBalancer/var-for-CodeStream/Alex_Blue_Green_on_Tito/initialDeployment-blue.yaml
+          scmConstants: {
+            }
+          yaml: ''
+      Approbation to Production:
+        type: UserOperation
+        preCondition: ${input.Disable_Approvals} == "No"
+        input:
+          approvers:
+          - ahugla@vmware.com
+          - ${requestBy}
+          approverGroups: [
+            ]
+          summary: Validation avant mise en prod de TITO version ${input.TITO_VERSION}
+          description: '- Validation du Canary'
+          sendemail: false
+          expirationInDays: 3
+          pipelineName: ${name}
+          cancelPreviousPendingUserOp: false
+      Update Slack:
+        type: REST
+        input:
+          action: post
+          url: ${var.Slack URL AH_team}
+          headers:
+            Accept: application/json
+            Content-Type: application/json
+          payload: '{"text":"Alex - Blue/Green on Tito - ${input.TITO_VERSION} - Green on production"}'
