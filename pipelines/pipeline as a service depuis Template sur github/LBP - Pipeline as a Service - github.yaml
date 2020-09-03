@@ -1,0 +1,131 @@
+---
+project: CMP_SEs
+kind: PIPELINE
+name: LBP - Pipeline as a Service - github
+icon: organization,left, is-purple
+enabled: true
+concurrency: 10
+input:
+  New_Pipeline_Name: ''
+  Version: V3.0
+_inputMeta:
+  Version:
+    description: ''
+    mandatory: true
+  New_Pipeline_Name:
+    description: Nom du nouveau pipeline
+    mandatory: true
+workspace:
+  endpoint: ''
+  image: ''
+  registry: ''
+  path: ''
+  limits:
+    cpu: 1.0
+    memory: 512
+stageOrder:
+- get commit ID
+- Create Token
+- Import and enable pipeline
+stages:
+  get commit ID:
+    taskOrder:
+    - get all releases
+    - find commit id
+    tasks:
+      get all releases:
+        type: REST
+        input:
+          action: get
+          url: https://api.github.com/repos/ahugla/CodeStream_Pipelines_Templates/tags
+          headers:
+            Accept: application/vnd.github.v3+json
+          payload: ''
+      find commit id:
+        type: vRO
+        endpoints:
+          vroServer: vRO Embedded
+        input:
+          workflowName: find sha for version
+          workflowID: 0e4c8a23-8e4e-4b91-bde7-585211730140
+          parameters:
+            payload: ${get commit ID.get all releases.output.responseBody}
+            version: ${input.Version}
+  Import and enable pipeline:
+    taskOrder:
+    - get payload
+    - replace pipeline name
+    - Import
+    - enable
+    tasks:
+      replace pipeline name:
+        type: vRO
+        endpoints:
+          vroServer: vRO Embedded
+        input:
+          workflowName: replace name in template
+          workflowID: 4160f8c0-6a7b-4395-af98-2084a96ef90f
+          parameters:
+            yamlFile: ${Import and enable pipeline.get payload.output.responseBody}
+            new_name: ${input.New_Pipeline_Name}
+      Import:
+        type: REST
+        input:
+          action: post
+          url: https://vra.cpod-vrealizesuite.az-demo.shwrfr.com/codestream/api/import
+          headers:
+            Accept: application/json, text/plain, */*
+            Content-Type: application/x-yaml
+            Authorization: Bearer ${Create Token.Get Access Token.output.responseBody.token}
+          payload: ${Import and enable pipeline.replace pipeline name.output.properties.yamlOutput}
+      get payload:
+        type: REST
+        input:
+          action: get
+          url: https://raw.githubusercontent.com/ahugla/CodeStream_Pipelines_Templates/${get commit ID.find
+            commit id.output.properties.commit_id}/Template_test_alex.yaml
+          headers:
+            Accept: application/json
+            Content-Type: application/json
+          payload: ''
+      enable:
+        type: REST
+        input:
+          action: post
+          url: https://vra.cpod-vrealizesuite.az-demo.shwrfr.com/codestream/api/import?action=apply
+          headers:
+            Accept: application/json, text/plain, */*
+            Content-Type: application/x-yaml
+            Authorization: Bearer ${Create Token.Get Access Token.output.responseBody.token}
+          payload: ${Import and enable pipeline.replace pipeline name.output.properties.yamlOutput}
+  Create Token:
+    taskOrder:
+    - Get API Token
+    - Get Access Token
+    tasks:
+      Get API Token:
+        type: REST
+        input:
+          action: post
+          url: https://vra.cpod-vrealizesuite.az-demo.shwrfr.com/csp/gateway/am/api/login?access_token
+          headers:
+            Accept: application/json
+            Content-Type: application/json
+          payload: |-
+            {
+             "username": "ahugla",
+             "domain": "shwrfr.com",
+             "password": "${var.vRA password}"
+            }
+      Get Access Token:
+        type: REST
+        input:
+          action: post
+          url: https://vra.cpod-vrealizesuite.az-demo.shwrfr.com/iaas/api/login
+          headers:
+            Accept: application/json
+            Content-Type: application/json
+          payload: |-
+            {
+             "refreshToken": "${Create Token.Get API Token.output.responseBody.refresh_token}"
+            }
