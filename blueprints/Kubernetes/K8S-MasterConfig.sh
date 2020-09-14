@@ -180,27 +180,31 @@ kubectl apply -f  https://raw.githubusercontent.com/google/cadvisor/master/deplo
 # -------------------------------------------------------------------------------
 #deploiement sur le master (sinon pb)
 kubectl apply -f https://raw.githubusercontent.com/kubernetes/dashboard/master/aio/deploy/recommended.yaml
-kubectl get pods -A > /tmp/allpods.log  #  pour le debug
-
 
 # creation du service de type LoadBalancer
 kubectl expose deployment kubernetes-dashboard --type=LoadBalancer --name=service-dashboard -n kubernetes-dashboard
-kubectl get services -A > /tmp/allservices.log  #  pour le debug
 # Il faut que les pods metalLB soit up  =>  au moins un worker node
 # Peut prendre quelques minutes pour etre indiqué avec 'get service' =>  si <pending> refaire apres un petit moment
 
-# create service account FOR DEFAULT NAMESPACE
-kubectl create serviceaccount dashboard -n default
+# On donne tous les droits au compte par default 'default'
+kubectl create clusterrolebinding fullrightstodefault \
+  --clusterrole=cluster-admin \
+  --serviceaccount=default:default
 
-# to link this account with the right privilege to access to the dashboard
-kubectl create clusterrolebinding dashboard-admin -n default \
-  --clusterrole=cluster.admin \
-  --serviceaccount=default:dashboard
+# on attend que le service dashboard recupere une IP externe (pour cela il faut un node de connecté)
+dashboard_svc_ip=`kubectl get services -n kubernetes-dashboard | grep service-dashboard | awk '{print $4}'`
+while [ "$dashboard_svc_ip" == "<pending>" ]
+do
+  echo "'service-dashboard' still <pending> ... waiting"
+  sleep 2
+  dashboard_svc_ip=`kubectl get services -n kubernetes-dashboard | grep service-dashboard | awk '{print $4}'`
+  echo "dashboard_svc_ip=$dashboard_svc_ip"
+done
 
 # Affichage de l'URL du Dashboard et du token
 dashboard_svc_ip=`kubectl get services -n kubernetes-dashboard | grep service-dashboard | awk '{print $4}'`
 dashboard_svc_port=`kubectl get services -n kubernetes-dashboard| grep service-dashboard | awk '{print $5}' | awk -F: '{print $1}'`
-dashboard_token=`kubectl get secret $(kubectl get serviceaccount dashboard -n default -o jsonpath="{.secrets[0].name}") -n default -o jsonpath="{.data.token}" | base64 --decode`
+dashboard_token=`kubectl get secret $(kubectl get serviceaccount default -n default -o jsonpath="{.secrets[0].name}") -n default -o jsonpath="{.data.token}" | base64 --decode`
 echo "-------------------------------------------------------------------------------------"
 echo "                                                                                     "
 echo "Access to Kubernetes Dashboard using:   https://$dashboard_svc_ip:$dashboard_svc_port"
@@ -208,7 +212,6 @@ echo "With token pour namespace 'default':                                      
 echo "$dashboard_token                                                                     "
 echo "                                                                                     "
 echo "-------------------------------------------------------------------------------------"
-
 # Creation du fichier avec ces informations: 
 echo "-------------------------------------------------------------------------------------" >  /tmp/K8S_Dashboard_Access.info
 echo "                                                                                     " >> /tmp/K8S_Dashboard_Access.info
