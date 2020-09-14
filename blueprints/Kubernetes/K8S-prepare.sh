@@ -66,7 +66,7 @@ yum-config-manager \
     https://download.docker.com/linux/centos/docker-ce.repo
 
 #Update all (before docker install to avoid last docker version compatibility issue with K8S)
-yum update -y 
+#yum update -y 
 
 # to see all available version for a package : yum --showduplicates list docker-ce
 yum install -y docker-ce-18.09.9-3.el7   # derniere version supportée à cette date

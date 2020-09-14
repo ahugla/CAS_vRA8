@@ -95,7 +95,7 @@ systemctl enable liagentd
 
 
 # reste a aller sur le serveur LI et l'associer avec l'agent linux.
-
+echo "LOG INSIHT : reste a aller sur le serveur LI et l'associer avec l'agent linux."
 
 
 
