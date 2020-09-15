@@ -165,16 +165,7 @@ kubectl apply -f /tmp/metalLBconfig.yaml
 
 # Role 'controller' de MetalLB reste pending tant qu'il n'y a pas au moins un node raccroché au cluster
 
-
-
-# Installe cAdvisor
-# -----------------
-# https://github.com/google/cadvisor/tree/master/deploy/kubernetes/base
-kubectl create namespace cadvisor
-kubectl apply -f  https://raw.githubusercontent.com/google/cadvisor/master/deploy/kubernetes/base/serviceaccount.yaml
-kubectl apply -f  https://raw.githubusercontent.com/google/cadvisor/master/deploy/kubernetes/base/daemonset.yaml
-
-     
+    
 
 # Installe le Dashboard Kubernetes et configure l'acces pour le namespace default
 # -------------------------------------------------------------------------------
@@ -191,11 +182,11 @@ kubectl create clusterrolebinding fullrightstodefault \
   --clusterrole=cluster-admin \
   --serviceaccount=default:default
 
-# on attend que le service dashboard recupere une IP externe (pour cela il faut un node de connecté)
+# On attend que le service dashboard recupere une IP externe (pour cela il faut un node de connecté)
 dashboard_svc_ip=`kubectl get services -n kubernetes-dashboard | grep service-dashboard | awk '{print $4}'`
 while [ "$dashboard_svc_ip" == "<pending>" ]
 do
-  echo "'service-dashboard' still <pending> ... waiting"
+  echo "'service-dashboard' still <pending> ... waiting 2s ..."
   sleep 2
   dashboard_svc_ip=`kubectl get services -n kubernetes-dashboard | grep service-dashboard | awk '{print $4}'`
   echo "dashboard_svc_ip=$dashboard_svc_ip"
@@ -208,7 +199,7 @@ dashboard_token=`kubectl get secret $(kubectl get serviceaccount default -n defa
 echo "-------------------------------------------------------------------------------------"
 echo "                                                                                     "
 echo "Access to Kubernetes Dashboard using:   https://$dashboard_svc_ip:$dashboard_svc_port"
-echo "With token pour namespace 'default':                                                 "
+echo "With token:                                                                          "
 echo "$dashboard_token                                                                     "
 echo "                                                                                     "
 echo "-------------------------------------------------------------------------------------"
@@ -222,5 +213,10 @@ echo "                                                                          
 echo "-------------------------------------------------------------------------------------" >> /tmp/K8S_Dashboard_Access.info
 
 
+
+# cadvisor EN TRAIN DE CHANGER vers metrics-meter ???  
+
+     # https://github.com/kubernetes-sigs/metrics-server
+     # https://github.com/google/cadvisor/tree/master/deploy/kubernetes/base
 
 
