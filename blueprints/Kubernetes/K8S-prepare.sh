@@ -110,6 +110,8 @@ EOF
 # kubeVersion=1.17.8   # 1.16.12, 1.17.8, 1.18.5
 yum install -y kubelet-$kubeVersion   kubeadm-$kubeVersion   kubectl-$kubeVersion  --disableexcludes=kubernetes
 
+systemctl enable kubelet.service
+
 
 
 
