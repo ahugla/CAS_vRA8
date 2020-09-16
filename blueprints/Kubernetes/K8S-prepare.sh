@@ -116,6 +116,9 @@ systemctl enable kubelet.service
 
 
 
+# Prerequis à l'init
+sysctl net.ipv4.ip_forward=1 
+
 
 
 

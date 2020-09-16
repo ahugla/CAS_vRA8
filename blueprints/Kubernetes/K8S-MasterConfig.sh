@@ -35,10 +35,6 @@ echo "CHECK: hostname --ip-address"
 hostname --ip-address
 
 
-# Prerequis à l'init
-sysctl net.ipv4.ip_forward=1 
-
-
 # Initialize Kubernetes master : https://kubernetes.io/docs/setup/independent/create-cluster-kubeadm/#before-you-begin
 # "init" verifie des pre-requis (comme le nombre de cpu) et cree le fichier de config de kubelet: /var/lib/kubelet/config.yaml
 echo "kubeadm init ... starting ..."
