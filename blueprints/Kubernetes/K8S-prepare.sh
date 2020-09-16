@@ -106,7 +106,9 @@ EOF
 # Install Kubernetes and start it
 
 #yum install -y kubelet kubeadm kubectl --disableexcludes=kubernetes
-# yum --showduplicates list 'kube*'    pour voir toutes les versions dispos
+# pour voir toutes les versions dispos: 
+#    yum --showduplicates list 'kube*'
+#    yum list --showduplicates kubeadm --disableexcludes=kubernetes
 # kubeVersion=1.17.8   # 1.16.12, 1.17.8, 1.18.5
 yum install -y kubelet-$kubeVersion   kubeadm-$kubeVersion   kubectl-$kubeVersion  --disableexcludes=kubernetes
 
