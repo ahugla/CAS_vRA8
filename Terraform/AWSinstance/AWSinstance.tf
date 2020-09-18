@@ -1,21 +1,7 @@
 
-
-variable "access-key" {
-  description = "AWS Access Key"
-}
-
-
-variable "secret-key" {
-  description = "AWS Secret Key"
-}
-
-
 provider "aws" {
   region = "eu-west-1"
-  access_key = var.access-key
-  secret_key = var.secret-key
 }
-
 
 
 resource "aws_instance" "web" {
