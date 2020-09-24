@@ -1,8 +1,3 @@
-
-
-# remarque il faut d'abord creer le role sinon on peut pas l'affecter a la DB.   =>  pb de dependance
-
-
 variable "postgres_password" {
   type = string
 }
@@ -12,7 +7,7 @@ provider "postgresql" {
   host            = "172.19.2.219"
   port            = 5432
   username        = "postgres"
-  password        = var.postgres_password!
+  password        = "var.postgres_password!"
   sslmode         = "disable"
 }
 
