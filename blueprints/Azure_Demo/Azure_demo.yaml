@@ -1,0 +1,45 @@
+formatVersion: 1
+inputs:
+  cloudcible:
+    type: string
+    title: Sur quel Cloud ?
+    default: ''
+    oneOf:
+      - title: PROD
+        const: ''
+      - title: PRE PROD
+        const: 'cloud:aws'
+      - title: TEST/DEV
+        const: 'env:azure'
+  password:
+    type: string
+    title: Password cmpse
+    encrypted: true
+resources:
+  Cloud_Machine_1:
+    type: Cloud.Machine
+    metadata:
+      layoutPosition:
+        - 0
+        - 1
+    properties:
+      image: CentOS
+      flavor: Small
+      resourceGroupName: '${self.endpointType == "azure" ? "RG1-DJ" : self.endpointType == "vsphere" ? "From_vRA8" : ""}'
+      constraints:
+        - tag: '${input.cloudcible}'
+      remoteAccess:
+        authentication: usernamePassword
+        username: cmpse
+        password: '${input.password}'
+      networks:
+        - network: '${resource.Cloud_Network_1.id}'
+  Cloud_Network_1:
+    type: Cloud.Network
+    metadata:
+      layoutPosition:
+        - 1
+        - 0
+    properties:
+      networkType: existing
+      resourceGroupName: '${self.endpointType == "azure" ? "RG1-DJ" : self.endpointType == "vsphere" ? "From_vRA8" : ""}'

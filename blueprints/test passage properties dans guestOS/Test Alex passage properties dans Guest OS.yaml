@@ -1,0 +1,41 @@
+formatVersion: 1
+inputs: {}
+resources:
+  Cloud_Machine_1:
+    type: Cloud.Machine
+    metadata:
+      layoutPosition:
+        - 1
+        - 1
+    properties:
+      image: CentOS
+      flavor: Small
+      myvar1: toto
+      customizationSpec: Linux
+      storage:
+        constraints:
+          - tag: 'stockage:prod'
+      networks:
+        - network: '${resource.Cloud_Network_1.id}'
+          assignment: static
+      cloudConfig: |
+        runcmd:
+          - echo ${self.myvar1}  >> /tmp/truc
+          - echo ${resource.Cloud_Machine_1.myvar1}  >> /tmp/truc
+          - echo "myvar1 = " ${self.myvar1}  >> /tmp/truc
+          
+          - echo ${self.networks[0].address}  >> /tmp/truc
+          - echo ${resource.Cloud_Machine_1.networks[0].address}  >> /tmp/truc
+          
+          - echo ${self.cpuCount}  >> /tmp/truc
+          - echo ${resource.Cloud_Machine_1.cpuCount}  >> /tmp/truc
+  Cloud_Network_1:
+    type: Cloud.Network
+    metadata:
+      layoutPosition:
+        - 2
+        - 0
+    properties:
+      networkType: existing
+      constraints:
+        - tag: 'netprofile:nsx'

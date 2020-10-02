@@ -1,0 +1,65 @@
+formatVersion: 1
+inputs:
+  mysecu:
+    type: string
+    default: 'security:noping'
+    title: Choix de la securite
+    oneOf:
+      - title: interdire le ping
+        const: 'security:noping'
+      - title: zone DMZ
+        const: 'security:dmz'
+      - title: Database network
+        const: 'security:db'
+  addsecu:
+    type: array
+    title: Securite supplementaire
+    default: null
+    items:
+      type: object
+      properties:
+        key:
+          type: string
+          title: nom de la regle
+        value:
+          type: string
+          title: valeur du tag
+resources:
+  Cloud_SecurityGroup_1:
+    type: Cloud.SecurityGroup
+    metadata:
+      layoutPosition:
+        - 0
+        - 1
+    properties:
+      constraints:
+        - tag: 'security:database'
+        - tag: '${input.mysecu}'
+        - tag: '${input.addsecu}'
+      securityGroupType: existing
+  Cloud_vSphere_Machine_1:
+    type: Cloud.vSphere.Machine
+    metadata:
+      layoutPosition:
+        - 1
+        - 1
+    properties:
+      image: CentOS
+      cpuCount: 1
+      totalMemoryMB: 1024
+      customizationSpec: Linux
+      networks:
+        - network: '${resource.Cloud_Network_1.id}'
+          assignment: static
+          securityGroups:
+            - '${resource.Cloud_SecurityGroup_1.id}'
+  Cloud_Network_1:
+    type: Cloud.Network
+    metadata:
+      layoutPosition:
+        - 2
+        - 0
+    properties:
+      networkType: existing
+      constraints:
+        - tag: 'netprofile:nsx'

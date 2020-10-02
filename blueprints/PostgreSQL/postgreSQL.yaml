@@ -1,0 +1,42 @@
+inputs:
+  postgres_password:
+    type: string
+    encrypted: true
+    title: Password du compte postgres
+resources:
+  VM:
+    type: Cloud.Machine
+    metadata:
+      layoutPosition:
+        - 0
+        - 1
+    properties:
+      image: CentOS
+      flavor: Small
+      customizationSpec: Linux
+      cloudConfig: |
+        #cloud-config
+        packages:
+          - wget
+        runcmd:
+          - touch /etc/cloud/cloud-init.disabled
+          - cd /tmp
+          - wget https://raw.githubusercontent.com/ahugla/Script-SSH/master/postgreSQL/install_postgresql.sh
+          - chmod 755 install_postgresql.sh
+          - /tmp/install_postgresql.sh  ${input.postgres_password}
+          - rm -f install_postgresql.sh
+      networks:
+        - name: '${Cloud_Network_1.name}'
+          network: '${resource.Cloud_Network_1.id}'
+          assignment: static
+  Cloud_Network_1:
+    type: Cloud.Network
+    metadata:
+      layoutPosition:
+        - 1
+        - 0
+    properties:
+      name: MonReseau
+      networkType: existing
+      constraints:
+        - tag: 'netprofile:nsx'

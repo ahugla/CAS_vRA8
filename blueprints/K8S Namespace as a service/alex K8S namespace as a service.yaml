@@ -1,0 +1,42 @@
+formatVersion: 1
+inputs:
+  K8S_cible:
+    type: string
+    title: Choix du Kubernetes
+    oneOf:
+      - title: Kubernetes de production
+        const: 'kubernete:prod'
+      - title: Kubernetes de developpement
+        const: 'kubernete:dev'
+    default: 'kubernete:dev'
+  namespaceName:
+    type: string
+    title: nom du namespace
+  QteCPU:
+    type: integer
+    title: Nombre de CPU
+    minimum: 1
+    maximum: 4
+    default: 1
+  QteMEM:
+    type: integer
+    title: Quantite de Memoire
+    minimum: 512
+    maximum: 4096
+    default: 512
+resources:
+  Cloud_K8S_Namespace_1:
+    type: Cloud.K8S.Namespace
+    metadata:
+      layoutPosition:
+        - 0
+        - 0
+    properties:
+      name: '${input.namespaceName}'
+      limits:
+        - resource: memory
+          limit: '${to_string(input.QteMEM)}'
+        - resource: cpu
+          limit: '${to_string(input.QteCPU)}'
+      constraints:
+        - tag: '${input.K8S_cible}'

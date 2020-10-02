@@ -1,0 +1,47 @@
+formatVersion: 1
+inputs:
+  gabarit:
+    type: string
+    enum:
+      - Small
+      - Medium
+    default: Small
+resources:
+  Cloud_Ansible_Tower_1:
+    type: Cloud.Ansible.Tower
+    metadata:
+      layoutPosition:
+        - 0
+        - 0
+    properties:
+      host: '${resource.Cloud_Machine_1.*}'
+      account: AWX showroom
+      jobTemplates:
+        provision:
+          - ahugla Apache with vars
+      hostVariables: |
+        variable1: httpd
+  Cloud_Machine_1:
+    type: Cloud.Machine
+    metadata:
+      layoutPosition:
+        - 1
+        - 0
+    properties:
+      image: CentOS
+      flavor: '${input.gabarit}'
+      customizationSpec: Linux
+      resourceGroupName: From_vRA8
+      networks:
+        - network: '${resource.Cloud_Network_1.id}'
+          assignment: static
+  Cloud_Network_1:
+    type: Cloud.Network
+    metadata:
+      layoutPosition:
+        - 2
+        - 0
+    properties:
+      networkType: existing
+      constraints:
+        - tag: 'netprofile:nsx'

@@ -1,0 +1,33 @@
+formatVersion: 1
+inputs:
+  Location:
+    title: Choix du cloud
+    type: string
+    default: aws
+    enum:
+      - aws
+      - onprem
+resources:
+  Cloud_Machine_1:
+    type: Cloud.Machine
+    metadata:
+      layoutPosition:
+        - 1
+        - 1
+    properties:
+      image: CentOS
+      flavor: Small
+      customizationSpec: Linux
+      constraints:
+        - tag: '${input.Location == "aws" ? "cloud:aws-vince" : ""}'
+      networks:
+        - network: '${resource.Cloud_Network_1.id}'
+          assignment: static
+  Cloud_Network_1:
+    type: Cloud.Network
+    metadata:
+      layoutPosition:
+        - 2
+        - 0
+    properties:
+      networkType: existing

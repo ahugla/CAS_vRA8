@@ -1,0 +1,92 @@
+formatVersion: 1
+inputs:
+  VM_count:
+    type: integer
+    title: Nombre de VM
+    default: 1
+    maximum: 3
+    minimum: 1
+  VM_Size:
+    type: string
+    title: Taille des VMs (Small ou Medium)
+    default: Small
+  VM_Subnet:
+    type: string
+    title: Choix du reseau
+    default: Dev
+    enum:
+      - Outils
+      - Dev
+      - Pre-Integration
+      - Integration
+  VM_Security:
+    type: string
+    title: Security Additionnelle
+    enum:
+      - pas de securité
+      - nossh
+      - noping
+  Application:
+    type: string
+    title: Que voulez vous installer ?
+    enum:
+      - apache
+      - nginx
+resources:
+  Ansible_Module:
+    type: Cloud.Ansible
+    metadata:
+      layoutPosition:
+        - 0
+        - 0
+    properties:
+      host: '${resource.VirtualMachine.*}'
+      count: '${input.VM_count}'
+      osType: linux
+      account: Ansible Controller
+      username: root
+      privateKeyFile: /root/.ssh/id_rsa
+      inventoryFile: /etc/ansible/hosts
+      playbooks:
+        provision:
+          - '/etc/ansible/playbooks/playbook_${input.Application}.yml'
+      maxConnectionRetries: 10
+      groups:
+        - '${input.Application}'
+  VirtualMachine:
+    type: Cloud.Machine
+    metadata:
+      layoutPosition:
+        - 1
+        - 0
+    properties:
+      image: CentOS
+      count: '${input.VM_count}'
+      flavor: '${input.VM_Size}'
+      customizationSpec: Linux
+      networks:
+        - network: '${resource.Cloud_Network_1.id}'
+          assignment: static
+          tags:
+            - value: security
+              key: '${input.VM_Security}'
+      cloudConfig: |
+        packages:
+          - python
+        runcmd:
+          - touch /etc/cloud/cloud-init.disabled
+        users:
+          - name: root
+            lock-passwd: false
+            ssh-authorized-keys: 
+              - ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC4w233TdMY+gvxgDI1pBWKRzixxpsn9OXbzWHjKxEKCw5wq2JNya7oZy4ac6MkHRWYTrmEmhJetShW6DO9FQJqtB8XaPvuim48x0Tprou8K3tcivCOOprvrUx1gAFz183aGjeHg+7nevwNAwxMfZNG3yJGA3uKnLNRJNnm7uC8JGZW1Zi8NJR1oiq+T8B9o/x1d/dpYmsdk4HXwsDMFKcN2i8nznzRlHaHhHoMOsJeBBnLIyrHRyrYrmr6eHn9PGHV2R69SjjfXilT/1ZQ5RL5tYX6nlLpFGqJzFUIlWaCrmOnGcwNnL8SQKh0l8B7/5LEgO3y7oOoXIlGldABvMNP root@vra-000263
+  Cloud_Network_1:
+    type: Cloud.Network
+    metadata:
+      layoutPosition:
+        - 2
+        - 0
+    properties:
+      networkType: existing
+      constraints:
+        - tag: 'netprofile:nsx'

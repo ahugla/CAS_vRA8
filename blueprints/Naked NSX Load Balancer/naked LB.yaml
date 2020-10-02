@@ -1,0 +1,25 @@
+formatVersion: 1
+inputs: {}
+resources:
+  Cloud_NSX_LoadBalancer_1:
+    type: Cloud.NSX.LoadBalancer
+    metadata:
+      layoutPosition:
+        - 0
+        - 0
+    properties:
+      routes:
+        - port: '80'
+          protocol: HTTP
+      network: '${resource.Cloud_NSX_Network_1.id}'
+      instances: []
+  Cloud_NSX_Network_1:
+    type: Cloud.NSX.Network
+    metadata:
+      layoutPosition:
+        - 1
+        - 0
+    properties:
+      networkType: existing
+      constraints:
+        - tag: 'net:dev'

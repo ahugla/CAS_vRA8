@@ -1,0 +1,25 @@
+formatVersion: 1
+inputs: {}
+resources:
+  Cloud_NSX_LoadBalancer_1:
+    type: Cloud.NSX.LoadBalancer
+    metadata:
+      layoutPosition:
+        - 0
+        - 0
+    properties:
+      routes:
+        - protocol: HTTP
+          port: '80'
+          instanceProtocol: HTTP
+          instancePort: '80'
+          healthCheckConfiguration:
+            protocol: HTTP
+            port: '80'
+            urlPath: /
+            intervalSeconds: 60
+            timeoutSeconds: 30
+            unhealthyThreshold: 10
+            healthyThreshold: 1
+      network: ''
+      instances: []

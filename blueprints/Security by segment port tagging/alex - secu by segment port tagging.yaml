@@ -1,0 +1,32 @@
+formatVersion: 1
+inputs: {}
+resources:
+  Cloud_vSphere_Machine_1:
+    type: Cloud.vSphere.Machine
+    metadata:
+      layoutPosition:
+        - 0
+        - 0
+    properties:
+      image: CentOS
+      cpuCount: 1
+      totalMemoryMB: 1024
+      customizationSpec: Linux
+      networks:
+        - network: '${resource.Cloud_NSX_Network_1.id}'
+          assignment: static
+          tags:
+            - key: security-prod # in NSX-T scope cannot be duplicate
+              value: prod
+            - key: security-db # in NSX-T scope cannot be duplicate
+              value: db
+  Cloud_NSX_Network_1:
+    type: Cloud.NSX.Network
+    metadata:
+      layoutPosition:
+        - 1
+        - 0
+    properties:
+      networkType: existing
+      constraints:
+        - tag: 'netprofile:nsx'
