@@ -20,7 +20,7 @@ inputs:
         const: 1.16.12
       - title: 1.17.8
         const: 1.17.8
-      - title: 1.18.5 incompatible avec codestream 8.1
+      - title: 1.18.5
         const: 1.18.5
   RangeIP:
     type: string
