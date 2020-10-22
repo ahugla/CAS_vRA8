@@ -31,14 +31,15 @@ echo "PATH = $PATH"
 # initial PATH  /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin
 
 # Validate the ip-address:
+# "hostname --ip-address" peut donner "172.17.1.54" ou "::1 172.17.1.54"  =>  on prefere la commande "hostname -I | awk '{print $1}'"
 echo "CHECK: hostname --ip-address"
-hostname --ip-address
+hostname -I | awk '{print $1}'
 
 
 # Initialize Kubernetes master : https://kubernetes.io/docs/setup/independent/create-cluster-kubeadm/#before-you-begin
 # "init" verifie des pre-requis (comme le nombre de cpu) et cree le fichier de config de kubelet: /var/lib/kubelet/config.yaml
 echo "kubeadm init ... starting ..."
-kubeadm init --pod-network-cidr=10.244.0.0/16 --apiserver-advertise-address=$(hostname --ip-address) --token-ttl 0 #--ignore-preflight-errors=NumCPU
+kubeadm init --pod-network-cidr=10.244.0.0/16 --apiserver-advertise-address=$(hostname -I | awk '{print $1}') --token-ttl 0 #--ignore-preflight-errors=NumCPU
 # The kubeadm command will take a few minutes and it will print a 'kubeadm join'
 # command once completed. Make sure to capture and store this 'kubeadm join'
 # command as it is required to add other nodes to the Kubernetes cluster.
