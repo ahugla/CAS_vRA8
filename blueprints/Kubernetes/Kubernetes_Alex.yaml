@@ -26,15 +26,15 @@ inputs:
     type: string
     description: DOIT ETRE UNIQUE - Range IP qui sera utilisé dans Kubernetes avec le mode de service de type LoadBalancer
     title: IP range
-    default: 172.19.2.226-172.19.2.239
+    default: 172.17.1.226-172.17.1.239
   LIserver:
     type: string
     title: Log Insight Server
-    default: vrli.cpod-vrealizesuite.az-demo.shwrfr.com
+    default: vrli.cpod-vrealize.az-fkd.cloud-garage.net
   LIversion:
     type: string
     title: Version de Log Insight
-    default: v8.1.0
+    default: v8.2.0
 resources:
   K8S_Master:
     type: Cloud.Machine
@@ -43,7 +43,7 @@ resources:
         - 0
         - 0
     properties:
-      image: CentOS
+      image: CentOS7.6
       flavor: Medium # 2 vCPU
       resourceGroupName: From_vRA8
       customizationSpec: Linux
@@ -52,10 +52,11 @@ resources:
           assignment: static
       cloudConfig: |
         #cloud-config
+        packages:
+          - git
         runcmd:
           - touch /etc/cloud/cloud-init.disabled
           - cd /tmp
-          - yum install -y git
           - git clone https://github.com/ahugla/CAS_vRA8.git
           - cp /tmp/CAS_vRA8/blueprints/Kubernetes/K8S-prepare.sh /tmp/K8S-prepare.sh
           - cp /tmp/CAS_vRA8/blueprints/Kubernetes/K8S-MasterConfig.sh /tmp/K8S-MasterConfig.sh
@@ -71,7 +72,7 @@ resources:
         - 0
         - 1
     properties:
-      image: CentOS
+      image: CentOS7.6
       flavor: Medium # 2 vCPU
       count: '${input.NbreNode}'
       resourceGroupName: From_vRA8
@@ -81,13 +82,14 @@ resources:
           assignment: static
       cloudConfig: |
         #cloud-config
+        packages:
+          - git
         runcmd:
           - touch /etc/cloud/cloud-init.disabled    # evite d'executer cloud-init au reboot
           - echo "resource.K8S_Master.address = " ${resource.K8S_Master.address}                          # Recupere souvent l'IP flannel =>  NO OK
           - echo "resource.K8S_Master.networks.address = " ${resource.K8S_Master.networks.address}        # Tableau des IPs des vnics  =>  NO OK
           - echo "resource.K8S_Master.networks.address[0] = " ${resource.K8S_Master.networks.address[0]}  # Premiere IP  =>  OK
           - cd /tmp
-          - yum install -y git
           - git clone https://github.com/ahugla/CAS_vRA8.git
           - cp /tmp/CAS_vRA8/blueprints/Kubernetes/K8S-prepare.sh /tmp/K8S-prepare.sh
           - cp /tmp/CAS_vRA8/blueprints/Kubernetes/K8S-JoinCluster.sh /tmp/K8S-JoinCluster.sh
@@ -104,5 +106,3 @@ resources:
         - 0
     properties:
       networkType: existing
-      constraints:
-        - tag: 'netprofile:nsx'
