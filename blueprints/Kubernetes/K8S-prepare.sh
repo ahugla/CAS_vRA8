@@ -69,7 +69,9 @@ yum-config-manager \
 #yum update -y 
 
 # to see all available version for a package : yum --showduplicates list docker-ce
-yum install -y docker-ce-18.09.9-3.el7   # derniere version supportée à cette date
+#yum install -y docker-ce-18.09.9-3.el7   # derniere version supportée à cette date
+yum install -y docker-ce-19.03.13-3.el7.x86_64   # derniere version supportée à cette date  => a utiliser avec K8S 1.19
+
 mkdir /etc/docker
 cat > /etc/docker/daemon.json <<EOF
 {

@@ -211,9 +211,12 @@ echo "--------------------------------------------------------------------------
 
 
 
-# cadvisor EN TRAIN DE CHANGER vers metrics-meter ???  
+# cadvisor est embedded dans kubelet.
+# cadvisor REST API en cours de dev
+# Mais cadvisor en train d'etre remplacé/complété par metrics-meter ou kube-state-metrics ???  
 
      # https://github.com/kubernetes-sigs/metrics-server
      # https://github.com/google/cadvisor/tree/master/deploy/kubernetes/base
+     # https://github.com/kubernetes/kube-state-metrics
 
 
