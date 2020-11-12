@@ -2,8 +2,8 @@
 #SOURCE : https://mapr.com/blog/making-data-actionable-at-scale-part-2-of-3/
 
 # ALEX H.
-# 30 Juin 2020
-# v1.10
+# 12 Novembre 2020
+# v1.11
 
 # USAGE
 # -----
@@ -165,6 +165,8 @@ kubectl apply -f /tmp/metalLBconfig.yaml
     
 
 # Installe le Dashboard Kubernetes et configure l'acces pour le namespace default
+# cadvisor est embedded dans kubelet.
+# Dashboard Kubernetes a besoin de Heapster (deprecated) ou metrics-server
 # -------------------------------------------------------------------------------
 #deploiement sur le master (sinon pb)
 kubectl apply -f https://raw.githubusercontent.com/kubernetes/dashboard/master/aio/deploy/recommended.yaml
@@ -189,6 +191,13 @@ do
   echo "dashboard_svc_ip=$dashboard_svc_ip"
 done
 
+# Le Kubernetes Dashboard depend de metrics-server, il faut l'installer
+curl -O  https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml
+# comme on est dans un env de test, les certificates sont pas configurés, si on rajoute pas --kubelet-insecure-tls, le pod metrics-server ne demarre pas
+sed -i '/kubelet-use-node-status-port/a \        - --kubelet-insecure-tls\' components.yaml
+kubectl apply -f components.yaml
+rm components.yaml
+
 # Affichage de l'URL du Dashboard et du token
 dashboard_svc_ip=`kubectl get services -n kubernetes-dashboard | grep service-dashboard | awk '{print $4}'`
 dashboard_svc_port=`kubectl get services -n kubernetes-dashboard| grep service-dashboard | awk '{print $5}' | awk -F: '{print $1}'`
@@ -210,13 +219,5 @@ echo "                                                                          
 echo "-------------------------------------------------------------------------------------" >> /tmp/K8S_Dashboard_Access.info
 
 
-
-# cadvisor est embedded dans kubelet.
-# cadvisor REST API en cours de dev
-# Mais cadvisor en train d'etre remplacé/complété par metrics-meter ou kube-state-metrics ???  
-
-     # https://github.com/kubernetes-sigs/metrics-server
-     # https://github.com/google/cadvisor/tree/master/deploy/kubernetes/base
-     # https://github.com/kubernetes/kube-state-metrics
 
 
