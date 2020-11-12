@@ -192,7 +192,8 @@ do
 done
 
 # Le Kubernetes Dashboard depend de metrics-server, il faut l'installer
-curl -O  https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml
+# -L car redirection
+curl -LO  https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml
 # comme on est dans un env de test, les certificates sont pas configurés, si on rajoute pas --kubelet-insecure-tls, le pod metrics-server ne demarre pas
 sed -i '/kubelet-use-node-status-port/a \        - --kubelet-insecure-tls\' components.yaml
 kubectl apply -f components.yaml
