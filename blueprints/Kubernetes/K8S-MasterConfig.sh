@@ -165,9 +165,9 @@ kubectl apply -f /tmp/metalLBconfig.yaml
     
 
 # Installe le Dashboard Kubernetes et configure l'acces pour le namespace default
-# cadvisor est embedded dans kubelet.
-# Dashboard Kubernetes a besoin de Heapster (deprecated) ou metrics-server
-# -------------------------------------------------------------------------------
+# cadvisor est embedded dans kubelet pour les besoins du core pipeline (pas pour monitoring externe)
+# Dashboard Kubernetes a besoin de metrics-server (Heapster is deprecated)
+# --------------------------------------------------------------------------------------------------
 #deploiement sur le master (sinon pb)
 kubectl apply -f https://raw.githubusercontent.com/kubernetes/dashboard/master/aio/deploy/recommended.yaml
 
@@ -218,6 +218,21 @@ echo "With token pour namespace 'default':                                      
 echo "$dashboard_token                                                                     " >> /tmp/K8S_Dashboard_Access.info
 echo "                                                                                     " >> /tmp/K8S_Dashboard_Access.info
 echo "-------------------------------------------------------------------------------------" >> /tmp/K8S_Dashboard_Access.info
+
+
+
+
+# Installation d'un service monitoring pipeline a base de cadvisor daemonset
+# Configuré pour vRops monitoring: hostPort: 31194
+# --------------------------------------------------------------------------
+git clone https://github.com/google/cadvisor.git
+# on modifie le yaml du daemonset pour ajouter « hostPort: 31194 »
+sed -i '/containerPort: 8080/a \            hostPort : 31194\'  cadvisor/deploy/kubernetes/base/daemonset.yaml
+# on installe cadvisor
+kubectl create -f cadvisor/deploy/kubernetes/base/
+rm -rf cadvisor
+
+
 
 
 
