@@ -1,7 +1,7 @@
 provider "vsphere" {
-  user           = "admin@cpod-vrealizesuite.az-demo.shwrfr.com"
+  user           = "admin@cpod-vrealize.az-fkd.cloud-garage.net"
   password       = "VMware1!"
-  vsphere_server = "vcsa.cpod-vrealizesuite.az-demo.shwrfr.com"
+  vsphere_server = "vcsa.cpod-vrealize.az-fkd.cloud-garage.net"
 
   # If you have a self-signed cert
   allow_unverified_ssl = true
@@ -10,12 +10,12 @@ provider "vsphere" {
 
 
 data "vsphere_datacenter" "my_dc" {
-  name = "cPod-VREALIZESUITE"
+  name = "cPod-VREALIZE"
 }
 
 
 resource "vsphere_folder" "folder" {
-  path          = "terraform-test-folder"
+  path          = "TFdemo/terraform-test-folder"
   type          = "vm"
   datacenter_id = data.vsphere_datacenter.my_dc.id
 }
