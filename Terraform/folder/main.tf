@@ -17,10 +17,10 @@ data "vsphere_datacenter" "my_dc" {
 
 
 
-resource "vsphere_folder" "folder" {
 
-  for_each =  toset(var.FolderList)
-  path          = "TFdemo/${each.value}"
+resource "vsphere_folder" "folder" {
+  count         = length(var.FolderList)
+  path          = "TFdemo/${var.FolderList[count.index]}"
   type          = "vm"
   datacenter_id = data.vsphere_datacenter.my_dc.id
 }
