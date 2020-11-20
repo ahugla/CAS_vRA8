@@ -1,5 +1,6 @@
 
 
+
 provider "vsphere" {
   user           = "admin@cpod-vrealize.az-fkd.cloud-garage.net"
   password       = var.vCenterPassword
