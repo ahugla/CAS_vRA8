@@ -3,9 +3,9 @@
 # INSTALL TITO SUR CentOS7.x
 #----------------------------------------------------------------------------------
 # alex
-# 3/01/2020
+# 27/11/2020
 #
-# V1.0
+# V1.1
 #
 #----------------------------------------------------------------------------------
 # USAGE
@@ -30,11 +30,12 @@ cd /var/www/html
 git checkout V1.9.6
 
   
-# INSTALL LI AGENT
+# INSTALL ET CONFIG DU LI AGENT
 cd /tmp
 git clone https://github.com/ahugla/LogInsight.git  /tmp/li
 rpm -ivh "/tmp/li/latest/VMware*.rpm"
 sed -i -e 's/;ssl=yes/ssl=no/g'  /var/lib/loginsight-agent/liagent.ini
+sed -i -e 's/;port=9543/port=9000/g'  /var/lib/loginsight-agent/liagent.ini
 systemctl restart liagentd
 systemctl enable liagentd
 rm -rf /tmp/li
@@ -48,5 +49,8 @@ echo "PROXY_PORT=$PROXY_PORT" >> /etc/sysconfig/httpd
 # Start Web Server
 systemctl start httpd
 systemctl enable httpd
+
+
+
 
 

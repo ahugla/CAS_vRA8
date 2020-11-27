@@ -7,9 +7,9 @@
 #    - Log Insight Agent
 #---------------------------------------------------------------------------------------------------------------------------
 # alex
-# 27/01/2020
+# 27/11/2020
 #
-# V2.0
+# V2.1
 #
 #---------------------------------------------------------------------------------------------------------------------------
 # USAGE:
@@ -66,11 +66,12 @@ systemctl start httpd
 systemctl enable httpd
 
 
-# INSTALL LI AGENT
+# INSTALL ET CONFIG DU LI AGENT
 cd /tmp
 git clone https://github.com/ahugla/LogInsight.git  /tmp/li
 rpm -ivh "/tmp/li/latest/VMware*.rpm"
 sed -i -e 's/;ssl=yes/ssl=no/g'  /var/lib/loginsight-agent/liagent.ini
+sed -i -e 's/;port=9543/port=9000/g'  /var/lib/loginsight-agent/liagent.ini
 systemctl restart liagentd
 systemctl enable liagentd
 rm -rf /tmp/li
