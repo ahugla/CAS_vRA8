@@ -226,16 +226,18 @@ echo "--------------------------------------------------------------------------
 # Configuré pour vRops monitoring: hostPort: 31194
 # --------------------------------------------------------------------------
 # ATTENTION IL FAUDRAIT INSTALLE LA DERNIERE VERSION VERIFIEE DE CADVISOR.... CELA PEUT ETRE UNE ANCIENNE DANS LE YAML!!!
+# image plus sur dockerhub, desormais registry ici:      https://console.cloud.google.com/gcr/images/google-containers/GLOBAL/
 git clone https://github.com/google/cadvisor.git
 # on modifie le yaml du daemonset pour ajouter « hostPort: 31194 »
 sed -i '/containerPort: 8080/a \            hostPort : 31194\'  cadvisor/deploy/kubernetes/base/daemonset.yaml
 # on installe cadvisor
 # ATTENTION IL FAUDRAIT INSTALLE LA DERNIERE VERSION VERIFIEE DE CADVISOR.... CELA PEUT ETRE UNE ANCIENNE DANS LE YAML!!!
+# image plus sur dockerhub, desormais registry ici:      https://console.cloud.google.com/gcr/images/google-containers/GLOBAL/
 kubectl create -f cadvisor/deploy/kubernetes/base/
 rm -rf cadvisor
+
+
 # ATTENTION IL FAUDRAIT INSTALLE LA DERNIERE VERSION VERIFIEE DE CADVISOR.... CELA PEUT ETRE UNE ANCIENNE DANS LE YAML!!!
-
-
-
+# image plus sur dockerhub, desormais registry ici:      https://console.cloud.google.com/gcr/images/google-containers/GLOBAL/
 
 
