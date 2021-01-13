@@ -8,17 +8,10 @@
 # -----
 #
 # cd /tmp
-# curl -O https://raw.githubusercontent.com/ahugla/CAS_vRA8/master/blueprints/Saltstack/Salt_Server_and_minion/salt_minion_install.sh
-# chmod 755 salt_minion_install.sh
-# ./salt_minion_install.sh   $MasterNode 
-# ex : ./salt_minion_install.sh  10.10.11.52
-# rm -f salt_minion_install.sh
-
-
-# Get parameter
-# -------------
-MASTER_IP=$1
-echo "Master = $MASTER_IP"
+# curl -O https://raw.githubusercontent.com/ahugla/CAS_vRA8/master/blueprints/Saltstack/Salt_Server_and_minion/salt_master_install.sh
+# chmod 755 salt_master_install.sh
+# ./salt_master_install.sh
+# rm -f salt_master_install.sh
 
 
 
@@ -46,17 +39,16 @@ python --version
 
 
 
-# Install last release of salt minion
+# Install last release of salt Master
 # -----------------------------------
 cd /tmp
 yum install -y https://repo.saltstack.com/py3/redhat/salt-py3-repo-latest.el7.noarch.rpm
 yum clean expire-cache
-yum install -y salt-minion   # salt-ssh   salt-master ...
+yum install -y salt-master   # salt-minion  salt-ssh ...
+systemctl enable salt-master
+systemctl start salt-master
 
-# set master:
-sed -i -e 's/#master: salt/master: '"$MASTER_IP"'/g'  /etc/salt/minion
 
-systemctl enable salt-minion
-systemctl start salt-minion
+
 
 
