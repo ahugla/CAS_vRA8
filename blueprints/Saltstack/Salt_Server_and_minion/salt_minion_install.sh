@@ -8,18 +8,21 @@
 # -----
 #
 # cd /tmp
-# curl -O https://raw.githubusercontent.com/ahugla/CAS_vRA8/master/blueprints/Kubernetes/K8S-JoinCluster.sh
-# chmod 755 K8S-JoinCluster.sh
-# ./$K8S-JoinCluster.sh  $MasterNode  $MasterPassword  $LIserver  $versionLI
-# ex : ./K8S-JoinCluster.sh  172.19.5.4  my_pass!  vrli.cpod-vrealizesuite.az-demo.shwrfr.com  v8.1.0
-# rm -f K8S-JoinCluster.sh
+# curl -O https://raw.githubusercontent.com/ahugla/CAS_vRA8/master/blueprints/Saltstack/Salt_Server_and_minion/salt_minion_install.sh
+# chmod 755 salt_minion_install.sh
+# salt_minion_install.sh   $MasterNode 
+# ex : ./salt_minion_install.sh  10.10.11.52
+# rm -f salt_minion_install.sh
+
+
+# Get parameter
+MASTER_IP=$1
+echo "Master = $MASTER_IP"
 
 
 
-
-
-Install python3
----------------
+# Install python3
+# ---------------
 cd /tmp
 
 # need to have an EPEL repo if not the case
@@ -42,21 +45,17 @@ python --version
 
 
 
-Install last release of salt minion
------------------------------------
+# Install last release of salt minion
+# -----------------------------------
 cd /tmp
 yum install -y https://repo.saltstack.com/py3/redhat/salt-py3-repo-latest.el7.noarch.rpm
 yum clean expire-cache
 yum install -y salt-minion   # salt-ssh   salt-master ...
 
 # set master:
-MASTER_IP=192.168.192.350
 sed -i -e 's/#master: salt/master: '"$MASTER_IP"'/g'  /etc/salt/minion
 
 systemctl enable salt-minion
 systemctl start salt-minion
-
-# if upgrade:   ystemctl restart salt-minion
-
 
 
