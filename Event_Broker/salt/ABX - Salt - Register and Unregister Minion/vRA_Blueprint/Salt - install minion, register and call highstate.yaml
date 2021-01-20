@@ -41,6 +41,10 @@ resources:
           - chmod 755 salt_minion_install.sh
           - ./salt_minion_install.sh ${input.salt_master}
           - rm -f salt_minion_install.sh
+          - # On attend que la clé du minion soit acceptée par le master (via ABX)
+          - while [ `salt-call test.ping | grep True | wc -l` != "1" ]; do echo "minion key not accepted yet, wait 5s ..."; sleep 5; done
+          - # Execution Salt
+          - salt-call state.highstate
   Cloud_Network_1:
     type: Cloud.Network
     metadata:
