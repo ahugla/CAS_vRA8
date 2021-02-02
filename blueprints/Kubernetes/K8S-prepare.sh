@@ -2,8 +2,8 @@
 #SOURCE : https://mapr.com/blog/making-data-actionable-at-scale-part-2-of-3/
 
 # ALEX H.
-# 12 Novembre 2020
-# v1.11
+# 2 Fevrier 2021
+# v1.12
 
 # USAGE
 # -----
@@ -122,7 +122,10 @@ systemctl enable kubelet.service
 sysctl net.ipv4.ip_forward=1 
 
 
-
+# Remarque FQDN ou shortname.
+# Si on veut que la commande "kubectl get nodes" retourne des shortnames et pas de FQDN, il faut verifier la config et la modifier si necessaire.
+# Verification :  "hostnamectl"   ou   "uname -n"
+# Remplacer le name : hostnamectl set-hostname [name]    +   reboot
 
 
 

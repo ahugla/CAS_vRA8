@@ -2,8 +2,8 @@
 #SOURCE : https://mapr.com/blog/making-data-actionable-at-scale-part-2-of-3/
 
 # ALEX H.
-# 12 Novembre 2020
-# v1.11
+# 2 Fevrier 2021
+# v1.12
 
 # USAGE
 # -----

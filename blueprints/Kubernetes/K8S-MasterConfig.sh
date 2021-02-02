@@ -2,8 +2,8 @@
 #SOURCE : https://mapr.com/blog/making-data-actionable-at-scale-part-2-of-3/
 
 # ALEX H.
-# 12 Novembre 2020
-# v1.11
+# 2 Fevrier 2021
+# v1.12
 
 # USAGE
 # -----
@@ -222,22 +222,22 @@ echo "--------------------------------------------------------------------------
 
 
 
-# Installation d'un service monitoring pipeline a base de cadvisor daemonset
+# Installation d'un service monitoring pipeline à base de cadvisor daemonset
 # Configuré pour vRops monitoring: hostPort: 31194
 # --------------------------------------------------------------------------
-# ATTENTION IL FAUDRAIT INSTALLE LA DERNIERE VERSION VERIFIEE DE CADVISOR.... CELA PEUT ETRE UNE ANCIENNE DANS LE YAML!!!
-# image plus sur dockerhub, desormais registry ici:      https://console.cloud.google.com/gcr/images/google-containers/GLOBAL/
+# ATTENTION IL FAUDRAIT INSTALLER LA DERNIERE VERSION VERIFIEE DE CADVISOR.... IL PEUT ETRE INDIQUE UNE ANCIENNE VERSION DANS LE YAML daemonset.yaml !!!
+# L'image de cadvisor n'est plus sur dockerhub, mais desormais sur la registry google ici:  https://console.cloud.google.com/gcr/images/google-containers/GLOBAL/
 git clone https://github.com/google/cadvisor.git
 # on modifie le yaml du daemonset pour ajouter « hostPort: 31194 »
 sed -i '/containerPort: 8080/a \            hostPort : 31194\'  cadvisor/deploy/kubernetes/base/daemonset.yaml
 # on installe cadvisor
-# ATTENTION IL FAUDRAIT INSTALLE LA DERNIERE VERSION VERIFIEE DE CADVISOR.... CELA PEUT ETRE UNE ANCIENNE DANS LE YAML!!!
-# image plus sur dockerhub, desormais registry ici:      https://console.cloud.google.com/gcr/images/google-containers/GLOBAL/
+# ATTENTION IL FAUDRAIT INSTALLER LA DERNIERE VERSION VERIFIEE DE CADVISOR.... IL PEUT ETRE INDIQUE UNE ANCIENNE VERSION DANS LE YAML daemonset.yaml !!!
+# L'image de cadvisor n'est plus sur dockerhub, mais desormais sur la registry google ici:  https://console.cloud.google.com/gcr/images/google-containers/GLOBAL/
 kubectl create -f cadvisor/deploy/kubernetes/base/
 rm -rf cadvisor
 
 
-# ATTENTION IL FAUDRAIT INSTALLE LA DERNIERE VERSION VERIFIEE DE CADVISOR.... CELA PEUT ETRE UNE ANCIENNE DANS LE YAML!!!
-# image plus sur dockerhub, desormais registry ici:      https://console.cloud.google.com/gcr/images/google-containers/GLOBAL/
+# ATTENTION IL FAUDRAIT INSTALLER LA DERNIERE VERSION VERIFIEE DE CADVISOR.... IL PEUT ETRE INDIQUE UNE ANCIENNE VERSION DANS LE YAML daemonset.yaml !!!
+# L'image de cadvisor n'est plus sur dockerhub, mais desormais sur la registry google ici:  https://console.cloud.google.com/gcr/images/google-containers/GLOBAL/
 
 
