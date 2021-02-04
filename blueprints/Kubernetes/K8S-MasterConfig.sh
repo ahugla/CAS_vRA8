@@ -11,7 +11,7 @@
 # cd /tmp
 # curl -O https://raw.githubusercontent.com/ahugla/CAS_vRA8/master/blueprints/Kubernetes/K8S-MasterConfig.sh
 # chmod 755 K8S-MasterConfig.sh
-# ./K8S-MasterConfig.sh $LB_IPrange
+# ./K8S-MasterConfig.sh $LB_IPrange  $cadvisor_version       # ex : ./K8S-MasterConfig.sh  172.17.1.226-172.17.1.239   v0.34.0
 # rm -f K8S-MasterConfig.sh
 #
 
@@ -19,6 +19,8 @@
 # display input parameters
 LB_IPrange=$1
 echo "LB_IPrange = $LB_IPrange"
+cadvisor_version=$2
+echo "cadvisor_version = $cadvisor_version"
 
 #set $HOME   INDISPENSABLE CAR UTILISATION DE LA COMMANDE kubectl
 echo "avant HOME = $HOME"
@@ -222,22 +224,29 @@ echo "--------------------------------------------------------------------------
 
 
 
+
 # Installation d'un service monitoring pipeline à base de cadvisor daemonset
 # Configuré pour vRops monitoring: hostPort: 31194
+# L'image de cadvisor n'est plus sur dockerhub, mais desormais sur la registry google ici:  https://console.cloud.google.com/gcr/images/google-containers/GLOBAL/
 # --------------------------------------------------------------------------
-# ATTENTION IL FAUDRAIT INSTALLER LA DERNIERE VERSION VERIFIEE DE CADVISOR.... IL PEUT ETRE INDIQUE UNE ANCIENNE VERSION DANS LE YAML daemonset.yaml !!!
-# L'image de cadvisor n'est plus sur dockerhub, mais desormais sur la registry google ici:  https://console.cloud.google.com/gcr/images/google-containers/GLOBAL/
+
+# clone des yaml de cadvisor
 git clone https://github.com/google/cadvisor.git
-# on modifie le yaml du daemonset pour ajouter « hostPort: 31194 »
-sed -i '/containerPort: 8080/a \            hostPort : 31194\'  cadvisor/deploy/kubernetes/base/daemonset.yaml
-# on installe cadvisor
-# ATTENTION IL FAUDRAIT INSTALLER LA DERNIERE VERSION VERIFIEE DE CADVISOR.... IL PEUT ETRE INDIQUE UNE ANCIENNE VERSION DANS LE YAML daemonset.yaml !!!
-# L'image de cadvisor n'est plus sur dockerhub, mais desormais sur la registry google ici:  https://console.cloud.google.com/gcr/images/google-containers/GLOBAL/
-kubectl create -f cadvisor/deploy/kubernetes/base/
+
+# on remplace le daemonset de cadvisor par celui pour vRops
+cd cadvisor/deploy/kubernetes/base
+rm -f daemonset.yaml
+curl -O https://raw.githubusercontent.com/ahugla/CAS_vRA8/master/blueprints/Kubernetes/cadvisor_for_vRops_daemonset.yaml
+
+# configuration  de la version de cadvisor
+sed -i -e 's/{{cadvisor_version}}/'"$cadvisor_version"'/g'  cadvisor_for_vRops_daemonset.yaml
+
+# deploiement
+kubectl create -f .
+
 rm -rf cadvisor
 
 
-# ATTENTION IL FAUDRAIT INSTALLER LA DERNIERE VERSION VERIFIEE DE CADVISOR.... IL PEUT ETRE INDIQUE UNE ANCIENNE VERSION DANS LE YAML daemonset.yaml !!!
-# L'image de cadvisor n'est plus sur dockerhub, mais desormais sur la registry google ici:  https://console.cloud.google.com/gcr/images/google-containers/GLOBAL/
+
 
 
