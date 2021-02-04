@@ -2,6 +2,7 @@
 # https://docs.vmware.com/en/Management-Packs-for-vRealize-Operations-Manager/1.5.1/kubernetes-solution/GUID-13C06790-C129-4547-B81C-FDCA2BEB29BC.html 
 # date : 4/02/2021
 #
+#
 apiVersion: apps/v1 # apps/v1beta2 in Kube 1.8, extensions/v1beta1 in Kube < 1.8
 kind: DaemonSet
 metadata:
