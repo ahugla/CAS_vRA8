@@ -1,0 +1,15 @@
+
+Lors du deploiement de le VM on cree une propriété à partir d'input user:
+      "salt_master": IP du master salt
+
+
+Les souscriptions 'register' et 'unregister' s'executent si la VM possede la propriété "salt_master". 
+On fait cela grace au filtre de souscription : "typeof event.data.customProperties.salt_master != "undefined";"
+
+
+On definit en ABX un secret qui a pour valeur le password root du SSCM.
+
+
+L'ABX de register s'execute en etape "Compute post provision"
+L'ABX d'unregister s'execute en etape "Compute removal"
+

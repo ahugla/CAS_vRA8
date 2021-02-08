@@ -1,0 +1,52 @@
+formatVersion: 1
+inputs:
+  salt_master:
+    type: string
+    default: vrasaltstack.cpod-vrealize.az-fkd.cloud-garage.net
+    title: Salt Master
+  nbre_minion:
+    type: integer
+    title: nombre de minions
+    default: 1
+resources:
+  Cloud_Machine_1:
+    type: Cloud.Machine
+    metadata:
+      layoutPosition:
+        - 1
+        - 1
+    properties:
+      image: CentOS7.6
+      flavor: Small
+      count: '${input.nbre_minion}'
+      customizationSpec: Linux
+      salt_master: '${input.salt_master}'
+      networks:
+        - network: '${resource.Cloud_Network_1.id}'
+          assignment: static
+      cloudConfig: |
+        #cloudconfig
+        packages:
+          - git
+        runcmd:
+          - cd /tmp
+          - curl -O https://raw.githubusercontent.com/ahugla/CAS_vRA8/master/blueprints/Saltstack/Salt_Server_and_minion/salt_minion_install.sh
+          - chmod 755 salt_minion_install.sh
+          - ./salt_minion_install.sh ${input.salt_master}
+          - rm -f salt_minion_install.sh
+          
+          - # On attend que la clé du minion soit acceptée par le master (via ABX)
+          - while [ `salt-call test.ping | grep True | wc -l` != "1" ]; do echo "minion key not accepted yet, wait 5s ..."; sleep 5; done
+          
+          - # Execution Salt
+          - salt-call state.highstate
+  Cloud_Network_1:
+    type: Cloud.Network
+    metadata:
+      layoutPosition:
+        - 2
+        - 0
+    properties:
+      networkType: existing
+      constraints:
+        - tag: 'net:nsx'
