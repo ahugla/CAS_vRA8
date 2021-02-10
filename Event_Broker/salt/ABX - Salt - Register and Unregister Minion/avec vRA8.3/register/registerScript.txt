@@ -1,39 +1,79 @@
 import paramiko     # pip3 install paramiko
 import time         # pas besoin de metttre en dependance car deja dans librairie par defaut
 
+
 def handler(context, inputs):
   
-  # Attend 60 sec que l'install du minion via cloud-init se termine
-  time.sleep(60)  
-  
-  salt_master = inputs["customProperties"] ["salt_master"]  # ip du salt master
-  username = "root"
+  #-----------------------------Variables
+
+  counter_sleep = 2 # duree entre chaque tentative
+  counter_max = 30 # nombre de tentavives max
+  salt_master = inputs["customProperties"] ["salt_master"]
+  username="root"
   salt_master_password = context.getSecret(inputs["SSCMrootPassword"])
+  minion = inputs["resourceNames"][0]
+
+  #-----------------------------
+
+  def executeSSHcommand_FIND(server, login, password, command, minion):
+    client = paramiko.SSHClient()
+    client.set_missing_host_key_policy(paramiko.MissingHostKeyPolicy())    # pas de check de clé
+    client.connect(server, username=login, password=password)
+    ssh_stdin, ssh_stdout, ssh_stderr = client.exec_command(command)
+    local_retour = "ABSENT"
+    for line in ssh_stdout:
+      trouve = line.find(minion)
+      if trouve == 0:
+        local_retour = "TROUVE"
+      else:
+        local_retour = "ABSENT"
+    client.close()
+    return local_retour
+
+  #-----------------------------
   
- 
- # Creation de la commande
-  minion_ID = inputs["resourceNames"][0] +"*"         # on rajoute l'etoile pour prendre en compte le hostname ou le FQDN
-  cmd_to_execute="salt-key -y --accept=" +minion_ID
-  
+  def executeSSHcommand_ACCEPT(server, login, password, command):
+    client = paramiko.SSHClient()
+    client.set_missing_host_key_policy(paramiko.MissingHostKeyPolicy())    # pas de check de clé
+    client.connect(server, username=login, password=password)
+    ssh_stdin, ssh_stdout, ssh_stderr = client.exec_command(command)
+    client.close()
+    return 0
+
+  #-----------------------------
   #logs
   print("server salt master : " +salt_master)
-  print("minion ID : " +minion_ID)
-  print("command to execute : " +cmd_to_execute)
+  print("VM minion : " +minion)
 
 
-  # execution SSH
-  client = paramiko.SSHClient()
-  client.set_missing_host_key_policy(paramiko.MissingHostKeyPolicy())    # pas de check de clé
-  client.connect(salt_master, username=username, password=salt_master_password)
-  ssh_stdin, ssh_stdout, ssh_stderr = client.exec_command(cmd_to_execute)
-  
-  # affichage de la sortie de la commande
-  for line in ssh_stdout:
-    print('... ' + line.strip('\n'))
-  
-  client.close()
+  #On attent que le minion soit en etat "unregistered" ou que le counter soit a 10 tentatives
+  retour = "ABSENT"
+  counter = 0
+  while (retour == "ABSENT") and (counter < counter_max):
+    # Creation de la commande
+    # cmd_to_execute="salt-key --list=pre | grep " +minion +" | wc -l"
+    cmd_to_execute="salt-key --list=pre | grep " +minion
+    #cmd_to_execute="salt-key --list-all | grep " +minion      # REMPLACER PAR  --list=pre
+    print("Recherche du minion, tentative " +str(counter) +"/" +str(counter_max) +". Retry toutes les " +str(counter_sleep) +" secondes")
+    print("command to execute : " +cmd_to_execute)
+    # execution SSH
+    retour=executeSSHcommand_FIND(salt_master,username,salt_master_password,cmd_to_execute, minion)
+    time.sleep(counter_sleep) 
+    counter = counter + 1  
 
 
-  outputs={"status":"Register minion terminé"}
+  # si c'est trouvé on passe la commande d'acceptation du minion
+  if retour == "TROUVE":
+    cmd_to_execute="salt-key -y --accept=" +minion +"*"
+    print("Le minion " +minion +" a été trouvé en 'Unaccepted key' ")
+    print("command to execute : " +cmd_to_execute)
+    retour=executeSSHcommand_ACCEPT(salt_master,username,salt_master_password,cmd_to_execute)
+    print("Le minion " +minion +" a été accepté sur le Salt Master")
+    outputs={"status":"Register minion terminé"}
+  else: 
+    print("Le minion " +minion +" n'a pas été trouvé en 'Unaccepted Key'!!")
+    outputs={"status":"Probleme car le minion n'a pas ete trouvé dans les Unaccepted Key"}
+
+
   return outputs
   
