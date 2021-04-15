@@ -12,7 +12,7 @@
 
 
 # Recuperation des variables
-DB_password=$1
+DB_password=$1   #  utilisé pour l'acces DB à 'root' et 'testuser'
 
 
 # recup du repo git
@@ -31,7 +31,7 @@ systemctl enable mariadb
 # /etc/mysql/mysql.conf.d/mysqld.cnf
 
 
-# set password
+# set password for root
 mysql -e "UPDATE mysql.user SET Password = PASSWORD('$DB_password') WHERE User = 'root'"
 systemctl restart mariadb
 
@@ -61,15 +61,15 @@ EOF
 # create base et populate
 mysql  --defaults-extra-file=/var/lib/mysql/extra  < /tmp/dump.sql
 #mysql -u root -p
-#USE testndc;
+#USE testdb;
 #SHOW TABLES;
-#select * from contenu_base_testndc;
+#select * from contenu_base_testdb;
 
 
-# create user testndcuser and enable remote connection
+# create user testuser and enable remote connection
 sed -i '2 i\bind-address = 0.0.0.0' /etc/my.cnf
-mysql --defaults-extra-file=/var/lib/mysql/extra -e "CREATE USER 'testndcuser'@'%' IDENTIFIED BY '$DB_password';"
-mysql --defaults-extra-file=/var/lib/mysql/extra -e "GRANT ALL PRIVILEGES ON testndc.* TO 'testndcuser'@'%';"
+mysql --defaults-extra-file=/var/lib/mysql/extra -e "CREATE USER 'testuser'@'%' IDENTIFIED BY '$DB_password';"
+mysql --defaults-extra-file=/var/lib/mysql/extra -e "GRANT ALL PRIVILEGES ON testdb.* TO 'testuser'@'%';"
 mysql --defaults-extra-file=/var/lib/mysql/extra -e "FLUSH PRIVILEGES;"
 
 
