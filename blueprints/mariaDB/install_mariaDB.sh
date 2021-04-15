@@ -29,7 +29,7 @@ systemctl enable mariadb
 
 
 # Allow remote connections
-/etc/mysql/mysql.conf.d/mysqld.cnf
+# /etc/mysql/mysql.conf.d/mysqld.cnf
 
 
 # set password
