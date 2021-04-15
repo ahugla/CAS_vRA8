@@ -7,18 +7,18 @@ SET sql_mode = 'NO_AUTO_VALUE_ON_ZERO';
 
 SET NAMES utf8mb4;
 
-CREATE DATABASE `testndc` /*!40100 DEFAULT CHARACTER SET utf8mb4 */;
-USE `testndc`;
+CREATE DATABASE `testdb` /*!40100 DEFAULT CHARACTER SET utf8mb4 */;
+USE `testdb`;
 
-DROP TABLE IF EXISTS `contenu_base_testndc`;
-CREATE TABLE `contenu_base_testndc` (
+DROP TABLE IF EXISTS `contenu_base_testdb`;
+CREATE TABLE `contenu_base_testdb` (
   `Index` int(11) NOT NULL AUTO_INCREMENT,
   `Nom` varchar(30) DEFAULT NULL,
   `Prenom` varchar(30) DEFAULT NULL,
   PRIMARY KEY (`Index`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-INSERT INTO `contenu_base_testndc` (`Index`, `Nom`, `Prenom`) VALUES
+INSERT INTO `contenu_base_testdb` (`Index`, `Nom`, `Prenom`) VALUES
 (1,	'Doe',	'John'),
 (2,	'Dupont',	'Jean'),
 (3,	'Morrison',	'Jim'),
