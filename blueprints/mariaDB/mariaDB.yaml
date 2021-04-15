@@ -1,0 +1,37 @@
+formatVersion: 1
+inputs:
+  DBpassword:
+    type: string
+    title: Password DB pour root et testuser
+    Description: passord DB pour les comptes testuser et root
+    encrypted: true
+resources:
+  Cloud_Machine_1:
+    type: Cloud.Machine
+    metadata:
+      layoutPosition:
+        - 0
+        - 0
+    properties:
+      image: CentOS7.6
+      flavor: Small
+      customizationSpec: Linux
+      networks:
+        - network: '${resource.Cloud_Network_1.id}'
+          assignment: static
+      cloudConfig: |
+        #cloud-config
+        runcmd:
+          - touch /etc/cloud/cloud-init.disabled
+          - cd /tmp
+          - curl -O https://raw.githubusercontent.com/ahugla/CAS_vRA8/master/blueprints/mariaDB/install_mariaDB.sh
+          - chmod 755 install_mariaDB.sh
+          - ./install_mariaDB.sh ${input.DBpassword}
+  Cloud_Network_1:
+    type: Cloud.Network
+    metadata:
+      layoutPosition:
+        - 1
+        - 0
+    properties:
+      networkType: existing
