@@ -13,7 +13,6 @@
 
 # Recuperation des variables
 MinIO_password=$1
-echo "MinIO_password = " $MinIO_password
 
 
 # Set parameters
