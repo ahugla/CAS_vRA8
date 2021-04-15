@@ -17,8 +17,7 @@ DB_password=$1
 
 # recup du repo git
 cd /tmp/
-git clone https://github.com/ahugla/test-bidouille.git
-#git clone https://github.com/ympondaven/POCNDC.git
+curl -O https://raw.githubusercontent.com/ahugla/CAS_vRA8/master/blueprints/mariaDB/dump.sql
 
 
 
@@ -60,7 +59,7 @@ EOF
 
 
 # create base et populate
-mysql  --defaults-extra-file=/var/lib/mysql/extra  < /tmp/test-bidouille/testDoca/dump_testndc.sql
+mysql  --defaults-extra-file=/var/lib/mysql/extra  < /tmp/dump.sql
 #mysql -u root -p
 #USE testndc;
 #SHOW TABLES;
