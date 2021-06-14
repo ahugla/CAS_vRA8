@@ -2,8 +2,8 @@
 #SOURCE : https://mapr.com/blog/making-data-actionable-at-scale-part-2-of-3/
 
 # ALEX H.
-# 2 Fevrier 2021
-# v1.12
+# 14 Juin 2021
+# v1.5
 
 # USAGE
 # -----
@@ -32,16 +32,78 @@ echo "apres HOME = $HOME"
 echo "PATH = $PATH"
 # initial PATH  /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin
 
-# Validate the ip-address:
+# get and check the ip-address:
 # "hostname --ip-address" peut donner "172.17.1.54" ou "::1 172.17.1.54"  =>  on prefere la commande "hostname -I | awk '{print $1}'"
 echo "CHECK: hostname --ip-address"
 hostname -I | awk '{print $1}'
+var_myIP=`hostname -I | awk '{print $1}'`
 
 
+
+
+# kubeadm avec config file et policy de logging
+# ---------------------------------------------
+kubeadm config print init-defaults >  /tmp/templateconfig.yaml
+
+# creation des repertoires
+mkdir /var/log/kubernetes
+mkdir /var/log/kubernetes/apiserver
+mkdir /etc/kubernetes/audit-policies
+# Creation de la policy de logging
+cat > /etc/kubernetes/audit-policies/policy.yaml << EOF  
+# Log all requests at the Metadata level.
+apiVersion: audit.k8s.io/v1
+kind: Policy
+rules:
+- level: Metadata
+EOF
+
+# update du fichier de config
+sed -i -e 's/advertiseAddress: 1.2.3.4/advertiseAddress: '$var_myIP'/g'  /tmp/templateconfig.yaml
+
+# update du fichier de config juste apres 'apiServer'
+lineref=`grep -n 'apiServer' /tmp/templateconfig.yaml | awk -F: '{print $ 1}'`
+sed -i -e ''$lineref' a \ \ \ \ pathType: DirectoryOrCreate' /tmp/templateconfig.yaml 
+sed -i -e ''$lineref' a \ \ \ \ mountPath: "/k8s-logs/apiserver/"' /tmp/templateconfig.yaml 
+sed -i -e ''$lineref' a \ \ \ \ hostPath: "/var/log/kubernetes/apiserver/"' /tmp/templateconfig.yaml 
+sed -i -e ''$lineref' a \ \ - name: "apiserver-log"' /tmp/templateconfig.yaml 
+sed -i -e ''$lineref' a \ \ \ \ pathType: DirectoryOrCreate' /tmp/templateconfig.yaml 
+sed -i -e ''$lineref' a \ \ \ \ mountPath: "/k8s-policy/"' /tmp/templateconfig.yaml 
+sed -i -e ''$lineref' a \ \ \ \ hostPath: "/etc/kubernetes/audit-policies/"' /tmp/templateconfig.yaml 
+sed -i -e ''$lineref' a \ \ - name: "policy-conf"' /tmp/templateconfig.yaml 
+sed -i -e ''$lineref' a \ \ extraVolumes:' /tmp/templateconfig.yaml 
+sed -i -e ''$lineref' a \ \ \ \ audit-log-path: /k8s-logs/apiserver/audit.log' /tmp/templateconfig.yaml 
+sed -i -e ''$lineref' a \ \ \ \ audit-policy-file: /k8s-policy/policy.yaml' /tmp/templateconfig.yaml 
+sed -i -e ''$lineref' a \ \ \ \ authorization-mode: Node, RBAC' /tmp/templateconfig.yaml 
+sed -i -e ''$lineref' a \ \ extraArgs:' /tmp/templateconfig.yaml 
+# AJOUTE:
+# extraArgs:
+#    authorization-mode: Node, RBAC
+#    audit-policy-file: /k8s-policy/policy.yaml
+#    audit-log-path: /k8s-logs/apiserver/audit.log
+#  extraVolumes:
+#  - name: "policy-conf"
+#    hostPath: "/etc/kubernetes/audit-policies/"
+#    mountPath: "/k8s-policy/"
+#    pathType: DirectoryOrCreate
+#  - name: "apiserver-log"
+#    hostPath: "/var/log/kubernetes/apiserver/"
+#    mountPath: "/k8s-logs/apiserver/"
+#    pathType: DirectoryOrCreate
+
+
+
+# init du cluster
+echo "kubeadm init ... starting ..."
+kubeadm init --config /tmp/templateconfig.yaml
+
+
+
+# kubeadm en command line (sans config de log pour l audit)
 # Initialize Kubernetes master : https://kubernetes.io/docs/setup/independent/create-cluster-kubeadm/#before-you-begin
 # "init" verifie des pre-requis (comme le nombre de cpu) et cree le fichier de config de kubelet: /var/lib/kubelet/config.yaml
-echo "kubeadm init ... starting ..."
-kubeadm init --pod-network-cidr=10.244.0.0/16 --apiserver-advertise-address=$(hostname -I | awk '{print $1}') --token-ttl 0 #--ignore-preflight-errors=NumCPU
+#echo "kubeadm init ... starting ..."
+#kubeadm init --pod-network-cidr=10.244.0.0/16 --apiserver-advertise-address=$(hostname -I | awk '{print $1}') --token-ttl 0 #--ignore-preflight-errors=NumCPU
 # The kubeadm command will take a few minutes and it will print a 'kubeadm join'
 # command once completed. Make sure to capture and store this 'kubeadm join'
 # command as it is required to add other nodes to the Kubernetes cluster.
