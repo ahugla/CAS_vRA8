@@ -58,8 +58,6 @@ rules:
 - level: Metadata
 EOF
 
-# update du fichier de config
-sed -i -e 's/advertiseAddress: 1.2.3.4/advertiseAddress: '$var_myIP'/g'  /tmp/templateconfig.yaml
 
 # update du fichier de config juste apres 'apiServer'
 lineref=`grep -n 'apiServer' /tmp/templateconfig.yaml | awk -F: '{print $ 1}'`
@@ -75,9 +73,11 @@ sed -i -e ''$lineref' a \ \ extraVolumes:' /tmp/templateconfig.yaml
 sed -i -e ''$lineref' a \ \ \ \ audit-log-path: /k8s-logs/apiserver/audit.log' /tmp/templateconfig.yaml 
 sed -i -e ''$lineref' a \ \ \ \ audit-policy-file: /k8s-policy/policy.yaml' /tmp/templateconfig.yaml 
 sed -i -e ''$lineref' a \ \ \ \ authorization-mode: Node, RBAC' /tmp/templateconfig.yaml 
+sed -i -e ''$lineref' a \ \ \ \ advertiseAddress: 1.2.3.4' /tmp/templateconfig.yaml 
 sed -i -e ''$lineref' a \ \ extraArgs:' /tmp/templateconfig.yaml 
 # AJOUTE:
 # extraArgs:
+#    advertiseAddress: 1.2.3.4
 #    authorization-mode: Node, RBAC
 #    audit-policy-file: /k8s-policy/policy.yaml
 #    audit-log-path: /k8s-logs/apiserver/audit.log
@@ -91,7 +91,8 @@ sed -i -e ''$lineref' a \ \ extraArgs:' /tmp/templateconfig.yaml
 #    mountPath: "/k8s-logs/apiserver/"
 #    pathType: DirectoryOrCreate
 
-
+# update du fichier de config avec ip correcte
+sed -i -e 's/advertiseAddress: 1.2.3.4/advertiseAddress: '$var_myIP'/g'  /tmp/templateconfig.yaml
 
 # init du cluster
 echo "kubeadm init ... starting ..."
