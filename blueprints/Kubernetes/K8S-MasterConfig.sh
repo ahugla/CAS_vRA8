@@ -2,7 +2,7 @@
 #SOURCE : https://mapr.com/blog/making-data-actionable-at-scale-part-2-of-3/
 
 # ALEX H.
-# 14 Juin 2021
+# 16 Juin 2021
 # v1.5
 
 # USAGE
@@ -11,16 +11,34 @@
 # cd /tmp
 # curl -O https://raw.githubusercontent.com/ahugla/CAS_vRA8/master/blueprints/Kubernetes/K8S-MasterConfig.sh
 # chmod 755 K8S-MasterConfig.sh
-# ./K8S-MasterConfig.sh $LB_IPrange  $cadvisor_version       # ex : ./K8S-MasterConfig.sh  172.17.1.226-172.17.1.239   v0.34.0
+# ./K8S-MasterConfig.sh $LB_IPrange  $cadvisor_version $k8s_cluter_name      # ex : ./K8S-MasterConfig.sh  172.17.1.226-172.17.1.239   v0.34.0   k8s_alex
 # rm -f K8S-MasterConfig.sh
 #
 
 
+cd /tmp
+
+
 # display input parameters
-LB_IPrange=$1
+LB_IPrange=$1         #LB_IPrange=172.17.1.236-172.17.1.239
+cadvisor_version=$2   #cadvisor_version=v0.34.0
+k8s_cluter_name=$3    #k8s_cluter_name=alex-k8s
 echo "LB_IPrange = $LB_IPrange"
-cadvisor_version=$2
 echo "cadvisor_version = $cadvisor_version"
+echo "k8s_cluter_name = $k8s_cluter_name"
+
+# recuperer la version de Kubernetes
+K8S_VERSION_WITHv=`kubelet --version | awk '{print $2}'`
+K8S_VERSION=`echo ${K8S_VERSION_WITHv:1:20}`
+echo "K8S_VERSION = $K8S_VERSION"
+
+# get and check the ip-address:
+# "hostname --ip-address" peut donner "172.17.1.54" ou "::1 172.17.1.54"  =>  on prefere la commande "hostname -I | awk '{print $1}'"
+echo "CHECK: hostname --ip-address"
+hostname -I | awk '{print $1}'
+var_myIP=`hostname -I | awk '{print $1}'`
+
+
 
 #set $HOME   INDISPENSABLE CAR UTILISATION DE LA COMMANDE kubectl
 echo "avant HOME = $HOME"
@@ -32,23 +50,24 @@ echo "apres HOME = $HOME"
 echo "PATH = $PATH"
 # initial PATH  /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin
 
-# get and check the ip-address:
-# "hostname --ip-address" peut donner "172.17.1.54" ou "::1 172.17.1.54"  =>  on prefere la commande "hostname -I | awk '{print $1}'"
-echo "CHECK: hostname --ip-address"
-hostname -I | awk '{print $1}'
-var_myIP=`hostname -I | awk '{print $1}'`
-
 
 
 
 # kubeadm avec config file et policy de logging
 # ---------------------------------------------
-kubeadm config print init-defaults >  /tmp/templateconfig.yaml
+curl -O https://raw.githubusercontent.com/ahugla/CAS_vRA8/master/blueprints/Kubernetes/kubeadm_config_file_template.yaml
+mv kubeadm_config_file_template.yaml kubeadm_config_file.yaml 
 
-# creation des repertoires
+# update du fichier de config:
+sed -i -e 's/A.B.C.D/'$var_myIP'/g'  /tmp/kubeadm_config_file.yaml   #  on met l'IP du master
+sed -i -e 's/K8S_VERSION/'$K8S_VERSION'/g'  /tmp/kubeadm_config_file.yaml   #  on indique la version de kubernetes a installer (la meme que kubeadm; kubectl et kubelet)
+sed -i -e 's/k8s_cluter_name/'$k8s_cluter_name'/g'  /tmp/kubeadm_config_file.yaml   #  on met le nom du cluster K8S
+
+# creation des repertoires pour les logs et pour le fichier de config des logs
 mkdir /var/log/kubernetes
 mkdir /var/log/kubernetes/apiserver
 mkdir /etc/kubernetes/audit-policies
+
 # Creation de la policy de logging
 cat > /etc/kubernetes/audit-policies/policy.yaml << EOF  
 # Log all requests at the Metadata level.
@@ -58,49 +77,39 @@ rules:
 - level: Metadata
 EOF
 
-
-# update du fichier de config juste apres 'apiServer'
-lineref=`grep -n 'apiServer' /tmp/templateconfig.yaml | awk -F: '{print $ 1}'`
-sed -i -e ''$lineref' a \ \ \ \ pathType: DirectoryOrCreate' /tmp/templateconfig.yaml 
-sed -i -e ''$lineref' a \ \ \ \ mountPath: "/k8s-logs/apiserver/"' /tmp/templateconfig.yaml 
-sed -i -e ''$lineref' a \ \ \ \ hostPath: "/var/log/kubernetes/apiserver/"' /tmp/templateconfig.yaml 
-sed -i -e ''$lineref' a \ \ - name: "apiserver-log"' /tmp/templateconfig.yaml 
-sed -i -e ''$lineref' a \ \ \ \ pathType: DirectoryOrCreate' /tmp/templateconfig.yaml 
-sed -i -e ''$lineref' a \ \ \ \ mountPath: "/k8s-policy/"' /tmp/templateconfig.yaml 
-sed -i -e ''$lineref' a \ \ \ \ hostPath: "/etc/kubernetes/audit-policies/"' /tmp/templateconfig.yaml 
-sed -i -e ''$lineref' a \ \ - name: "policy-conf"' /tmp/templateconfig.yaml 
-sed -i -e ''$lineref' a \ \ extraVolumes:' /tmp/templateconfig.yaml 
-sed -i -e ''$lineref' a \ \ \ \ audit-log-path: /k8s-logs/apiserver/audit.log' /tmp/templateconfig.yaml 
-sed -i -e ''$lineref' a \ \ \ \ audit-policy-file: /k8s-policy/policy.yaml' /tmp/templateconfig.yaml 
-sed -i -e ''$lineref' a \ \ \ \ authorization-mode: Node, RBAC' /tmp/templateconfig.yaml 
-sed -i -e ''$lineref' a \ \ \ \ advertiseAddress: 1.2.3.4' /tmp/templateconfig.yaml 
-sed -i -e ''$lineref' a \ \ extraArgs:' /tmp/templateconfig.yaml 
-# AJOUTE:
-# extraArgs:
-#    advertiseAddress: 1.2.3.4
-#    authorization-mode: Node, RBAC
-#    audit-policy-file: /k8s-policy/policy.yaml
-#    audit-log-path: /k8s-logs/apiserver/audit.log
-#  extraVolumes:
-#  - name: "policy-conf"
-#    hostPath: "/etc/kubernetes/audit-policies/"
-#    mountPath: "/k8s-policy/"
-#    pathType: DirectoryOrCreate
-#  - name: "apiserver-log"
-#    hostPath: "/var/log/kubernetes/apiserver/"
-#    mountPath: "/k8s-logs/apiserver/"
-#    pathType: DirectoryOrCreate
-
-# update du fichier de config avec ip correcte
-sed -i -e 's/advertiseAddress: 1.2.3.4/advertiseAddress: '$var_myIP'/g'  /tmp/templateconfig.yaml
-
-# init du cluster
-echo "kubeadm init ... starting ..."
-kubeadm init --config /tmp/templateconfig.yaml
+# EXEMPLE D'UN FICHIER DE CONFIG POUR KUBEADM INIT:
+# apiVersion: kubeadm.k8s.io/v1beta2
+# kind: InitConfiguration
+# localAPIEndpoint:
+#   advertiseAddress: 172.17.1.74
+#   bindPort: 6443
+# apiServer:
+#   extraArgs:
+#     audit-policy-file: /k8s-policy/policy.yaml
+#     audit-log-path: /k8s-logs/apiserver/audit.log
+#   extraVolumes:
+#   - name: "policy-conf"
+#     hostPath: "/etc/kubernetes/audit-policies/"
+#     mountPath: "/k8s-policy/"
+#     pathType: DirectoryOrCreate
+#   - name: "apiserver-log"
+#     hostPath: "/var/log/kubernetes/apiserver/"
+#     mountPath: "/k8s-logs/apiserver/"
+#     pathType: DirectoryOrCreate
+#   timeoutForControlPlane: 4m0s
+# kind: ClusterConfiguration
+# kubernetesVersion: 1.21.1
+# clusterName: kubernetes
+# networking:
+#   dnsDomain: cluster.local
+#   podSubnet: 10.244.0.0/16
+#   serviceSubnet: 10.96.0.0/12
+# scheduler: {}
 
 
 
-# kubeadm en command line (sans config de log pour l audit)
+# OLD : kubeadm en command line (sans config de log pour l audit)
+# ---------------------------------------------------------------
 # Initialize Kubernetes master : https://kubernetes.io/docs/setup/independent/create-cluster-kubeadm/#before-you-begin
 # "init" verifie des pre-requis (comme le nombre de cpu) et cree le fichier de config de kubelet: /var/lib/kubelet/config.yaml
 #echo "kubeadm init ... starting ..."
@@ -110,6 +119,13 @@ kubeadm init --config /tmp/templateconfig.yaml
 # command as it is required to add other nodes to the Kubernetes cluster.
 # --token-ttl 0 permet de faire que le token du bootstrap n'expire jamais (on 
 # peut tj faire des add nodes sans avoir a recreer un token)
+
+
+
+# init du cluster
+echo "kubeadm init ... starting ..."
+kubeadm init --config /tmp/kubeadm_config_file.yaml
+
 
 # EXEMPLE D'OUTPUT:
 # Your Kubernetes control-plane has initialized successfully!
@@ -134,7 +150,7 @@ sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
 sudo chown $(id -u):$(id -g) $HOME/.kube/config
 
 
-# MUST wait for K8S to start
+# MUST wait for K8S to start (on attend un running au moins) 
 # Si pas de $HOME=/root  alors  errormsg : The connection to the server localhost:8080 was refused
 isRunning=`kubectl get pods --all-namespaces | grep Running | wc -l`
 while [ $isRunning -lt 1 ]
@@ -144,6 +160,16 @@ do
 	kubectl get pods --all-namespaces
 	isRunning=`kubectl get pods --all-namespaces | grep Running | wc -l`
 done
+# EXEMPLE D'OUTPUT:
+# [root@vRA-VM-0878 ~]# kubectl get pods --all-namespaces
+# kube-system   coredns-86c58d9df4-dxzfz              0/1     Pending   0     => demarrera apres l'install de flannel
+# kube-system   coredns-86c58d9df4-hjzjv              0/1     Pending   0     => demarrera apres l'install de flannel
+# kube-system   etcd-vra-vm-0878                      1/1     Running   0
+# kube-system   kube-apiserver-vra-vm-0878            1/1     Running   0
+# kube-system   kube-controller-manager-vra-vm-0878   1/1     Running   0
+# kube-system   kube-proxy-trfcx                      1/1     Running   0
+# kube-system   kube-scheduler-vra-vm-0878            1/1     Running   0
+
 
 
 

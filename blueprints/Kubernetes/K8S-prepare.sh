@@ -2,8 +2,8 @@
 #SOURCE : https://mapr.com/blog/making-data-actionable-at-scale-part-2-of-3/
 
 # ALEX H.
-# 2 Fevrier 2021
-# v1.12
+# 16 Juin 2021
+# v1.5
 
 # USAGE
 # -----
@@ -17,8 +17,11 @@
 
 # get parameter
 # yum --showduplicates list 'kube*'   pour voir toutes les versions dispos
-kubeVersion=$1
-echo "kubeVersion = $kubeVersion"
+dockerVersion=19.03.13-3.el7    #  last=20.10.7-3.el7 
+kubeVersion=$1    #1.19.1          last=1.21.1  
+echo "dockerVersion à installer = $dockerVersion"
+echo "kubeVersion à installer = $kubeVersion"
+
 
 
 # Test nombre vCPU
@@ -66,11 +69,12 @@ yum-config-manager \
     https://download.docker.com/linux/centos/docker-ce.repo
 
 #Update all (before docker install to avoid last docker version compatibility issue with K8S)
-#yum update -y 
+yum update -y 
 
-# to see all available version for a package : yum --showduplicates list docker-ce
+# to see all available version for a package:  yum list docker-ce --showduplicates | sort -r
 #yum install -y docker-ce-18.09.9-3.el7   # derniere version supportée à cette date
-yum install -y docker-ce-19.03.13-3.el7.x86_64   # derniere version supportée à cette date  => a utiliser avec K8S 1.19
+#yum install -y docker-ce-19.03.13-3.el7.x86_64   # derniere version supportée à cette date  => a utiliser avec K8S 1.19
+yum install -y docker-ce-$dockerVersion   # derniere version supportée à cette date  => a utiliser avec K8S 1.19
 
 mkdir /etc/docker
 cat > /etc/docker/daemon.json <<EOF
@@ -111,11 +115,12 @@ EOF
 # pour voir toutes les versions dispos: 
 #    yum --showduplicates list 'kube*'
 #    yum list --showduplicates kube* --disableexcludes=kubernetes
-# kubeVersion=1.17.8   # 1.16.12, 1.17.8, 1.18.5   1.19.1
+# kubeVersion=1.17.8   # 1.16.12, 1.17.8, 1.18.5   1.19.1   1.20.7  1.21.1
 yum install -y kubelet-$kubeVersion   kubeadm-$kubeVersion   kubectl-$kubeVersion  --disableexcludes=kubernetes
 
-systemctl enable kubelet.service
+systemctl enable --now kubelet
 
+#The kubelet is now restarting every few seconds, as it waits in a crashloop for kubeadm to tell it what to do.
 
 
 # Prerequis à l'init
