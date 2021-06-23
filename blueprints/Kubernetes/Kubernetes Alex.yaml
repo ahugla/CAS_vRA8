@@ -18,19 +18,19 @@ inputs:
     default: kubernetes
   kubernetesVersion:
     type: string
-    default: 1.19.3
+    default: 1.21.1
     title: Kubernetes version
     oneOf:
-      - title: 1.16.12
-        const: 1.16.12
-      - title: 1.17.8
-        const: 1.17.8
-      - title: 1.18.5
-        const: 1.18.5
-      - title: 1.19.3
-        const: 1.19.3
       - title: 1.21.1
         const: 1.21.1
+      - title: 1.19.3
+        const: 1.19.3
+      - title: 1.18.5
+        const: 1.18.5
+      - title: 1.17.8
+        const: 1.17.8
+      - title: 1.16.12
+        const: 1.16.12
   RangeIP:
     type: string
     description: DOIT ETRE UNIQUE - Range IP qui sera utilisé dans Kubernetes avec le mode de service de type LoadBalancer
@@ -51,7 +51,7 @@ inputs:
     title: Log Insight Server
   LIversion:
     type: string
-    default: v8.2.0
+    default: v8.4.0
     title: Version de Log Insight
 resources:
   K8S_Master:
