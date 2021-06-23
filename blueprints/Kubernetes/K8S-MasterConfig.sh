@@ -2,8 +2,8 @@
 #SOURCE : https://mapr.com/blog/making-data-actionable-at-scale-part-2-of-3/
 
 # ALEX H.
-# 16 Juin 2021
-# v1.5
+# 23 Juin 2021
+# v1.51
 
 # USAGE
 # -----
@@ -63,20 +63,6 @@ sed -i -e 's/A.B.C.D/'$var_myIP'/g'  /tmp/kubeadm_config_file.yaml   #  on met l
 sed -i -e 's/K8S_VERSION/'$K8S_VERSION'/g'  /tmp/kubeadm_config_file.yaml   #  on indique la version de kubernetes a installer (la meme que kubeadm; kubectl et kubelet)
 sed -i -e 's/k8s_cluter_name/'$k8s_cluter_name'/g'  /tmp/kubeadm_config_file.yaml   #  on met le nom du cluster K8S
 
-# creation des repertoires pour les logs et pour le fichier de config des logs
-mkdir /var/log/kubernetes
-mkdir /var/log/kubernetes/apiserver
-mkdir /etc/kubernetes/audit-policies
-
-# Creation de la policy de logging
-cat > /etc/kubernetes/audit-policies/policy.yaml << EOF  
-# Log all requests at the Metadata level.
-apiVersion: audit.k8s.io/v1
-kind: Policy
-rules:
-- level: Metadata
-EOF
-
 # EXEMPLE D'UN FICHIER DE CONFIG POUR KUBEADM INIT:
 # apiVersion: kubeadm.k8s.io/v1beta2
 # kind: InitConfiguration
@@ -105,6 +91,16 @@ EOF
 #   podSubnet: 10.244.0.0/16
 #   serviceSubnet: 10.96.0.0/12
 # scheduler: {}
+
+# creation des repertoires pour les logs et pour le fichier de policy de log d'audit 
+mkdir /var/log/kubernetes
+mkdir /var/log/kubernetes/apiserver
+mkdir /etc/kubernetes/audit-policies
+
+# Creation de la policy de logging
+# Log verbs 'create' and 'delete' at the 'Metadata' level.
+curl -O https://raw.githubusercontent.com/ahugla/CAS_vRA8/master/blueprints/Kubernetes/audit_policy.yaml
+mv audit_policy.yaml /etc/kubernetes/audit-policies/policy.yaml 
 
 
 

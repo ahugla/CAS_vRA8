@@ -1,0 +1,19 @@
+# ALEX POLICY
+# 23 juin 2021
+
+apiVersion: audit.k8s.io/v1
+kind: Policy
+
+# On Ne log pas les stages 'RequestReceived'
+omitStages:
+  - "RequestReceived"
+
+rules:
+
+  # On ne log pas les verbes (get, list, watch, patch et update)
+  - level: None
+    verbs: ["get", "list", "watch", "patch", "update"]
+
+  # Log tout le reste en Level Metadata (donc les verbes "create" et "delete")
+  - level: Metadata
+
