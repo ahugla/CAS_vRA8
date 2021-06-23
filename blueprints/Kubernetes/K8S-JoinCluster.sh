@@ -12,7 +12,7 @@
 # curl -O https://raw.githubusercontent.com/ahugla/CAS_vRA8/master/blueprints/Kubernetes/K8S-JoinCluster.sh
 # chmod 755 K8S-JoinCluster.sh
 # ./$K8S-JoinCluster.sh  $MasterNode  $MasterPassword  $LIserver  $versionLI
-# ex : ./K8S-JoinCluster.sh  172.19.5.4  my_pass!  vrli.cpod-vrealizesuite.az-demo.shwrfr.com  v8.1.0
+# ex : ./K8S-JoinCluster.sh  172.19.5.4  my_pass!  vrli.cpod-vrealizesuite.az-demo.shwrfr.com  v8.4.0
 # rm -f K8S-JoinCluster.sh
 
 # Set and display paramaters
@@ -88,14 +88,12 @@ sed -i '/ssl=yes/d' $liconfig
 # ajout de la conf ssl apres 'SSL usage'
 sed -i '/SSL usage/a ssl=no' $liconfig
 
-
 # restart et reboot persistence
 systemctl restart liagentd
 systemctl enable liagentd
 
-
 # reste a aller sur le serveur LI et l'associer avec l'agent linux.
-echo "LOG INSIHT : reste a aller sur le serveur LI et l'associer avec l'agent linux."
+echo "LOG INSIGHT : reste a aller sur le serveur LI et l'associer avec l'agent linux."
 
 
 

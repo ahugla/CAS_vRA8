@@ -80,7 +80,7 @@ resources:
           - cp /tmp/CAS_vRA8/blueprints/Kubernetes/K8S-MasterConfig.sh /tmp/K8S-MasterConfig.sh
           - chmod 755 K8S-prepare.sh K8S-MasterConfig.sh
           - /tmp/K8S-prepare.sh ${input.kubernetesVersion}
-          - /tmp/K8S-MasterConfig.sh ${input.RangeIP} ${input.cadvisor_version} ${input.k8s_cluter_name}
+          - /tmp/K8S-MasterConfig.sh ${input.RangeIP} ${input.cadvisor_version} ${input.k8s_cluter_name} ${input.LIserver} ${input.LIversion}
           - rm -f K8S-prepare.sh
           - rm -f K8S-MasterConfig.sh
   K8S_Nodes:

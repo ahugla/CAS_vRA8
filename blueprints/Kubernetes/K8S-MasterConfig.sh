@@ -11,7 +11,7 @@
 # cd /tmp
 # curl -O https://raw.githubusercontent.com/ahugla/CAS_vRA8/master/blueprints/Kubernetes/K8S-MasterConfig.sh
 # chmod 755 K8S-MasterConfig.sh
-# ./K8S-MasterConfig.sh $LB_IPrange  $cadvisor_version $k8s_cluter_name      # ex : ./K8S-MasterConfig.sh  172.17.1.226-172.17.1.239   v0.34.0   k8s_alex
+# ./K8S-MasterConfig.sh $LB_IPrange  $cadvisor_version $k8s_cluter_name $LIserver $versionLI    # ex : ./K8S-MasterConfig.sh  172.17.1.226-172.17.1.239   v0.34.0   k8s_alex  vrli.cpod-vrealizesuite.az-demo.shwrfr.com  v8.4.0
 # rm -f K8S-MasterConfig.sh
 #
 
@@ -23,9 +23,13 @@ cd /tmp
 LB_IPrange=$1         #LB_IPrange=172.17.1.236-172.17.1.239
 cadvisor_version=$2   #cadvisor_version=v0.34.0
 k8s_cluter_name=$3    #k8s_cluter_name=alex-k8s
+LIserver=$4           #LIserver=vrli.cpod-vrealizesuite.az-demo.shwrfr.com
+versionLI=$5          #versionLI=v8.4.0
 echo "LB_IPrange = $LB_IPrange"
 echo "cadvisor_version = $cadvisor_version"
 echo "k8s_cluter_name = $k8s_cluter_name"
+echo "LIserver = $LIserver"
+echo "versionLI = $versionLI"
 
 # recuperer la version de Kubernetes
 K8S_VERSION_WITHv=`kubelet --version | awk '{print $2}'`
@@ -331,6 +335,35 @@ kubectl create -f .
 
 rm -rf cadvisor
 
+
+
+
+# Installation de Log Insight sur le master (pour le monitoring des logs d'audit de K8S)
+# Installation de l'agent Log Insight
+cd /tmp
+git clone https://github.com/ahugla/LogInsight.git  /tmp/li
+rpmLI=`ls /tmp/li/$versionLI/*.rpm`
+rpm -iv $rpmLI
+
+# config agent hostname + no ssl
+#-------------------------------
+liconfig=/var/lib/loginsight-agent/liagent.ini
+# suppression de toutes les lignes contenant hostname=
+sed -i '/hostname=/d' $liconfig
+# ajout de la conf server apres la ligne [server]
+ligne1="hostname=$LIserver"
+sed -i '/\[server\]/a '$ligne1'' $liconfig
+#suppression de toutes les lignes contenant ssl=yes
+sed -i '/ssl=yes/d' $liconfig
+# ajout de la conf ssl apres 'SSL usage'
+sed -i '/SSL usage/a ssl=no' $liconfig
+
+# restart et reboot persistence
+systemctl restart liagentd
+systemctl enable liagentd
+
+# reste a aller sur le serveur LI et l'associer avec l'agent linux.
+echo "LOG INSIGHT : reste a aller sur le serveur LI et l'associer avec l'agent linux."
 
 
 
