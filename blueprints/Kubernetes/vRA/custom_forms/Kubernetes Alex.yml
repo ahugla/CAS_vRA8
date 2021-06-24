@@ -1,0 +1,243 @@
+layout:
+  pages:
+    - id: page_general
+      sections:
+        - id: section_project
+          fields:
+            - id: project
+              display: dropDown
+              state:
+                visible: false
+                read-only: false
+              signpostPosition: right-middle
+        - id: section_0c11db68
+          fields:
+            - id: image_6c12d5e4
+              display: image
+              state:
+                visible: true
+                read-only: false
+              signpostPosition: right-middle
+      title: Présentation
+      state: {}
+    - id: page_898b1f8e
+      sections:
+        - id: section_3e55ad22
+          fields:
+            - id: deploymentName
+              display: textField
+              state:
+                visible: true
+                read-only: false
+              signpostPosition: right-middle
+        - id: section_09593b44
+          fields:
+            - id: NodeSize
+              display: radio
+              state:
+                visible: true
+                read-only: false
+              signpostPosition: right-middle
+        - id: section_e473c43e
+          fields:
+            - id: rootPasswd
+              display: passwordField
+              state:
+                visible: true
+                read-only: false
+              signpostPosition: right-middle
+      title: Infrastructure
+      state: {}
+    - id: page_eb2ae19e
+      sections:
+        - id: section_e6c9e9fd
+          fields:
+            - id: NbreNode
+              display: integerField
+              state:
+                visible: true
+                read-only: false
+              signpostPosition: right-middle
+        - id: section_716e23ac
+          fields:
+            - id: k8s_cluter_name
+              display: textField
+              state:
+                visible: true
+                read-only: false
+              signpostPosition: right-middle
+        - id: section_944305ab
+          fields:
+            - id: kubernetesVersion
+              display: dropDown
+              state:
+                visible: true
+                read-only: false
+              signpostPosition: right-middle
+        - id: section_c3f1200f
+          fields:
+            - id: RangeIP
+              display: textField
+              state:
+                visible: true
+                read-only: false
+              signpostPosition: right-middle
+        - id: section_68a6cadb
+          fields:
+            - id: cadvisor_version
+              display: dropDown
+              state:
+                visible: true
+                read-only: false
+              signpostPosition: right-middle
+      title: Kubernetes
+      state: {}
+    - id: page_e03d24ac
+      sections:
+        - id: section_06535dc4
+          fields:
+            - id: LIversion
+              display: textField
+              state:
+                visible: true
+                read-only: false
+              signpostPosition: right-middle
+        - id: section_20da309d
+          fields:
+            - id: LIserver
+              display: textField
+              state:
+                visible: true
+                read-only: false
+              signpostPosition: right-middle
+      title: logs
+      state: {}
+schema:
+  project:
+    label: Project
+    type:
+      dataType: string
+      isMultiple: false
+    valueList:
+      id: projects
+      type: scriptAction
+    constraints:
+      required: true
+  image_6c12d5e4:
+    type:
+      dataType: string
+    default: >-
+      https://raw.githubusercontent.com/ahugla/CAS_vRA8/master/blueprints/Kubernetes/vRA/custom_forms/general.bmp
+    placeholder: ''
+    constraints: {}
+  deploymentName:
+    label: Nom du  déploiement
+    type:
+      dataType: string
+      isMultiple: false
+    constraints:
+      required: true
+      max-value: 80
+  NodeSize:
+    label: Taille des noeuds
+    description: taille des noeuds (master et workers)
+    signpost: taille des noeuds (master et workers)
+    type:
+      dataType: string
+      isMultiple: false
+    default: medium
+    valueList:
+      - label: medium (2 vCPU - 4 Go RAM)
+        value: medium
+      - label: large (4 vCPU - 8 Go RAM)
+        value: large
+  rootPasswd:
+    label: Password configuré
+    description: Password root (deja configuré dans le template) de la VM master K8S.
+    signpost: Password root (deja configuré dans le template) de la VM master K8S.
+    type:
+      dataType: secureString
+      isMultiple: false
+    constraints:
+      required: true
+  NbreNode:
+    label: Nombre de kubernetes nodes
+    type:
+      dataType: integer
+      isMultiple: false
+    default: 2
+    constraints:
+      max-value: 4
+      min-value: 0
+  k8s_cluter_name:
+    label: Nom du cluster Kubernetes
+    description: Nom du cluster Kubernetes souhaité
+    signpost: Nom du cluster Kubernetes souhaité
+    type:
+      dataType: string
+      isMultiple: false
+    default: kubernetes
+  kubernetesVersion:
+    label: Kubernetes version
+    type:
+      dataType: string
+      isMultiple: false
+    default: 1.21.1
+    valueList:
+      - label: 1.21.1
+        value: 1.21.1
+      - label: 1.19.3
+        value: 1.19.3
+      - label: 1.18.5
+        value: 1.18.5
+      - label: 1.17.8
+        value: 1.17.8
+      - label: 1.16.12
+        value: 1.16.12
+  RangeIP:
+    label: IP range
+    description: >-
+      DOIT ETRE UNIQUE - Range IP qui sera utilisé dans Kubernetes avec le mode
+      de service de type LoadBalancer
+    signpost: >-
+      DOIT ETRE UNIQUE - Range IP qui sera utilisé dans Kubernetes avec le mode
+      de service de type LoadBalancer
+    type:
+      dataType: string
+      isMultiple: false
+    default: 172.17.1.236-172.17.1.239
+    constraints: {}
+  cadvisor_version:
+    label: cadvisor Version
+    description: >-
+      Check versions here -
+      "https://console.cloud.google.com/gcr/images/google-containers/GLOBAL/cadvisor"
+    signpost: >-
+      Check versions here -
+      "https://console.cloud.google.com/gcr/images/google-containers/GLOBAL/cadvisor"
+    type:
+      dataType: string
+      isMultiple: false
+    default: v0.36.0
+    valueList:
+      - label: v0.36.0
+        value: v0.36.0
+      - label: v0.34.0
+        value: v0.34.0
+      - label: v0.31.0
+        value: v0.31.0
+  LIversion:
+    label: Version de Log Insight à installer sur les nodes
+    type:
+      dataType: string
+      isMultiple: false
+    default: v8.4.0
+    constraints: {}
+  LIserver:
+    label: Log Insight Server
+    type:
+      dataType: string
+      isMultiple: false
+    default: vrli.cpod-vrealize.az-fkd.cloud-garage.net
+options:
+  externalValidations: []

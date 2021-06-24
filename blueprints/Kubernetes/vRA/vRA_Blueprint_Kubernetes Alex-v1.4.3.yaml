@@ -1,5 +1,14 @@
 formatVersion: 1
 inputs:
+  NodeSize:
+    type: string
+    description: taille des noeuds (master et workers)
+    default: medium
+    oneOf:
+      - title: medium (2 vCPU - 4 Go RAM)
+        const: medium
+      - title: large (4 vCPU - 8 Go RAM)
+        const: large
   NbreNode:
     type: integer
     default: 2
