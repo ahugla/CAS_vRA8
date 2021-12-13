@@ -9,7 +9,7 @@ variable "myTag" {
 
 
 resource "aws_instance" "web" {
-  ami = "ami-0950a18001c172f3a"
+  ami = "ami-08a2aed6e0a6f9c7d"
   instance_type = "t2.nano"
 
   tags = {
