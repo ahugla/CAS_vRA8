@@ -1,0 +1,25 @@
+formatVersion: 1
+inputs:
+  bucketName:
+    type: string
+  isVersioningEnabled:
+    title: Versioning
+    type: boolean
+    default: false
+resources:
+  Cloud_Service_AWS_S3_Bucket_1:
+    type: Cloud.Service.AWS.S3.Bucket
+    metadata:
+      layoutPosition:
+        - 0
+        - 1
+    properties:
+      region: eu-west-3
+      account: AWS - ALEX
+      versioning:
+        - enabled: '${input.isVersioningEnabled}'
+          mfa_delete: false
+      bucket: '${input.bucketName}'
+      tags:
+        owner: alexh
+        env: prod

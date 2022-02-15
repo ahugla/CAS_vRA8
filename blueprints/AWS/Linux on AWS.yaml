@@ -1,0 +1,42 @@
+formatVersion: 1
+inputs:
+  hasPublicIP:
+    title: Avec IP publique ?
+    type: boolean
+    default: false
+resources:
+  Cloud_Machine_1:
+    type: Cloud.Machine
+    metadata:
+      layoutPosition:
+        - 0
+        - 1
+    properties:
+      image: CentOS7.6
+      flavor: Small
+      constraints:
+        - tag: 'zone:alexaws'
+      tags:
+        - key: owner
+          value: alex
+      networks:
+        - network: '${resource.Cloud_Network_1.id}'
+          assignPublicIpAddress: '${input.hasPublicIP}'
+      remoteAccess:
+        authentication: keyPairName
+        keyPair: ahugla_keypair
+      cloudConfig: |
+        #cloud-config  
+        packages:
+          - git
+        runcmd:
+          - yum install -y httpd
+          - systemctl start httpd
+  Cloud_Network_1:
+    type: Cloud.Network
+    metadata:
+      layoutPosition:
+        - 1
+        - 0
+    properties:
+      networkType: existing
