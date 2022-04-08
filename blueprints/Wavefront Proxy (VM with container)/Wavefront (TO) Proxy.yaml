@@ -1,0 +1,38 @@
+formatVersion: 1
+inputs:
+  WAVEFRONT_TOKEN:
+    type: string
+    title: Token Wavefront Sandbox
+    description: Proxy sous forme container docker. Le nom du proxy dans Wavefront est l'ID du container wavefront
+    encrypted: true
+resources:
+  Cloud_Machine_1:
+    type: Cloud.Machine
+    metadata:
+      layoutPosition:
+        - 0
+        - 0
+    properties:
+      image: CentOS7.6
+      flavor: Small
+      customizationSpec: Linux
+      networks:
+        - network: ${resource.Cloud_Network_1.id}
+          assignment: static
+      cloudConfig: |
+        #cloud-config
+        runcmd:
+          - touch /etc/cloud/cloud-init.disabled
+          - cd /tmp
+          - curl -O https://raw.githubusercontent.com/ahugla/Wavefront/master/install_proxy_docker.sh
+          - sed -i 's/73e333333-3333-3333-3333-333333ee45/'"${input.WAVEFRONT_TOKEN}"'/g' install_proxy_docker.sh
+          - chmod 755 install_proxy_docker.sh
+          - ./install_proxy_docker.sh
+  Cloud_Network_1:
+    type: Cloud.Network
+    metadata:
+      layoutPosition:
+        - 1
+        - 0
+    properties:
+      networkType: existing
