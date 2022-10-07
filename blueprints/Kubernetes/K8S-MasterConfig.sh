@@ -16,6 +16,13 @@
 #
 
 
+
+
+# LOGGING DANS /tmp/K8S_INSTALL.LOG
+# ----------------------------------
+echo "Phase K8S-MasterConfig debut"  >> /tmp/K8S_INSTALL.LOG
+
+
 cd /tmp
 
 
@@ -364,6 +371,14 @@ systemctl enable liagentd
 
 # reste a aller sur le serveur LI et l'associer avec l'agent linux.
 echo "LOG INSIGHT : reste a aller sur le serveur LI et l'associer avec l'agent linux."
+
+
+
+
+# LOGGING DANS /tmp/K8S_INSTALL.LOG
+# ----------------------------------
+echo "Phase K8S-MasterConfig terminé"  >> /tmp/K8S_INSTALL.LOG
+
 
 
 
