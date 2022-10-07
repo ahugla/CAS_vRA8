@@ -15,6 +15,11 @@
 # rm -f K8S-prepare.sh
 
 
+# LOGGING DANS /tmp/K8S_INSTALL.LOG
+# ----------------------------------
+echo "Phase K8S-prepare debut"  >> /tmp/K8S_INSTALL.LOG
+
+
 # get parameter
 # yum --showduplicates list 'kube*'   pour voir toutes les versions dispos
 dockerVersion=19.03.13-3.el7    #  last=20.10.7-3.el7 
@@ -103,8 +108,7 @@ name=Kubernetes
 baseurl=https://packages.cloud.google.com/yum/repos/kubernetes-el7-x86_64
 enabled=1
 gpgcheck=1
-repo_gpgcheck=1
-gpgkey=https://packages.cloud.google.com/yum/doc/yum-key.gpg https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg
+gpgkey=https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg
 exclude=kube*
 EOF
 
@@ -113,7 +117,7 @@ EOF
 
 #yum install -y kubelet kubeadm kubectl --disableexcludes=kubernetes
 # pour voir toutes les versions dispos: 
-#    yum --showduplicates list 'kube*'
+#    yum --showduplicates list 'kube*' --disableexcludes=kubernetes
 #    yum list --showduplicates kube* --disableexcludes=kubernetes
 # kubeVersion=1.17.8   # 1.16.12, 1.17.8, 1.18.5   1.19.1   1.20.7  1.21.1
 yum install -y kubelet-$kubeVersion   kubeadm-$kubeVersion   kubectl-$kubeVersion  --disableexcludes=kubernetes
@@ -133,8 +137,10 @@ sysctl net.ipv4.ip_forward=1
 # Remplacer le name : hostnamectl set-hostname [name]    +   reboot
 
 
-
-
-
+# LOGGING DANS /tmp/K8S_INSTALL.LOG
+# ----------------------------------
+K8S_VERSION_WITHv=`kubelet --version | awk '{print $2}'`
+echo "Phase K8S-prepare terminé"  >> /tmp/K8S_INSTALL.LOG
+echo "K8S_VERSION = $K8S_VERSION_WITHv"  >> /tmp/K8S_INSTALL.LOG
 
 
