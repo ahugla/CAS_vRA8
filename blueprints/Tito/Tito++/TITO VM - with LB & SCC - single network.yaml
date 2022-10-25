@@ -1,0 +1,161 @@
+formatVersion: 1
+inputs:
+  isSalt:
+    type: integer
+    title: Installer le minion ?
+    default: 0
+    oneOf:
+      - title: non
+        const: 0
+      - title: oui
+        const: 1
+  Enable_Salt_SecOps:
+    title: Enable SecOps ?
+    description: Enable Vulnerability and Compliance scans
+    type: boolean
+    default: false
+  nbre_Nodes:
+    title: Nombre de noeuds ?
+    type: integer
+    maximum: 5
+    minimum: 1
+    default: 1
+  titoVersion:
+    title: Version de Tito ?
+    type: string
+    description: Version de code de Tito
+    default: V2.3
+    enum:
+      - V2.3
+      - V2.2
+      - V1.9.6
+      - V1.9.4
+      - V1.8.9
+      - V1.7.1
+      - v1.55
+  wavefront_proxy:
+    title: Proxy Wavefront
+    type: string
+    default: vra-008178.cpod-vrealize.az-fkd.cloud-garage.net
+  wavefront_port:
+    title: Port Wavefront
+    type: string
+    default: 2878
+resources:
+  Saltstack:
+    type: Cloud.SaltStack
+    metadata:
+      layoutPosition:
+        - 0
+        - 2
+    properties:
+      count: ${input.isSalt}
+      hosts:
+        - ${resource.VM_web.id}
+      masterId: saltstack_enterprise_installer
+      stateFiles: []
+      saltEnvironment: base
+      additionalMinionParams:
+        grains:
+          from_vRA_Enable_SecOps: ${to_string(input.Enable_Salt_SecOps)}
+  Ansible_OS:
+    type: Cloud.Ansible
+    metadata:
+      layoutPosition:
+        - 0
+        - 3
+    properties:
+      host: ${resource.VM_web.*}
+      osType: linux
+      account: Alex - Ansible OSS
+      username: root
+      password: ${secret.DeployedVMDefaultPassword}
+      count: ${input.nbre_Nodes}
+      groups:
+        - webservers
+      playbooks:
+        provision:
+          - /etc/ansible/playbooks/apache.yml
+  LB_front:
+    type: Cloud.LoadBalancer
+    metadata:
+      layoutPosition:
+        - 1
+        - 1
+    properties:
+      type: SMALL
+      loggingLevel: INFO
+      routes:
+        - protocol: HTTP
+          port: '80'
+          instanceProtocol: HTTP
+          instancePort: '80'
+          healthCheckConfiguration:
+            protocol: HTTP
+            port: '80'
+            urlPath: /
+            intervalSeconds: 60
+            timeoutSeconds: 30
+            unhealthyThreshold: 10
+            healthyThreshold: 1
+      network: ${resource.Network.id}
+      instances:
+        - ${resource.VM_web.id}
+      internetFacing: false
+  VM_web:
+    type: Cloud.Machine
+    metadata:
+      layoutPosition:
+        - 1
+        - 2
+    properties:
+      count: ${input.nbre_Nodes}
+      image: CentOS7.6
+      flavor: Small
+      customizationSpec: Linux
+      cloudConfig: |
+        #cloud-config
+        packages:
+          - git
+        runcmd:
+          - touch /etc/cloud/cloud-init.disabled
+          - cd /tmp
+          - curl -O https://raw.githubusercontent.com/ahugla/CAS_vRA8/master/blueprints/Tito/Install_Tito_LIagent_WavefrontConfig_Tracing.sh
+          - chmod 755 Install_Tito_LIagent_WavefrontConfig_Tracing.sh
+          - /tmp/Install_Tito_LIagent_WavefrontConfig_Tracing.sh ${input.wavefront_proxy} ${input.wavefront_port} ${input.titoVersion}
+          - rm -f /tmp/Install_Tito_LIagent_WavefrontConfig_Tracing.sh
+      networks:
+        - name: ${Network.name}
+          network: ${resource.Network.id}
+          assignment: static
+          securityGroups:
+            - ${resource["Secu-AllowWeb"].id}
+      remoteAccess:
+        authentication: usernamePassword
+        username: root
+        password: ${secret.DeployedVMDefaultPassword}
+  Secu-AllowWeb:
+    type: Cloud.SecurityGroup
+    metadata:
+      layoutPosition:
+        - 1
+        - 3
+    properties:
+      securityGroupType: new
+      rules:
+        - direction: inbound
+          name: AllowWeb
+          service: HTTP
+          source: ANY
+          access: Allow
+  Network:
+    type: Cloud.Network
+    metadata:
+      layoutPosition:
+        - 2
+        - 0
+    properties:
+      name: MonReseau
+      networkType: existing
+      constraints:
+        - tag: net:noping

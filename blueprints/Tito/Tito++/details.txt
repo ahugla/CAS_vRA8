@@ -1,0 +1,14 @@
+validé en vRA 8.10 le 25 oct 2022
+
+
+Deploiement Tito avec:
+- integration Ansible Open Source pour l install de httpd
+- integration Wavefront (input pour l'IP/Port du proxy)
+- integration Log Insight (agent installé et configuré par defaut)
+- integration SaltStack
+	- installation du minion (minion demandé à l'input oui/non)
+	- integration dans SecOps via "grains" (SecOps demandé à l'input via oui/non)
+- integration NSX
+	- LoadBalancing NSX
+	- icmp bloqué par default sur les VMs (imposé)
+	- Security Group pour creer une 'new' regle qui Allow HTTP
