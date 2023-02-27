@@ -2,8 +2,8 @@
 #SOURCE : https://mapr.com/blog/making-data-actionable-at-scale-part-2-of-3/
 
 # ALEX H.
-# 23 Juin 2021
-# v1.51
+# 27 fev 2023
+# v1.52
 
 # USAGE
 # -----
@@ -267,7 +267,37 @@ kubectl apply -f /tmp/metalLBconfig.yaml
 # Dashboard Kubernetes a besoin de metrics-server (Heapster is deprecated)
 # --------------------------------------------------------------------------------------------------
 #deploiement sur le master (sinon pb)
-kubectl apply -f https://raw.githubusercontent.com/kubernetes/dashboard/master/aio/deploy/recommended.yaml
+mkdir dashboard
+cd dashboard
+curl -O https://raw.githubusercontent.com/kubernetes/dashboard/master/charts/recommended/00_dashboard-namespace.yaml
+curl -O https://raw.githubusercontent.com/kubernetes/dashboard/master/charts/recommended/01_dashboard-serviceaccount.yaml
+curl -O https://raw.githubusercontent.com/kubernetes/dashboard/master/charts/recommended/02_dashboard-service.yaml
+curl -O https://raw.githubusercontent.com/kubernetes/dashboard/master/charts/recommended/03_dashboard-secret.yaml
+curl -O https://raw.githubusercontent.com/kubernetes/dashboard/master/charts/recommended/04_dashboard-configmap.yaml
+curl -O https://raw.githubusercontent.com/kubernetes/dashboard/master/charts/recommended/05_dashboard-rbac.yaml
+curl -O https://raw.githubusercontent.com/kubernetes/dashboard/master/charts/recommended/06_dashboard-deployment.yaml
+curl -O https://raw.githubusercontent.com/kubernetes/dashboard/master/charts/recommended/07_scraper-service.yaml
+curl -O https://raw.githubusercontent.com/kubernetes/dashboard/master/charts/recommended/08_scraper-deployment.yaml
+kubectl apply -f 00_dashboard-namespace.yaml
+sleep 2
+kubectl apply -f 01_dashboard-serviceaccount.yaml
+sleep 2
+kubectl apply -f 02_dashboard-service.yaml
+sleep 2
+kubectl apply -f 03_dashboard-secret.yaml
+sleep 2
+kubectl apply -f 04_dashboard-configmap.yaml
+sleep 2
+kubectl apply -f 05_dashboard-rbac.yaml
+sleep 2
+kubectl apply -f 06_dashboard-deployment.yaml
+sleep 2
+kubectl apply -f 07_scraper-service.yaml
+sleep 2
+kubectl apply -f 08_scraper-deployment.yaml
+sleep 2
+cd /tmp
+rm -rf /tmp/dashboard
 
 # creation du service de type LoadBalancer
 kubectl expose deployment kubernetes-dashboard --type=LoadBalancer --name=service-dashboard -n kubernetes-dashboard
@@ -316,7 +346,7 @@ echo "With token pour namespace 'default':                                      
 echo "$dashboard_token                                                                     " >> /tmp/K8S_Dashboard_Access.info
 echo "                                                                                     " >> /tmp/K8S_Dashboard_Access.info
 echo "-------------------------------------------------------------------------------------" >> /tmp/K8S_Dashboard_Access.info
-
+cp /tmp/K8S_Dashboard_Access.info /root/K8S_Dashboard_Access.info
 
 
 
