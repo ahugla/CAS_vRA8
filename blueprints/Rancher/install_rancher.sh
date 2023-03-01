@@ -45,8 +45,9 @@ docker --version
 
 # install rancher
 # ---------------
+modprobe ip_tables
 #docker run -d --restart=unless-stopped -p 80:80 -p 443:443 --privileged rancher/rancher:v2.4.9  # =>  OK
-docker run -d --restart=unless-stopped -p 80:80 -p 443:443 --privileged rancher/rancher          # =>  NO OK !!! ???
+docker run -d --restart=unless-stopped -p 80:80 -p 443:443 --privileged rancher/rancher          # =>  NO OK si pas de 'modprobe ip_tables'
 # WAIT 60s le temps que le container demarre completement
 # acces:   http://ip
 sleep 60
