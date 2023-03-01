@@ -1,11 +1,17 @@
 formatVersion: 1
 inputs:
-  nb_VMs:
+  nb_VMs_worker:
     type: integer
-    title: Nb of Rancher node VMs?
+    title: Nb of worker node?
     default: 1
-    minimum: 1
+    minimum: 0
     maximum: 4
+  nb_VMs_master:
+    type: integer
+    title: Nb of master node?
+    default: 1
+    minimum: 0
+    maximum: 2
 resources:
   Manager:
     type: Cloud.Machine
@@ -33,7 +39,7 @@ resources:
       networks:
         - network: ${resource.Cloud_NSX_Network_1.id}
           assignment: static
-  Nodes:
+  Master_Nodes:
     type: Cloud.Machine
     metadata:
       layoutPosition:
@@ -42,16 +48,50 @@ resources:
     properties:
       image: Rocky Linux x64  8.x_mix
       customizationSpec: Linux
-      flavor: Small
-      count: ${input.nb_VMs}
+      flavor: Medium
+      count: ${input.nb_VMs_master}
       cloudConfigSettings:
         deploymentFailOnCloudConfigRuntimeError: true #cancel a deployment when there is a syntax error
       cloudConfig: |
         #cloud-config
         packages:
           - git
+          - wget
         runcmd:
           - touch /etc/cloud/cloud-init.disabled
+          - cd /tmp
+          - modprobe ip_tables
+          - wget https://raw.githubusercontent.com/ahugla/Docker/master/install_Docker_on_Rocky8.sh
+          - chmod 755 install_Docker_on_Rocky8.sh
+          - ./install_Docker_on_Rocky8.sh
+      networks:
+        - network: ${resource.Cloud_NSX_Network_1.id}
+          assignment: static
+  Worker_Nodes:
+    type: Cloud.Machine
+    metadata:
+      layoutPosition:
+        - 0
+        - 2
+    properties:
+      image: Rocky Linux x64  8.x_mix
+      customizationSpec: Linux
+      flavor: Medium
+      count: ${input.nb_VMs_worker}
+      cloudConfigSettings:
+        deploymentFailOnCloudConfigRuntimeError: true #cancel a deployment when there is a syntax error
+      cloudConfig: |
+        #cloud-config
+        packages:
+          - git
+          - wget
+        runcmd:
+          - touch /etc/cloud/cloud-init.disabled
+          - cd /tmp
+          - modprobe ip_tables
+          - wget https://raw.githubusercontent.com/ahugla/Docker/master/install_Docker_on_Rocky8.sh
+          - chmod 755 install_Docker_on_Rocky8.sh
+          - ./install_Docker_on_Rocky8.sh
       networks:
         - network: ${resource.Cloud_NSX_Network_1.id}
           assignment: static
