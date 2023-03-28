@@ -1,0 +1,78 @@
+formatVersion: 1
+inputs:
+  Enable_Salt_SecOps:
+    title: Enable SecOps sur minIO ?
+    description: Enable Vulnerability and Compliance scans
+    type: boolean
+    default: false
+  allow_DB_ping:
+    title: Autoriser le ping de la DB ?
+    type: boolean
+    default: false
+resources:
+  Salt_SecOps:
+    type: Cloud.SaltStack
+    metadata:
+      layoutPosition:
+        - 0
+        - 2
+    properties:
+      masterId: saltstack_enterprise_installer
+      stateFiles: []
+      saltEnvironment: base
+      additionalMinionParams:
+        grains:
+          from_vRA_Enable_SecOps: ${to_string(input.Enable_Salt_SecOps)}
+      hosts:
+        - ${resource.VM_redis.id}
+  MicroSeg:
+    type: Cloud.SecurityGroup
+    metadata:
+      layoutPosition:
+        - 1
+        - 1
+    properties:
+      constraints:
+        - tag: '${input.allow_DB_ping == true ? "security:none" : "security:noping"}'
+      securityGroupType: existing
+  VM_redis:
+    type: Cloud.Machine
+    metadata:
+      layoutPosition:
+        - 1
+        - 2
+    properties:
+      image: Rocky Linux x64 9.x_mix
+      customizationSpec: Linux
+      flavor: Small
+      cloudConfigSettings:
+        deploymentFailOnCloudConfigRuntimeError: true #cancel a deployment when there is a syntax error
+      cloudConfig: |
+        #cloud-config
+        packages:
+          - wget
+        runcmd:
+          - touch /etc/cloud/cloud-init.disabled
+          - cd /tmp
+          - wget https://raw.githubusercontent.com/ahugla/K8S_yaml/main/DEMO_Mixte_VM_K8S/Vote_App_Mixte/install_redis_rocky.sh
+          - chmod 755 install_redis_rocky.sh
+          - ./install_redis_rocky.sh
+      remoteAccess:
+        authentication: usernamePassword
+        username: root
+        password: ${secret.DeployedVMDefaultPassword}
+      networks:
+        - network: ${resource.Cloud_NSX_Network_1.id}
+          assignment: static
+          securityGroups:
+            - ${resource.MicroSeg.id}
+  Cloud_NSX_Network_1:
+    type: Cloud.NSX.Network
+    metadata:
+      layoutPosition:
+        - 2
+        - 0
+    properties:
+      networkType: existing
+      constraints:
+        - tag: net:nsx
