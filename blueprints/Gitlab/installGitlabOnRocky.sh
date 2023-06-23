@@ -46,7 +46,7 @@ dnf install -y gitlab-ce
 
 
 InitialRootPassword=`more /etc/gitlab/initial_root_password | grep Password: | awk -F: '{print $2}'`
-echo "Install GitLab CE Terminée - WAIT 10 min for service to start"
+echo "Install GitLab CE Terminée - ATTENDRE QQ MINUTES QUE LE SERVICE DEMARRE"
 echo "Connect using : " $EXTERNAL_URL
 echo "Use login/pass : root / "$InitialRootPassword
 echo "root password in /etc/gitlab/initial_root_password (dure 24h)"
