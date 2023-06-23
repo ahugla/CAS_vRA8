@@ -44,6 +44,9 @@ external_url="http://`hostname`.cpod-vrealize.az-fkd.cloud-garage.net"
 dnf install -y gitlab-ce
 
 
+echo "Install GitLab CE Terminée"
+
+
 # POUR SE CONNECTER :   http://[VRA_VM].cpod-vrealize.az-fkd.cloud-garage.net
 # login : root
 # password :  dans /etc/gitlab/initial_root_password   (disparait apres 24h)
