@@ -1,0 +1,38 @@
+formatVersion: 1
+inputs: {}
+resources:
+  Cloud_Machine_1:
+    type: Cloud.Machine
+    metadata:
+      layoutPosition:
+        - 0
+        - 0
+    properties:
+      image: Rocky Linux x64 9.x_mix
+      customizationSpec: Linux
+      flavor: Medium
+      cloudConfigSettings:
+        deploymentFailOnCloudConfigRuntimeError: true #cancel a deployment when there is a syntax error
+      cloudConfig: |
+        #cloud-config
+        packages:
+          - wget
+        runcmd:
+          - touch /etc/cloud/cloud-init.disabled
+          - cd /tmp
+          - wget https://raw.githubusercontent.com/ahugla/CAS_vRA8/master/blueprints/Gitlab/installGitlabOnRocky.sh
+          - chmod +x /tmp/installGitlabOnRocky.sh
+          - ./installGitlabOnRocky.sh
+      networks:
+        - network: ${resource.Cloud_NSX_Network_1.id}
+          assignment: static
+  Cloud_NSX_Network_1:
+    type: Cloud.NSX.Network
+    metadata:
+      layoutPosition:
+        - 1
+        - 0
+    properties:
+      networkType: existing
+      constraints:
+        - tag: net:no_nsx
