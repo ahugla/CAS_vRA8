@@ -41,13 +41,14 @@ curl -sS https://packages.gitlab.com/install/repositories/gitlab/gitlab-ce/scrip
 # Install GitLab CE 
 #EXTERNAL_URL="http://[VRA_VM].cpod-vrealize.az-fkd.cloud-garage.net"
 #EXTERNAL_URL="http://`hostname`.cpod-vrealize.az-fkd.cloud-garage.net"
-#EXTERNAL_URL="http://`hostname`.cpod-vrealize.az-fkd.cloud-garage.net" dnf install -y gitlab-ce
 export EXTERNAL_URL="http://`hostname`.cpod-vrealize.az-fkd.cloud-garage.net" 
 dnf install -y gitlab-ce
 
 
-echo "Install GitLab CE Terminée"
+InitialRootPassword=`more /etc/gitlab/initial_root_password | grep Password: | awk -F: '{print $2}'`
+echo "Install GitLab CE Terminée - WAIT 10 min for service to start"
 echo "Connect using : " $EXTERNAL_URL
+echo "Use login/pass : root / "$InitialRootPassword
 echo "root password in /etc/gitlab/initial_root_password (dure 24h)"
 
 
@@ -59,4 +60,5 @@ echo "root password in /etc/gitlab/initial_root_password (dure 24h)"
 #
 # Si ca ne fonctionne pas, ouvrir   vi /etc/gitlab/gitlab.rb  et remplacer external_url par la valeur.
 # puis faire "gitlab-ctl reconfigure"
+
 
