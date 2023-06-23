@@ -39,10 +39,11 @@ curl -sS https://packages.gitlab.com/install/repositories/gitlab/gitlab-ce/scrip
 
 
 # Install GitLab CE 
-#external_url="http://[VRA_VM].cpod-vrealize.az-fkd.cloud-garage.net"
-#external_url="http://`hostname`.cpod-vrealize.az-fkd.cloud-garage.net"
-EXTERNAL_URL="http://`hostname`.cpod-vrealize.az-fkd.cloud-garage.net" dnf install -y gitlab-ce
-
+#EXTERNAL_URL="http://[VRA_VM].cpod-vrealize.az-fkd.cloud-garage.net"
+#EXTERNAL_URL="http://`hostname`.cpod-vrealize.az-fkd.cloud-garage.net"
+#EXTERNAL_URL="http://`hostname`.cpod-vrealize.az-fkd.cloud-garage.net" dnf install -y gitlab-ce
+export EXTERNAL_URL="http://`hostname`.cpod-vrealize.az-fkd.cloud-garage.net" 
+dnf install -y gitlab-ce
 
 
 echo "Install GitLab CE Terminée"
