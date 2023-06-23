@@ -24,7 +24,7 @@ cat /proc/sys/vm/swappiness
 
 # Install the EPEL YUM repo and then update the system
 sudo dnf install -y epel-release
-sudo dnf -y update && sudo shutdown -r now          # ===>>>>   REBOOT
+#sudo dnf -y update && sudo shutdown -r now          # ===>>>>   REBOOT
 
 
 # Install required dependencies
