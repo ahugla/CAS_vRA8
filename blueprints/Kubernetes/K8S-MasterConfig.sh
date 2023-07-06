@@ -26,16 +26,11 @@ cd /tmp
 
 
 # display input parameters
-#LB_IPrange=$1                               #LB_IPrange=172.17.1.236-172.17.1.239
-#cadvisor_version=$2                         #cadvisor_version=v0.34.0
-#k8s_cluter_name=$3                          #k8s_cluter_name=alex-k8s
-#LIserver=$4                                 #LIserver=vrli.cpod-vrealizesuite.az-demo.shwrfr.com
-#versionLI=$5                                #versionLI=v8.4.0
-LB_IPrange=172.17.1.240-172.17.1.242        #LB_IPrange=172.17.1.236-172.17.1.239
-cadvisor_version=v0.36.0                    #cadvisor_version=v0.34.0
-k8s_cluter_name=kubernetes                  #k8s_cluter_name=alex-k8s
-LIserver=""                                 #LIserver=vrli.cpod-vrealizesuite.az-demo.shwrfr.com
-versionLI=""                                #versionLI=v8.4.0
+LB_IPrange=$1                               #LB_IPrange=172.17.1.236-172.17.1.239
+cadvisor_version=$2                         #cadvisor_version=v0.34.0
+k8s_cluter_name=$3                          #k8s_cluter_name=alex-k8s
+LIserver=$4                                 #LIserver=vrli.cpod-vrealizesuite.az-demo.shwrfr.com
+versionLI=$5                                #versionLI=v8.4.0
 echo "LB_IPrange = $LB_IPrange"
 echo "cadvisor_version = $cadvisor_version"
 echo "k8s_cluter_name = $k8s_cluter_name"
@@ -407,6 +402,7 @@ rm -rf cadvisor
 cd /tmp
 git clone https://github.com/ahugla/LogInsight.git  /tmp/li
 rpmLI=`ls /tmp/li/$versionLI/*.rpm`
+echo "commande d'install Log Insight: " $rpmLI
 rpm -iv $rpmLI
 
 # config agent hostname + no ssl
