@@ -1,9 +1,8 @@
 #!/bin/bash
-#SOURCE : https://mapr.com/blog/making-data-actionable-at-scale-part-2-of-3/
 
 # ALEX H.
-# 27 fev 2023
-# v1.52
+# 6 Juillet 2022
+# v1.60
 
 # USAGE
 # -----
@@ -27,11 +26,16 @@ cd /tmp
 
 
 # display input parameters
-LB_IPrange=$1         #LB_IPrange=172.17.1.236-172.17.1.239
-cadvisor_version=$2   #cadvisor_version=v0.34.0
-k8s_cluter_name=$3    #k8s_cluter_name=alex-k8s
-LIserver=$4           #LIserver=vrli.cpod-vrealizesuite.az-demo.shwrfr.com
-versionLI=$5          #versionLI=v8.4.0
+#LB_IPrange=$1                               #LB_IPrange=172.17.1.236-172.17.1.239
+#cadvisor_version=$2                         #cadvisor_version=v0.34.0
+#k8s_cluter_name=$3                          #k8s_cluter_name=alex-k8s
+#LIserver=$4                                 #LIserver=vrli.cpod-vrealizesuite.az-demo.shwrfr.com
+#versionLI=$5                                #versionLI=v8.4.0
+LB_IPrange=172.17.1.240-172.17.1.242        #LB_IPrange=172.17.1.236-172.17.1.239
+cadvisor_version=v0.36.0                    #cadvisor_version=v0.34.0
+k8s_cluter_name=kubernetes                  #k8s_cluter_name=alex-k8s
+LIserver=""                                 #LIserver=vrli.cpod-vrealizesuite.az-demo.shwrfr.com
+versionLI=""                                #versionLI=v8.4.0
 echo "LB_IPrange = $LB_IPrange"
 echo "cadvisor_version = $cadvisor_version"
 echo "k8s_cluter_name = $k8s_cluter_name"
@@ -226,83 +230,64 @@ echo "alias kk='kubectl'" >> /root/.bash_profile
 
 # MetalLB install and config in Layer 2 Mode
 #-------------------------------------------
-echo "Creation du LB metalLB (en mode Layer 2) dans le namespace metallb-system"
-kubectl apply -f https://raw.githubusercontent.com/metallb/metallb/v0.9.3/manifests/namespace.yaml    # create metallb-system namespace
-kubectl apply -f https://raw.githubusercontent.com/metallb/metallb/v0.9.3/manifests/metallb.yaml      # deploy MetalLB
+# see:    https://metallb.universe.tf/installation/   
+#
+# install metallb
+kubectl apply -f https://raw.githubusercontent.com/metallb/metallb/v0.13.10/config/manifests/metallb-native.yaml
 
-# On first install only
-kubectl create secret generic -n metallb-system memberlist --from-literal=secretkey="$(openssl rand -base64 128)"
-# The components in the manifest are:
-# The metallb-system/controller deployment. This is the cluster-wide controller that handles IP address assignments.
-# The metallb-system/speaker daemonset. This is the component that speaks the protocol(s) of your choice to make the services reachable.
-# Service accounts for the controller and speaker, along with the RBAC permissions that the components need to function.
-# The installation manifest does not include a configuration file. MetalLB’s components will still start, but will remain idle until 
-# you define and deploy a configmap. 
-# The memberlist secret contains the secretkey to encrypt the communication between speakers for the fast dead node detection.
-
-# create config file (ConfigMap)
-cat <<EOF > /tmp/metalLBconfig.yaml
-apiVersion: v1
-kind: ConfigMap
+# IP Pool configuration
+cat <<EOF > /tmp/IPAddressPool.yaml
+apiVersion: metallb.io/v1beta1
+kind: IPAddressPool
 metadata:
   namespace: metallb-system
-  name: config
-data:
-  config: |
-    address-pools:
-      - name: my-ip-space
-        protocol: layer2
-        addresses:
-          - $LB_IPrange
+  name: pool1
+  labels: 
+    zone: east
+spec:
+  addresses:
+  - $LB_IPrange
+EOF
+ 
+ # apply IP Pool configuration
+kubectl apply -f /tmp/IPAddressPool.yaml
+
+# L2 Advertisement config
+cat <<EOF > /tmp/L2Advertisement.yaml
+apiVersion: metallb.io/v1beta1
+kind: L2Advertisement
+metadata:
+  name: example
+  namespace: metallb-system
+spec:
+  ipAddressPools:
+  - pool1
 EOF
 
-kubectl apply -f /tmp/metalLBconfig.yaml
+ # apply L2 Advertisement configuration
+kubectl apply -f /tmp/L2Advertisement.yaml
 
-# Role 'controller' de MetalLB reste pending tant qu'il n'y a pas au moins un node raccroché au cluster
 
-    
 
-# Installe le Dashboard Kubernetes et configure l'acces pour le namespace default
-# cadvisor est embedded dans kubelet pour les besoins du core pipeline (pas pour monitoring externe)
-# Dashboard Kubernetes a besoin de metrics-server (Heapster is deprecated)
-# --------------------------------------------------------------------------------------------------
-#deploiement sur le master (sinon pb)
-mkdir dashboard
-cd dashboard
-curl -O https://raw.githubusercontent.com/kubernetes/dashboard/master/charts/recommended/00_dashboard-namespace.yaml
-curl -O https://raw.githubusercontent.com/kubernetes/dashboard/master/charts/recommended/01_dashboard-serviceaccount.yaml
-curl -O https://raw.githubusercontent.com/kubernetes/dashboard/master/charts/recommended/02_dashboard-service.yaml
-curl -O https://raw.githubusercontent.com/kubernetes/dashboard/master/charts/recommended/03_dashboard-secret.yaml
-curl -O https://raw.githubusercontent.com/kubernetes/dashboard/master/charts/recommended/04_dashboard-configmap.yaml
-curl -O https://raw.githubusercontent.com/kubernetes/dashboard/master/charts/recommended/05_dashboard-rbac.yaml
-curl -O https://raw.githubusercontent.com/kubernetes/dashboard/master/charts/recommended/06_dashboard-deployment.yaml
-curl -O https://raw.githubusercontent.com/kubernetes/dashboard/master/charts/recommended/07_scraper-service.yaml
-curl -O https://raw.githubusercontent.com/kubernetes/dashboard/master/charts/recommended/08_scraper-deployment.yaml
-kubectl apply -f 00_dashboard-namespace.yaml
-sleep 2
-kubectl apply -f 01_dashboard-serviceaccount.yaml
-sleep 2
-kubectl apply -f 02_dashboard-service.yaml
-sleep 2
-kubectl apply -f 03_dashboard-secret.yaml
-sleep 2
-kubectl apply -f 04_dashboard-configmap.yaml
-sleep 2
-kubectl apply -f 05_dashboard-rbac.yaml
-sleep 2
-kubectl apply -f 06_dashboard-deployment.yaml
-sleep 2
-kubectl apply -f 07_scraper-service.yaml
-sleep 2
-kubectl apply -f 08_scraper-deployment.yaml
-sleep 2
-cd /tmp
-rm -rf /tmp/dashboard
+
+# Kubernetes Dashboard   
+# ---------------------
+# Le Kubernetes Dashboard depend de metrics-server, il faut l'installer
+# -L car redirection
+curl -LO  https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml
+# comme on est dans un env de test, les certificates sont pas configurés, si on rajoute pas --kubelet-insecure-tls, le pod metrics-server ne demarre pas
+sed -i '/kubelet-use-node-status-port/a \        - --kubelet-insecure-tls\' components.yaml
+kubectl apply -f components.yaml
+rm components.yaml
+
+# deploy K8S Dashboard
+kubectl apply -f https://raw.githubusercontent.com/kubernetes/dashboard/v2.7.0/aio/deploy/recommended.yaml
 
 # creation du service de type LoadBalancer
 kubectl expose deployment kubernetes-dashboard --type=LoadBalancer --name=service-dashboard -n kubernetes-dashboard
 # Il faut que les pods metalLB soit up  =>  au moins un worker node
-# Peut prendre quelques minutes pour etre indiqué avec 'get service' =>  si <pending> refaire apres un petit moment
+# Peut prendre quelques minutes pour etre indiqué avec 'get service' =>  si le service est <pending> refaire apres un petit moment
+# Si le service reste en pending faire "kubectl apply -f /tmp/IPAddressPool.yaml" pour reappliquer la config IP POOL de Metal LB
 
 # On donne tous les droits au compte par default 'default'
 kubectl create clusterrolebinding fullrightstodefault \
@@ -318,14 +303,6 @@ do
   dashboard_svc_ip=`kubectl get services -n kubernetes-dashboard | grep service-dashboard | awk '{print $4}'`
   echo "dashboard_svc_ip=$dashboard_svc_ip"
 done
-
-# Le Kubernetes Dashboard depend de metrics-server, il faut l'installer
-# -L car redirection
-curl -LO  https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml
-# comme on est dans un env de test, les certificates sont pas configurés, si on rajoute pas --kubelet-insecure-tls, le pod metrics-server ne demarre pas
-sed -i '/kubelet-use-node-status-port/a \        - --kubelet-insecure-tls\' components.yaml
-kubectl apply -f components.yaml
-rm components.yaml
 
 # Affichage de l'URL du Dashboard et du token
 dashboard_svc_ip=`kubectl get services -n kubernetes-dashboard | grep service-dashboard | awk '{print $4}'`
@@ -350,31 +327,41 @@ cp /tmp/K8S_Dashboard_Access.info /root/K8S_Dashboard_Access.info
 
 
 
-
+# Service Monitoring
+# ------------------
 # Installation d'un service monitoring pipeline à base de cadvisor daemonset
 # Configuré pour vRops monitoring: hostPort: 31194
 # L'image de cadvisor n'est plus sur dockerhub, mais desormais sur la registry google ici:  https://console.cloud.google.com/gcr/images/google-containers/GLOBAL/
+# https://www.kubecost.com/kubernetes-devops-tools/cadvisor/
 # --------------------------------------------------------------------------
 
 # clone des yaml de cadvisor
 git clone https://github.com/google/cadvisor.git
 
-# on remplace le daemonset de cadvisor par celui pour vRops
 cd cadvisor/deploy/kubernetes/base
-rm -f daemonset.yaml
-curl -O https://raw.githubusercontent.com/ahugla/CAS_vRA8/master/blueprints/Kubernetes/cadvisor_for_vRops_daemonset.yaml
 
+# on remplace le daemonset de cadvisor par celui pour vRops,
+curl -O https://raw.githubusercontent.com/ahugla/CAS_vRA8/master/blueprints/Kubernetes/cadvisor_for_vRops_daemonset.yaml
 # configuration  de la version de cadvisor
 sed -i -e 's/{{cadvisor_version}}/'"$cadvisor_version"'/g'  cadvisor_for_vRops_daemonset.yaml
 
-# deploiement
-kubectl create -f .
+# kustomize
+# necessaire pour mettre les bon tags et namespaces
+# conserver 'daemonset.yaml' car sinon il ne le trouve pas et il fait un message d'erreur
+kubectl kustomize .
 
+# deploiement
+kubectl apply -f namespace.yaml
+kubectl apply -f serviceaccount.yaml
+kubectl apply -f cadvisor_for_vRops_daemonset.yaml
+
+cd /tmp
 rm -rf cadvisor
 
 
 
-
+# Log Insight agent
+# -----------------
 # Installation de Log Insight sur le master (pour le monitoring des logs d'audit de K8S)
 # Installation de l'agent Log Insight
 cd /tmp
