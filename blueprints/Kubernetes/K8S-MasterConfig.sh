@@ -238,13 +238,15 @@ kubectl apply -f https://raw.githubusercontent.com/metallb/metallb/v0.13.10/conf
 # On attend que metallb soit demarré avant de le configurer
 nb_metallb=`kubectl get pods -n metallb-system | grep / | wc -l` 
 nb_metallb_running=`kubectl get pods -n metallb-system | grep Running | grep / | wc -l` 
+echo " metallb: $nb_metallb_running / $nb_metallb"
 while [ "$nb_metallb_running" != "$nb_metallb" ]
 do
-  echo " On attend que metallb demarre : $nb_metallb_running / $nb_metallb ... waiting 2s ..."
+  echo " metallb: On attend que metallb demarre : $nb_metallb_running / $nb_metallb ... waiting 2s ..."
   sleep 2
   nb_metallb=`kubectl get pods -n metallb-system | grep / | wc -l` 
   nb_metallb_running=`kubectl get pods -n metallb-system | grep Running | grep / | wc -l` 
 done
+echo " metallb: $nb_metallb_running / $nb_metallb"
 
 # IP Pool configuration
 cat <<EOF > /tmp/IPAddressPool.yaml
@@ -263,6 +265,19 @@ EOF
  # apply IP Pool configuration
 kubectl apply -f /tmp/IPAddressPool.yaml
 
+# On attend que IPpool soit present  (ne fonctionne qu'avec un seul ip pool)
+IPpoolCheck=`kubectl get IPAddressPool -n metallb-system | wc -l`
+echo " metallb: IPAddressPool = $IPpoolCheck"
+while [ "$IPpoolCheck" != "2" ]
+do
+  echo " metallb: IPAddressPool pas pret ... waiting 2s ..."
+  sleep 2
+  IPpoolCheck=`kubectl get IPAddressPool -n metallb-system | wc -l`
+  echo " metallb: IPpoolCheck = $IPpoolCheck"
+  kubectl apply -f ./IPAddressPool.yaml   #  car meme si les pods sont up, qq fois le service met 10s a monter et la commande precedente ne passe pas.
+done
+echo " metallb: IPAddressPool OK"
+
 # L2 Advertisement config
 cat <<EOF > /tmp/L2Advertisement.yaml
 apiVersion: metallb.io/v1beta1
@@ -277,6 +292,18 @@ EOF
 
  # apply L2 Advertisement configuration
 kubectl apply -f /tmp/L2Advertisement.yaml
+
+# On attend que L2Advertisement soit present (ne fonctionne qu'avec un seul advertisement)
+L2AdvertisementCheck=`kubectl get L2Advertisement -n metallb-system | wc -l`
+echo " metallb: L2Advertisement = $L2AdvertisementCheck"
+while [ "$L2AdvertisementCheck" != "2" ]
+do
+  echo " metallb: L2Advertisement pas pret ... waiting 2s ..."
+  sleep 2
+  L2AdvertisementCheck=`kubectl get L2Advertisement -n metallb-system | wc -l`
+  echo " metallb: L2Advertisement = $L2AdvertisementCheck"
+done
+echo " metallb: L2Advertisement OK"
 
 rm -f /tmp/IPAddressPool.yaml
 rm -f /tmp/L2Advertisement.yaml
