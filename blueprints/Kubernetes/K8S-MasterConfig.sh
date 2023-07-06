@@ -235,6 +235,17 @@ echo "alias kk='kubectl'" >> /root/.bash_profile
 # install metallb
 kubectl apply -f https://raw.githubusercontent.com/metallb/metallb/v0.13.10/config/manifests/metallb-native.yaml
 
+# On attend que metallb soit demarré avant de le configurer
+nb_metallb=`kubectl get pods -n metallb-system | grep / | wc -l` 
+nb_metallb_running=`kubectl get pods -n metallb-system | grep Running | grep / | wc -l` 
+while [ "$nb_metallb_running" != "$nb_metallb" ]
+do
+  echo " On attend que metallb demarre : $nb_metallb_running / $nb_metallb ... waiting 2s ..."
+  sleep 2
+  nb_metallb=`kubectl get pods -n metallb-system | grep / | wc -l` 
+  nb_metallb_running=`kubectl get pods -n metallb-system | grep Running | grep / | wc -l` 
+done
+
 # IP Pool configuration
 cat <<EOF > /tmp/IPAddressPool.yaml
 apiVersion: metallb.io/v1beta1
@@ -267,6 +278,8 @@ EOF
  # apply L2 Advertisement configuration
 kubectl apply -f /tmp/L2Advertisement.yaml
 
+rm -f /tmp/IPAddressPool.yaml
+rm -f /tmp/L2Advertisement.yaml
 
 
 
