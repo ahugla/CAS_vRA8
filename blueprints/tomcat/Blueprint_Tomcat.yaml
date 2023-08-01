@@ -1,0 +1,40 @@
+formatVersion: 1
+inputs:
+  admin_password:
+    type: string
+    encrypted: true
+    title: password du compte admin
+resources:
+  Tomcat-server:
+    type: Cloud.Machine
+    metadata:
+      layoutPosition:
+        - 0
+        - 0
+    properties:
+      image: Rocky Linux x64 9.x_mix
+      flavor: Medium
+      customizationSpec: Linux
+      networks:
+        - network: ${resource.Cloud_Network_1.id}
+          assignment: static
+      cloudConfig: |
+        #cloud-config
+        packages:
+          - vim
+        runcmd:
+          - touch /etc/cloud/cloud-init.disabled
+          - cd /tmp
+          - curl -O https://raw.githubusercontent.com/ahugla/CAS_vRA8/master/blueprints/tomcat/tomcat_install.sh
+          - chmod 755 tomcat_install.sh
+          - ./tomcat_install.sh  ${input.admin_password}
+  Cloud_Network_1:
+    type: Cloud.Network
+    metadata:
+      layoutPosition:
+        - 1
+        - 0
+    properties:
+      networkType: existing
+      constraints:
+        - tag: net:nsx
