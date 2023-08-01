@@ -3,73 +3,99 @@
 
 
 
-# Install OpenJDK11
-dnf install -y java-11-openjdk.x86_64
-#java --version
+
+
+#https://www.centlinux.com/2022/12/install-apache-tomcat-on-rocky-linux-9.html
+
+
+cd /tmp
+
+# Set Parameters
+URL_TOMCAT=https://dlcdn.apache.org/tomcat/tomcat-10/v10.1.11/bin/apache-tomcat-10.1.11.tar.gz
+echo "URL_TOMCAT = "$URL_TOMCAT
+admin_passwd=VMware1!
 
 
 
-# Create a non-root user for Tomcat
-groupadd tomcat
-
-
-# Create a directory to save Apache Tomcat files
-mkdir /opt/tomcat
+# install pre-requis
+dnf install -y wget tar gzip
+dnf install -y java-11-openjdk
+# pour avoir le tzdb.dat
+dnf install -y tzdata-java
 
 
 #Add user and set the above-created directory its home folder and also disable its login rights
-useradd -s /bin/nologin -g tomcat -d /opt/tomcat tomcat
+useradd -r -d /opt/tomcat/ -s /sbin/nologin -c "Tomcat User" tomcat
 
 
-# Download tomcat 10
-# voir version dispo:   http://mirrors.standaloneinstaller.com/apache/tomcat/
-cd /opt/tomcat
-curl -O  http://mirrors.standaloneinstaller.com/apache/tomcat/tomcat-10/v10.1.11/bin/apache-tomcat-10.1.11.tar.gz
+# download tomcat 
+curl -O $URL_TOMCAT
 
 
-# Extract and delete package
-tar -zxvf apache-tomcat-*.tar.gz -C /opt/tomcat --strip-components=1
-rm -f apache-tomcat-10.1.11.tar.gz
+# extract tomcat
+mkdir /opt/tomcat
+tar xf apache-tomcat-*.tar.gz -C /opt/tomcat --strip-components=1
 
 
-# As we already have created a dedicated user for Tomcat, thus we permit it to read the files available in it
-chown -R tomcat: /opt/tomcat
+# Grant ownership of /opt/tomcat directory to tomcat user.
+chown -R tomcat:tomcat /opt/tomcat/
 
 
-# Allow the script available inside the folder to execute
-sh -c 'chmod +x /opt/tomcat/bin/*.sh'
+
+# Need to create one or more admin users to manage your Tomcat server via Application Manager.
+ligne1="<role rolename=\"admin-gui\"/>"
+sed -i '/<\/tomcat-users>/i  '"$ligne1"'' /opt/tomcat/conf/tomcat-users.xml
+ligne2="<role rolename=\"manager-gui\"/>"
+sed -i '/<\/tomcat-users>/i  '"$ligne2"'' /opt/tomcat/conf/tomcat-users.xml
+ligne3="<user username=\"admin\" password=\"$admin_passwd\" roles=\"admin-gui,manager-gui\"/>"
+sed -i '/<\/tomcat-users>/i  '"$ligne3"'' /opt/tomcat/conf/tomcat-users.xml
+
+
+
+# By default Application Manager is allowed to be accessed from localhost only.
+# Must edit the following file to make your application manager accessible from other machines within the same network.
+sed -i '/Valve className/d' /opt/tomcat/webapps/manager/META-INF/context.xml
+sed -i '/Valve className/d' /opt/tomcat/webapps/host-manager/META-INF/context.xml
+sed -i '/allow=\"127/d' /opt/tomcat/webapps/manager/META-INF/context.xml
+sed -i '/allow=\"127/d' /opt/tomcat/webapps/host-manager/META-INF/context.xml
+
 
 
 # Create Apache Tomcat service file
 # By default, we won’t have a Systemd unit file for Tomcat like the Apache server to stop, start and enable its services.
 # Thus, we create one, so that we could easily manage it.
-cat <<EOF > /etc/systemd/system/tomcat.service
+cat <<EOF > /usr/lib/systemd/system/tomcat.service
 [Unit]
-Description=Tomcat webs servlet container
-After=network.target
+Description=Apache Tomcat Server
+After=syslog.target network.target
 
 [Service]
 Type=forking
-
 User=tomcat
 Group=tomcat
 
-Environment="JAVA_HOME=/usr/lib/jvm/jre"
-Environment="JAVA_OPTS=-Djava.awt.headless=true -Djava.security.egd=file:/dev/./urandom"
+Environment=CATALINA_PID=/opt/tomcat/temp/tomcat.pid
+Environment=CATALINA_HOME=/opt/tomcat
+Environment=CATALINA_BASE=/opt/tomcat
 
-Environment="CATALINA_BASE=/opt/tomcat"
-Environment="CATALINA_HOME=/opt/tomcat"
-Environment="CATALINA_PID=/opt/tomcat/temp/tomcat.pid"
-Environment="CATALINA_OPTS=-Xms512M -Xmx1024M -server -XX:+UseParallelGC"
+ExecStart=/opt/tomcat/bin/catalina.sh start
+ExecStop=/opt/tomcat/bin/catalina.sh stop
 
-ExecStart=/opt/tomcat/bin/startup.sh
-ExecStop=/opt/tomcat/bin/shutdown.sh
+RestartSec=10
+Restart=always
 
 [Install]
 WantedBy=multi-user.target
 EOF
 
 
+# notify systemd
+systemctl daemon-reload
+
+
 # make reboot persistent and start
-systemctl enable --now tomcat
+systemctl enable tomcat
 systemctl start tomcat
+
+
+
