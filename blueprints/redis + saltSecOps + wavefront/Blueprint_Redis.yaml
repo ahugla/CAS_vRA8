@@ -1,12 +1,12 @@
 formatVersion: 1
 inputs:
   Enable_Salt_SecOps:
-    title: Enable SecOps sur minIO ?
+    title: Enable SecOps sur redis ?
     description: Enable Vulnerability and Compliance scans
     type: boolean
     default: false
   allow_DB_ping:
-    title: Autoriser le ping de la DB ?
+    title: Autoriser le ping de redis ?
     type: boolean
     default: false
   wavefront_proxy:
@@ -24,7 +24,7 @@ resources:
     metadata:
       layoutPosition:
         - 0
-        - 0
+        - 2
     properties:
       masterId: saltstack_enterprise_installer
       stateFiles: []
@@ -38,7 +38,7 @@ resources:
     type: Cloud.SecurityGroup
     metadata:
       layoutPosition:
-        - 0
+        - 1
         - 1
     properties:
       constraints:
@@ -48,7 +48,7 @@ resources:
     type: Cloud.Machine
     metadata:
       layoutPosition:
-        - 0
+        - 1
         - 2
     properties:
       image: Rocky Linux x64 9.x_mix
@@ -79,7 +79,7 @@ resources:
     type: Cloud.NSX.Network
     metadata:
       layoutPosition:
-        - 1
+        - 2
         - 0
     properties:
       networkType: existing
