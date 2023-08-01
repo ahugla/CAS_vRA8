@@ -1,8 +1,13 @@
 #!/bin/bash
 
-
-
-
+#
+#  Installe Tomcat 10
+#
+#  USAGE     tomcat_install  [admin password]
+#
+#  v1.0
+#  1 Aout 2023
+#
 
 
 #https://www.centlinux.com/2022/12/install-apache-tomcat-on-rocky-linux-9.html
@@ -13,7 +18,7 @@ cd /tmp
 # Set Parameters
 URL_TOMCAT=https://dlcdn.apache.org/tomcat/tomcat-10/v10.1.11/bin/apache-tomcat-10.1.11.tar.gz
 echo "URL_TOMCAT = "$URL_TOMCAT
-admin_passwd=VMware1!
+admin_passwd=$1
 
 
 
