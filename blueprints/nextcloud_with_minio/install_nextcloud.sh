@@ -185,6 +185,10 @@ systemctl restart httpd
 
 
 
+# RESTE A FAIRE LE SETUP AUTOMATIQUE (CELUI QU ON FAIT PAR WEB UI)
+# https://docs.nextcloud.com/server/latest/admin_manual/configuration_server/automatic_configuration.html
+
+
 
 
 
