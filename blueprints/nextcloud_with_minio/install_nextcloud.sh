@@ -18,9 +18,9 @@
 # Recuperation des variables
 # --------------------------
 DB_root_password=$1
-echo "DB_root_password = " $DB_root_password
+echo "DB_root_password = " $DB_root_password					   # full admin sur la DB
 DB_nextcloud_user_password=$2
-echo "DB_nextcloud_user_password = " $DB_nextcloud_user_password
+echo "DB_nextcloud_user_password = " $DB_nextcloud_user_password   # compte qui a les droits sur la DB nextcloud
 
 
 
