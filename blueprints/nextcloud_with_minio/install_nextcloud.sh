@@ -85,7 +85,7 @@ mysql -u root  --password=$DB_root_password -e  "CREATE DATABASE nextcloud_db;"
 #+--------------------+
 #4 rows in set (0.00 sec)
 
-#Create a User called nextcloud-user and grant permissions on the nextcloud-db database
+#Create a User called nextcloud-user and grant permissions on the nextcloud_db database
 mysql -u root  --password=$DB_root_password -e "GRANT ALL ON nextcloud_db.* TO 'nextcloud-user'@'localhost' IDENTIFIED BY '$DB_nextcloud_user_password';"
 mysql -u root  --password=$DB_root_password -e "FLUSH PRIVILEGES;"
 
@@ -157,9 +157,9 @@ mv  /var/www/html/nextcloud/config/config.php    /var/www/html/nextcloud/config/
 
 cat <<EOF > /var/www/html/nextcloud/config/config.php
 <?php
-	$CONFIG = array (
+	\$CONFIG = array (
      'objectstore' => [
-        'class' => '\\OC\\Files\\ObjectStore\\S3',
+        'class' => '\\\OC\\\Files\\\ObjectStore\\\S3',
         'arguments' => [
                 'bucket' => 'nextcloud',
                 'autocreate' => false,
