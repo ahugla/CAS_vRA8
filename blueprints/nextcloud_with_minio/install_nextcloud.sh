@@ -93,6 +93,8 @@ mysql -u root  --password=$DB_root_password -e "FLUSH PRIVILEGES;"
 
 # install nextcloud
 # -----------------
+systemctl stop httpd
+
 # download NextCloud
 wget https://download.nextcloud.com/server/releases/nextcloud-24.0.3.zip
 
@@ -109,8 +111,6 @@ chown -R apache:apache /var/www/html/nextcloud/
 systemctl restart httpd
 
 
-#----
-
 # On  recupere l'acces KEY/SECRET pour minio dans le fichier /root/minioTokenForNextcloud sur le serveur minio
 full_line=`sshpass -p $minio_root_password ssh -o StrictHostKeyChecking=no root@$minio_server 'cat /root/minioTokenForNextcloud'`
 #echo "full_line = $full_line"
@@ -118,7 +118,6 @@ ACCESS_KEY=`echo $full_line | awk '{print $3}'`
 ACCESS_SECRET=`echo $full_line | awk '{print $6}'`
 #echo $ACCESS_KEY
 #echo $ACCESS_SECRET
-
 
 
 # BY DEFAULT FILE ARE STORED IN /var/www/html/nextcloud/data 
@@ -177,11 +176,14 @@ EOF
 sed -i -e 's/MINIO_SERVER/'"$minio_server"'/g'  /var/www/html/nextcloud/config/config.php
 sed -i -e 's/MINIO_KEY/'"$ACCESS_KEY"'/g'  /var/www/html/nextcloud/config/config.php
 sed -i -e 's/MINIO_SECRET/'"$ACCESS_SECRET"'/g'  /var/www/html/nextcloud/config/config.php
+
+
+# Enable permission for the Apache webserver user to access the NextCloud files
 chown -R apache:apache /var/www/html/nextcloud/
 
 
 # restart apache
-systemctl restart httpd
+systemctl start httpd
 
 
 
