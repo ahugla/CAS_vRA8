@@ -6,7 +6,7 @@
 #   Install LAMP stack with mariaDB
 #
 #
-#   USAGE : ./script.sh  [DB_root_password]  [DB_nextcloud_user_password]
+#   USAGE : ./script.sh  [DB_root_password]  [DB_nextcloud_user_password]  [minio_server]  [minio_root_password]
 #
 #	
 #   https://wiki.crowncloud.net/?How_to_Install_LAMP_Stack_on_Rocky_Linux_9
@@ -18,9 +18,11 @@
 # Recuperation des variables
 # --------------------------
 DB_root_password=$1
-echo "DB_root_password = " $DB_root_password					   # full admin sur la DB
+#echo "DB_root_password = " $DB_root_password					   # full admin sur la DB
 DB_nextcloud_user_password=$2
-echo "DB_nextcloud_user_password = " $DB_nextcloud_user_password   # compte qui a les droits sur la DB nextcloud
+#echo "DB_nextcloud_user_password = " $DB_nextcloud_user_password   # compte qui a les droits sur la DB nextcloud
+minio_server=$3
+minio_root_password=$4
 
 
 
@@ -39,7 +41,7 @@ systemctl status httpd
 # install php
 # ---------------
 dnf install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-9.noarch.rpm
-dnf install -y yum-utils wget
+dnf install -y yum-utils wget sshpass
 dnf install -y php php-zip php-intl php-mysqlnd php-dom php-simplexml php-xml php-xmlreader
 dnf install -y php-curl php-exif php-ftp php-gd php-iconv php-json php-ldap php-mbstring php-posix php-sockets php-tokenizer php-opcache
 php -v
@@ -105,4 +107,87 @@ chown -R apache:apache /var/www/html/nextcloud/
 
 # restart apache
 systemctl restart httpd
+
+
+#----
+
+# On  recupere l'acces KEY/SECRET pour minio dans le fichier /root/minioTokenForNextcloud sur le serveur minio
+full_line=`sshpass -p $minio_root_password ssh -o StrictHostKeyChecking=no root@$minio_server 'cat /root/minioTokenForNextcloud'`
+#echo "full_line = $full_line"
+ACCESS_KEY=`echo $full_line | awk '{print $3}'`
+ACCESS_SECRET=`echo $full_line | awk '{print $6}'`
+#echo $ACCESS_KEY
+#echo $ACCESS_SECRET
+
+
+
+# BY DEFAULT FILE ARE STORED IN /var/www/html/nextcloud/data 
+# WE CAN REPLACE WITH S3 LIKE MINIO, mounts a bucket on an S3 object storage 
+# To change data location update  /var/www/html/nextcloud/config/config.php
+# https://docs.nextcloud.com/server/latest/admin_manual/configuration_files/primary_storage.html
+
+# By default /var/www/html/nextcloud/config/config.php : 
+#	<?php
+#	$CONFIG = array (
+#  	  'instanceid' => 'ocff8wylwm69',
+#	);
+
+
+# Pour la configuration avec S3 minio
+#	<?php
+#	$CONFIG = array (
+#     'objectstore' => [
+#        'class' => '\\OC\\Files\\ObjectStore\\S3',
+#        'arguments' => [
+#                'bucket' => 'nextcloud',
+#                'autocreate' => false,
+#                'hostname' => '10.11.10.33',
+#                'key' => 'Hj4CLpVR0NCxyvOD7aEr',
+#                'secret' => 'fygWDCFcxQX6BsDeAI25D6C0NUUbOgugUgrK8IzH',
+#                'port' => 9000,
+#                'use_ssl' => false,
+#                // required for some non-Amazon S3 implementations
+#                'use_path_style' => true,
+#        ],
+#     ],
+#	);
+
+
+mv  /var/www/html/nextcloud/config/config.php    /var/www/html/nextcloud/config/_config.php.initial
+
+cat <<EOF > /var/www/html/nextcloud/config/config.php
+<?php
+	$CONFIG = array (
+     'objectstore' => [
+        'class' => '\\OC\\Files\\ObjectStore\\S3',
+        'arguments' => [
+                'bucket' => 'nextcloud',
+                'autocreate' => false,
+                'hostname' => 'MINIO_SERVER',
+                'key' => 'MINIO_KEY',
+                'secret' => 'MINIO_SECRET',
+                'port' => 9000,
+                'use_ssl' => false,
+                // required for some non-Amazon S3 implementations
+                'use_path_style' => true,
+        ],
+     ],
+	);
+EOF
+sed -i -e 's/MINIO_SERVER/'"$minio_server"'/g'  /var/www/html/nextcloud/config/config.php
+sed -i -e 's/MINIO_KEY/'"$ACCESS_KEY"'/g'  /var/www/html/nextcloud/config/config.php
+sed -i -e 's/MINIO_SECRET/'"$ACCESS_SECRET"'/g'  /var/www/html/nextcloud/config/config.php
+chown -R apache:apache /var/www/html/nextcloud/
+
+
+# restart apache
+systemctl restart httpd
+
+
+
+
+
+
+
+
 
