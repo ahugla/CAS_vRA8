@@ -197,7 +197,7 @@ cat <<EOF > /var/www/html/nextcloud/config/autoconfig.php
   "dbtableprefix" => "",
   "adminlogin"    => "admin",
   "adminpass"     => "ADMIN_PASSWORD",
-  "directory"     => "/www/htdocs/nextcloud/data",
+  "directory"     => "/var/www/html/nextcloud/data/",
 );
 EOF
 sed -i -e 's/DB_NEXTCLOUD_USER_PASSWORD/'"$DB_nextcloud_user_password"'/g'  /var/www/html/nextcloud/config/autoconfig.php
