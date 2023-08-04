@@ -6,11 +6,12 @@
 #   Install LAMP stack with mariaDB
 #
 #
-#   USAGE : ./script.sh  [DB_root_password]  [DB_nextcloud_user_password]  [minio_server]  [minio_root_password]
+#   USAGE : ./script.sh  [DB_root_password]  [DB_nextcloud_user_password]  [minio_server]  [minio_root_password]  [nextcloud_admin_password]
 #
 #	
 #   https://wiki.crowncloud.net/?How_to_Install_LAMP_Stack_on_Rocky_Linux_9
 #   https://wiki.crowncloud.net/?How_to_Install_NextCloud_on_Rocky_Linux_9
+#   https://docs.nextcloud.com/server/latest/admin_manual/configuration_server/automatic_configuration.html
 #
 
 
@@ -18,11 +19,13 @@
 # Recuperation des variables
 # --------------------------
 DB_root_password=$1
-#echo "DB_root_password = " $DB_root_password					   # full admin sur la DB
+#echo "DB_root_password = " $DB_root_password					        # full admin sur la DB
 DB_nextcloud_user_password=$2
 #echo "DB_nextcloud_user_password = " $DB_nextcloud_user_password   # compte qui a les droits sur la DB nextcloud
 minio_server=$3
 minio_root_password=$4
+nextcloud_admin_password=$5
+#echo "nextcloud_admin_password = " $nextcloud_admin_password       # compte admin de nextcloud (UI)
 
 
 
@@ -186,14 +189,23 @@ chown -R apache:apache /var/www/html/nextcloud/
 systemctl start httpd
 
 
-
-# RESTE A FAIRE LE SETUP AUTOMATIQUE (CELUI QU ON FAIT PAR WEB UI)
+# RESTE A FAIRE LE SETUP AUTOMATIQUE (CELUI QU ON FAIT PAR WEB UI) et qui associe la database et cree le compte d'admin de l'UI nextcloud
 # https://docs.nextcloud.com/server/latest/admin_manual/configuration_server/automatic_configuration.html
-
-
-
-
-
-
-
-
+# To automate install create a configuration file, called .../config/autoconfig.php, and set the file parameters as required
+# /var/www/html/nextcloud/config/autoconfig.php is automatically removed after the initial configuration has been applied.
+cat <<EOF > /var/www/html/nextcloud/config/autoconfig.php
+<?php
+\$AUTOCONFIG = array(
+  "dbtype"        => "mysql",
+  "dbname"        => "nextcloud_db",
+  "dbuser"        => "nextcloud-user",
+  "dbpass"        => "DB_NEXTCLOUD_USER_PASSWORD",
+  "dbhost"        => "localhost",
+  "dbtableprefix" => "",
+  "adminlogin"    => "admin",
+  "adminpass"     => "ADMIN_PASSWORD",
+  "directory"     => "/www/htdocs/nextcloud/data",
+);
+EOF
+sed -i -e 's/DB_NEXTCLOUD_USER_PASSWORD/'"$DB_nextcloud_user_password"'/g'  /var/www/html/nextcloud/config/autoconfig.php
+sed -i -e 's/ADMIN_PASSWORD/'"$nextcloud_admin_password"'/g'  /var/www/html/nextcloud/config/autoconfig.php
