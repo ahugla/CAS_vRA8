@@ -40,6 +40,7 @@ mkdir /data
 mount /dev/sdb1 /data
 # mount permanent (reboot persistent)
 echo "/dev/sdb1               /data         ext4    defaults        0   0"   >> /etc/fstab
+systemctl daemon-reload
 
 
 #download minIO
