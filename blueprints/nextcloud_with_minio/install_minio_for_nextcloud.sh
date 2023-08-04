@@ -25,16 +25,28 @@ cd /tmp
 yum install -y wget
 
 
+# create partition
+(echo "n"; echo "p"; echo ""; echo ""; echo ""; echo "w") | fdisk /dev/sdb 
+#'lsblk' pour voir
+
+# format partition
+mkfs -t ext4 /dev/sdb1
+#'lsblk -f'  pour voir
+
+# folder for minio storage file
+mkdir /data
+
+# mount 
+mount /dev/sdb1 /data
+# mount permanent (reboot persistent)
+echo "/dev/sdb1               /data         ext4    defaults        0   0"   >> /etc/fstab
+
+
 #download minIO
 mkdir /opt/minio
 mkdir /opt/minio/bin
 wget https://dl.minio.io/server/minio/release/linux-amd64/minio -O /opt/minio/bin/minio
 chmod +x /opt/minio/bin/minio
-
-
-
-# folder for minio storage file
-mkdir /data
 
 
 # create content bucket
