@@ -210,3 +210,13 @@ chown -R apache:apache /var/www/html/nextcloud/
 
 # restart apache
 systemctl start httpd
+
+
+
+# IDEE D'AMELIORATION
+#
+# - separer la DB  t-tiers => 3tiers
+# - Choix du path DATA
+# - creer un objet disque dans le blueprint le disque
+#
+#
