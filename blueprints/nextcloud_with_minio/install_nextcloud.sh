@@ -181,13 +181,6 @@ sed -i -e 's/MINIO_KEY/'"$ACCESS_KEY"'/g'  /var/www/html/nextcloud/config/config
 sed -i -e 's/MINIO_SECRET/'"$ACCESS_SECRET"'/g'  /var/www/html/nextcloud/config/config.php
 
 
-# Enable permission for the Apache webserver user to access the NextCloud files
-chown -R apache:apache /var/www/html/nextcloud/
-
-
-# restart apache
-systemctl start httpd
-
 
 # RESTE A FAIRE LE SETUP AUTOMATIQUE (CELUI QU ON FAIT PAR WEB UI) et qui associe la database et cree le compte d'admin de l'UI nextcloud
 # https://docs.nextcloud.com/server/latest/admin_manual/configuration_server/automatic_configuration.html
@@ -209,3 +202,11 @@ cat <<EOF > /var/www/html/nextcloud/config/autoconfig.php
 EOF
 sed -i -e 's/DB_NEXTCLOUD_USER_PASSWORD/'"$DB_nextcloud_user_password"'/g'  /var/www/html/nextcloud/config/autoconfig.php
 sed -i -e 's/ADMIN_PASSWORD/'"$nextcloud_admin_password"'/g'  /var/www/html/nextcloud/config/autoconfig.php
+
+
+# Enable permission for the Apache webserver user to access the NextCloud files
+chown -R apache:apache /var/www/html/nextcloud/
+
+
+# restart apache
+systemctl start httpd
