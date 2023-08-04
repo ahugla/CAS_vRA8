@@ -216,7 +216,6 @@ systemctl start httpd
 # IDEE D'AMELIORATION
 #
 # - separer la DB  t-tiers => 3tiers
-# - Choix du path DATA
-# - creer un objet disque dans le blueprint le disque
+# - Choix du path DATA pour le chemin nextcloud ??   (car pour minio c est deja dans /data avec un mount sur un disque externe)  
 #
 #
