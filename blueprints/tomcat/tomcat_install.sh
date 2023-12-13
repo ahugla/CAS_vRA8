@@ -16,7 +16,8 @@
 cd /tmp
 
 # Set Parameters
-URL_TOMCAT=https://archive.apache.org/dist/tomcat/tomcat-10/v10.1.11/bin/apache-tomcat-10.1.11.tar.gz
+URL_TOMCAT=https://archive.apache.org/dist/tomcat/tomcat-9/v9.0.84/bin/apache-tomcat-9.0.84.tar.gz
+#URL_TOMCAT=https://archive.apache.org/dist/tomcat/tomcat-10/v10.1.11/bin/apache-tomcat-10.1.11.tar.gz
 echo "URL_TOMCAT = "$URL_TOMCAT
 admin_passwd=$1
 
