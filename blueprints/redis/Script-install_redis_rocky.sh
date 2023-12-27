@@ -26,3 +26,11 @@ systemctl status redis
 
 
 
+# creation du requirepass
+cat /dev/urandom | tr -dc A-Za-z0-9 | head -c 10 >> /etc/redis/redis.conf
+
+# creation de l'ACL d'admin 
+user dbadmin on +@all ~*  >VMware1!
+
+
+systemctl restart redis
