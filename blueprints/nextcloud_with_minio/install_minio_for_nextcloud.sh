@@ -172,13 +172,15 @@ rm -f ./policyminio.json
 # --------------------------------------
 
 # retrieve minio Access Key and Secret Key
-Access_Key=`echo /root/minioTokenForNextcloud  | awk '{print $3}'`
-secret_Key=`echo /root/minioTokenForNextcloud  | awk '{print $6}'`
+Access_Key=`more /root/minioTokenForNextcloud  | awk '{print $3}'`
+Secret_Key=`more /root/minioTokenForNextcloud  | awk '{print $6}'`
 
 # mise a disposition de minio Access Key / Secret Key via un redis central
-dnf install -y redis
+dnf install -y redis   # pour avoir redis-cli
 redis_auth=" -h $redisServer -p $redisPort --user dbadmin --pass $redis_password "
-cmd1=" set  Minio_Access_Key  $Access_Key  EX 1200 "    # supprimé de redis apres 1200 sec
+cmd1=" set  Minio_Access_Key_$HOSTNAME  $Access_Key  EX 1200 "    # supprimé de redis apres 1200 sec (temporaire)
 redis-cli $redis_auth $cmd1
-cmd2=" set  Minio_Secret_Key  $secret_Key  EX 1200 "    # supprimé de redis apres 1200 sec
+cmd2=" set  Minio_Secret_Key_$HOSTNAME  $Secret_Key  EX 1200 "    # supprimé de redis apres 1200 sec (temporaire)
 redis-cli $redis_auth $cmd2
+dnf remove -y redis    # plus besoin
+
