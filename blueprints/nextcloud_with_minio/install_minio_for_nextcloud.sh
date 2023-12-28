@@ -8,7 +8,8 @@
 #
 #  USAGE :  install_minIO.sh [password]
 #
-
+#  ACCESS : IP:9000 avec le compte "minioadmin"
+#
 
 
 # Recuperation des variables
@@ -153,7 +154,7 @@ EOF
 
 
 # creer un token pour minioadmin
-#mc admin user svcacct add  --access-key "myuserserviceaccount"   --secret-key "myuserserviceaccountpassword"  --policy "/path/to/policy.json"   alias  user
+# mc admin user svcacct add  --access-key "myuserserviceaccount"   --secret-key "myuserserviceaccountpassword"  --policy "/path/to/policy.json"   alias  user
 # local est l'alias utilisé (le contexte qui contient les credentials), il existe par defaut et pointe vers le s3 minio local
 echo `mc admin user svcacct add --policy ./policyminio.json local minioadmin` > /root/minioTokenForNextcloud
     #=>   Access Key: 8D2JSDWEQJY93V7JGK96 Secret Key: zVfI4HrSKB2+azu96q3D97cow0QXQE5Wgr88k2d6 Expiration: no-expiry
