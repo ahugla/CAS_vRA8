@@ -126,12 +126,8 @@ ACCESS_SECRET=`echo $full_line | awk '{print $6}'`
 
 
 # INUTILE
-#echo "TOTO: DEBUT" >> /var/log/ALEXLOG.log
-#ls  /var/www/html/nextcloud/config/  >> /var/log/ALEXLOG.log
-#mv  /var/www/html/nextcloud/config/config.php    /var/www/html/nextcloud/config/_config.php.initial
-#echo "TOTO : MV FAIT"  >> /var/log/ALEXLOG.log
-#ls  /var/www/html/nextcloud/config/  >> /var/log/ALEXLOG.log
-#echo "TOTO : FIN"  >> /var/log/ALEXLOG.log
+# mv  /var/www/html/nextcloud/config/config.php    /var/www/html/nextcloud/config/_config.php.initial
+
 
 
 cat <<EOF > /var/www/html/nextcloud/config/config.php
@@ -191,19 +187,18 @@ sed -i -e 's/ADMIN_PASSWORD/'"$nextcloud_admin_password"'/g'  /var/www/html/next
 # Enable permission for the Apache webserver user to access the NextCloud files
 chown -R apache:apache /var/www/html/nextcloud/
 
-# supprimer cet "index.html" qui ne sert a rien  (il est vide)
-rm -f /var/www/html/nextcloud/data/index.html
 
 # restart apache
 systemctl start httpd
 
 
 
+
 # IDEE D'AMELIORATION
 #
+# - utiliser redis pour stockage password cross tier temporaire
+# - enlever l'autologon avec le compte 'admin'  (http://IP/nextcloud est logué la premiere fois)
 # - separer la DB  t-tiers => 3tiers
 # - Choix du path DATA pour le chemin nextcloud ??   (car pour minio c est deja dans /data avec un mount sur un disque externe)  
 # - https ?
-# - utiliser redis pour stockage password cross tier temporaire
 # - variabiliser le niveau de log 
-# - enlever l'autologon avec le compte 'admin'  (http://IP/nextcloud est logué la premiere fois)
