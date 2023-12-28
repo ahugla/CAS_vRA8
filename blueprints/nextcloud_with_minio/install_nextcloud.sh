@@ -124,12 +124,15 @@ ACCESS_SECRET=`echo $full_line | awk '{print $6}'`
 #echo $ACCESS_KEY
 #echo $ACCESS_SECRET
 
-echo "TOTO: DEBUT" >> /var/log/ALEXLOG.log
-ls  /var/www/html/nextcloud/config/  >> /var/log/ALEXLOG.log
-mv  /var/www/html/nextcloud/config/config.php    /var/www/html/nextcloud/config/_config.php.initial
-echo "TOTO : MV FAIT"  >> /var/log/ALEXLOG.log
-ls  /var/www/html/nextcloud/config/  >> /var/log/ALEXLOG.log
-echo "TOTO : FIN"  >> /var/log/ALEXLOG.log
+
+# INUTILE
+#echo "TOTO: DEBUT" >> /var/log/ALEXLOG.log
+#ls  /var/www/html/nextcloud/config/  >> /var/log/ALEXLOG.log
+#mv  /var/www/html/nextcloud/config/config.php    /var/www/html/nextcloud/config/_config.php.initial
+#echo "TOTO : MV FAIT"  >> /var/log/ALEXLOG.log
+#ls  /var/www/html/nextcloud/config/  >> /var/log/ALEXLOG.log
+#echo "TOTO : FIN"  >> /var/log/ALEXLOG.log
+
 
 cat <<EOF > /var/www/html/nextcloud/config/config.php
 <?php
@@ -203,4 +206,4 @@ systemctl start httpd
 # - https ?
 # - utiliser redis pour stockage password cross tier temporaire
 # - variabiliser le niveau de log 
-#
+# - enlever l'autologon avec le compte 'admin'  (http://IP/nextcloud est logué la premiere fois)
