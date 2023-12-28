@@ -124,12 +124,12 @@ ACCESS_SECRET=`echo $full_line | awk '{print $6}'`
 #echo $ACCESS_KEY
 #echo $ACCESS_SECRET
 
-echo "TOTO: DEBUT"
-ls  /var/www/html/nextcloud/config/
+echo "TOTO: DEBUT" >> /var/log/ALEXLOG.log
+ls  /var/www/html/nextcloud/config/  >> /var/log/ALEXLOG.log
 mv  /var/www/html/nextcloud/config/config.php    /var/www/html/nextcloud/config/_config.php.initial
-echo "TOTO : MV FAIT"
-ls  /var/www/html/nextcloud/config/
-echo "TOTO : FIN"
+echo "TOTO : MV FAIT"  >> /var/log/ALEXLOG.log
+ls  /var/www/html/nextcloud/config/  >> /var/log/ALEXLOG.log
+echo "TOTO : FIN"  >> /var/log/ALEXLOG.log
 
 cat <<EOF > /var/www/html/nextcloud/config/config.php
 <?php
@@ -178,7 +178,7 @@ cat <<EOF > /var/www/html/nextcloud/config/autoconfig.php
   "adminlogin"    => "admin",
   "adminpass"     => "ADMIN_PASSWORD",
   "directory"     => "/var/www/html/nextcloud/data/",
-  "loglevel"      => 2,
+  "loglevel"      => "2",
 );
 EOF
 sed -i -e 's/DB_NEXTCLOUD_USER_PASSWORD/'"$DB_nextcloud_user_password"'/g'  /var/www/html/nextcloud/config/autoconfig.php
