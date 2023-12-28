@@ -6,7 +6,7 @@
 #  03/08/2023
 #
 #
-#  USAGE :  install_minIO.sh [password]
+#  USAGE :  install_minIO.sh [password] [redis_password]
 #
 #  ACCESS : IP:9000 avec le compte "minioadmin"
 #
@@ -14,9 +14,12 @@
 
 # Recuperation des variables
 MinIO_password=$1
+redis_password=$2
 
 
 # Set parameters
+redisServer=vra-009429.cpod-vrealize.az-fkd.cloud-garage.net
+redisPort=6379
 export MINIO_ACCESS_KEY=minioadmin
 export MINIO_VOLUMES="/data"
 export MINIO_OPTS="--address :9000"
@@ -159,8 +162,23 @@ EOF
 echo `mc admin user svcacct add --policy ./policyminio.json local minioadmin` > /root/minioTokenForNextcloud
     #=>   Access Key: 8D2JSDWEQJY93V7JGK96 Secret Key: zVfI4HrSKB2+azu96q3D97cow0QXQE5Wgr88k2d6 Expiration: no-expiry
 
+# une fois la policy créee on peut supprimer le fichier
 rm -f ./policyminio.json
 
 
 
 
+# On met sur Redis le compte pour minio
+# --------------------------------------
+
+# retrieve minio Access Key and Secret Key
+Access_Key=`echo /root/minioTokenForNextcloud  | awk '{print $3}'`
+secret_Key=`echo /root/minioTokenForNextcloud  | awk '{print $6}'`
+
+# mise a disposition de minio Access Key / Secret Key via un redis central
+dnf install -y redis
+redis_auth=" -h $redisServer -p $redisPort --user dbadmin --pass $redis_password "
+cmd1=" set  Minio_Access_Key  $Access_Key  EX 1200 "    # supprimé de redis apres 1200 sec
+redis-cli $redis_auth $cmd1
+cmd2=" set  Minio_Secret_Key  $secret_Key  EX 1200 "    # supprimé de redis apres 1200 sec
+redis-cli $redis_auth $cmd2

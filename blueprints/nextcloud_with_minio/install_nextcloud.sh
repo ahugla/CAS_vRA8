@@ -124,8 +124,12 @@ ACCESS_SECRET=`echo $full_line | awk '{print $6}'`
 #echo $ACCESS_KEY
 #echo $ACCESS_SECRET
 
-
+echo "TOTO: DEBUT"
+ls  /var/www/html/nextcloud/config/
 mv  /var/www/html/nextcloud/config/config.php    /var/www/html/nextcloud/config/_config.php.initial
+echo "TOTO : MV FAIT"
+ls  /var/www/html/nextcloud/config/
+echo "TOTO : FIN"
 
 cat <<EOF > /var/www/html/nextcloud/config/config.php
 <?php
