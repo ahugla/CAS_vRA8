@@ -267,3 +267,14 @@ systemctl start httpd
 # - variabiliser le niveau de log 
 # - acces a minio en https   https://min.io/docs/minio/linux/operations/network-encryption.html
 
+
+<< COMMENTS
+# convert crt to pem
+openssl x509 -in cert.crt -out cert.pem
+
+# import certif
+sudo -u apache php /var/www/html/nextcloud/occ security:certificates:import /tmp/public.pem
+
+
+
+COMMENTS

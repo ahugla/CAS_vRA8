@@ -23,6 +23,9 @@ redisPort=6379
 export MINIO_ACCESS_KEY=minioadmin
 export MINIO_VOLUMES="/data"
 export MINIO_OPTS="--address :9000"
+DomainName=cpod-vrealize.az-fkd.cloud-garage.net
+minio_FQDN=$HOSTNAME.$DomainName                    #  FQDN du serveur lui meme (minio)
+
 
 
 cd /tmp
@@ -181,4 +184,17 @@ redis-cli $redis_auth $cmd1
 cmd2=" set  Minio_Secret_Key_$HOSTNAME  $Secret_Key  EX 1200 "    # supprimé de redis apres 1200 sec (temporaire)
 redis-cli $redis_auth $cmd2
 dnf remove -y redis    # plus besoin
+
+
+
+<<COMMENTS
+# By default, the MinIO server looks for the TLS keys and certificates
+# certif dans  :   /root/.minio/certs
+
+# Generate a self-signed certificate 
+cd /root/.minio/certs
+openssl req -x509 -sha256 -nodes -days 3650 -newkey rsa:2048 -keyout private.key -out public.crt -subj "/C=XX/ST=FR/L=Paris/O=Broadcom/OU=CMPSE/CN=$minio_FQDN"
+
+# fonctionne pour minio mais nextcloud n y accede plus !
+COMMENTS
 
