@@ -170,21 +170,14 @@ cat <<EOF > /var/www/html/nextcloud/config/config.php
                 'use_path_style' => true,
         ],
      ],
-     'trusted_domains' =>
-      [
-        'localhost',
-        'NEXTCLOUD_FQDN',
-        'NEXTCLOUD_IP'
-      ],
 	);
 EOF
 sed -i -e 's/MINIO_SERVER/'"$minio_server_IP"'/g'  /var/www/html/nextcloud/config/config.php
 sed -i -e 's/MINIO_KEY/'"$ACCESS_KEY"'/g'  /var/www/html/nextcloud/config/config.php
 sed -i -e 's/MINIO_SECRET/'"$ACCESS_SECRET"'/g'  /var/www/html/nextcloud/config/config.php
-sed -i -e 's/NEXTCLOUD_FQDN/'"$nextcloud_FQDN"'/g'  /var/www/html/nextcloud/config/config.php
-sed -i -e 's/NEXTCLOUD_IP/'"$nextcloud_IP"'/g'  /var/www/html/nextcloud/config/config.php
 
 
+<<comment
 # BY DEFAULT FILE ARE STORED IN /var/www/html/nextcloud/data 
 # WE CAN REPLACE WITH S3 LIKE MINIO, mounts a bucket on an S3 object storage 
 # To change data location update  /var/www/html/nextcloud/config/config.php
@@ -213,6 +206,7 @@ cat <<EOF > /var/www/html/nextcloud/config/autoconfig.php
 EOF
 sed -i -e 's/DB_NEXTCLOUD_USER_PASSWORD/'"$DB_nextcloud_user_password"'/g'  /var/www/html/nextcloud/config/autoconfig.php
 sed -i -e 's/ADMIN_PASSWORD/'"$nextcloud_admin_password"'/g'  /var/www/html/nextcloud/config/autoconfig.php
+comment
 
 
 # Enable permission for the Apache webserver user to access the NextCloud files
@@ -233,11 +227,30 @@ systemctl start httpd
 #sudo -u apache php /var/www/html/nextcloud/occ maintenance:install --help
 
 
-sudo -u apache php /var/www/html/nextcloud/occ maintenance:install --admin-pass=$nextcloud_admin_password
+sudo -u apache php /var/www/html/nextcloud/occ maintenance:install \
+   --admin-user='admin' \
+   --admin-pass=$nextcloud_admin_password \
+   --database-host='localhost' \
+   --database='mysql' \
+   --database-name='nextcloud_db' \
+   --database-user='nextcloud-user' \
+   --database-pass=$DB_nextcloud_user_password \
+   --data-dir='/var/www/html/nextcloud/data/'
 
 
-rm -f /var/www/html/nextcloud//config/CAN_INSTALL
-rm -f /var/www/html/nextcloud//config/autoconfig.php
+
+
+# ajout des URL de connexion possibles
+#sudo -u apache php /var/www/html/nextcloud/occ  config:system:get  nextcloud  trusted_domain
+sudo -u apache php /var/www/html/nextcloud/occ  config:system:set   trusted_domains  1 --value=nextcloud_IP
+sudo -u apache php /var/www/html/nextcloud/occ  config:system:set   trusted_domains  2 --value=nextcloud_FQDN
+
+
+
+<<comment
+rm -f /var/www/html/nextcloud/config/CAN_INSTALL
+rm -f /var/www/html/nextcloud/config/autoconfig.php
+comment
 
 
 # restart apache
