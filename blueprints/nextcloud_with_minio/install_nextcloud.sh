@@ -126,7 +126,7 @@ chown -R apache:apache /var/www/html/nextcloud/
 systemctl restart httpd
 
 
-# OLD METHOD
+# OLD METHOD (sshpass)
 # ----------
 # On  recupere l'acces KEY/SECRET pour minio dans le fichier /root/minioTokenForNextcloud sur le serveur minio
 # full_line=`sshpass -p $minio_root_password ssh -o StrictHostKeyChecking=no root@$minio_server_IP 'cat /root/minioTokenForNextcloud'`
@@ -200,21 +200,37 @@ sudo -u apache php /var/www/html/nextcloud/occ maintenance:install \
    --database-name='nextcloud_db' \
    --database-user='nextcloud-user' \
    --database-pass=$DB_nextcloud_user_password \
-   --data-dir='/var/www/html/nextcloud/data/'
+   --data-dir='/var/www/html/nextcloud/data/' 
 
 
 # ajout des URL autorisées pour les connexions
 #sudo -u apache php /var/www/html/nextcloud/occ  config:system:get  nextcloud  trusted_domain
 sudo -u apache php /var/www/html/nextcloud/occ  config:system:set   trusted_domains  1 --value=$nextcloud_IP
 sudo -u apache php /var/www/html/nextcloud/occ  config:system:set   trusted_domains  2 --value=$nextcloud_FQDN
+
+
+# Configurer le log level a 1
+# loglevel : 0=DEBUG(All activity), 1=INFO, 2=WARN, 3=ERROR, 5=FATAL
+sudo -u apache php /var/www/html/nextcloud/occ  config:system:set   loglevel --value='1'
+
+
+# inutile desormais car install et conf effectuée
 rm -f /var/www/html/nextcloud/config/CAN_INSTALL
+
+
+# Creation du raccourci vers le fichier de log dans /var/log/
+ln -s  /var/www/html/nextcloud/data/nextcloud.log  /var/log/nextcloud.log
+
+
+
 
 
 # IDEE D'AMELIORATION
 #
 # - separer la DB  t-tiers => 3tiers
-# - Choix du path DATA pour le chemin nextcloud ??   (car pour minio c est deja dans /data avec un mount sur un disque externe)  
 # - https ?    https://docs.nextcloud.com/server/latest/admin_manual/installation/source_installation.html 
 # - variabiliser le niveau de log 
 
 
+
+ 
