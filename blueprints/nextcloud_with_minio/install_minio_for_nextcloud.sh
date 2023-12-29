@@ -156,7 +156,8 @@ cat <<EOF > ./policyminio.json
 EOF
 
 
-# creer un token pour minioadmin
+# creer un token pour minioadmin qu'on met dans /root/minioTokenForNextcloud
+# ---------------------------------------------------------------------------
 # mc admin user svcacct add  --access-key "myuserserviceaccount"   --secret-key "myuserserviceaccountpassword"  --policy "/path/to/policy.json"   alias  user
 # local est l'alias utilisé (le contexte qui contient les credentials), il existe par defaut et pointe vers le s3 minio local
 echo `mc admin user svcacct add --policy ./policyminio.json local minioadmin` > /root/minioTokenForNextcloud
@@ -167,14 +168,11 @@ rm -f ./policyminio.json
 
 
 
-
 # On met sur Redis le compte pour minio
 # --------------------------------------
-
 # retrieve minio Access Key and Secret Key
 Access_Key=`more /root/minioTokenForNextcloud  | awk '{print $3}'`
 Secret_Key=`more /root/minioTokenForNextcloud  | awk '{print $6}'`
-
 # mise a disposition de minio Access Key / Secret Key via un redis central
 dnf install -y redis   # pour avoir redis-cli
 redis_auth=" -h $redisServer -p $redisPort --user dbadmin --pass $redis_password "
