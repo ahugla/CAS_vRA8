@@ -217,7 +217,6 @@ systemctl start httpd
 
 # IDEE D'AMELIORATION
 #
-# - utiliser redis pour stockage password cross tier temporaire
 # - enlever l'autologon avec le compte 'admin'  (http://IP/nextcloud est logué la premiere fois)
 # - separer la DB  t-tiers => 3tiers
 # - Choix du path DATA pour le chemin nextcloud ??   (car pour minio c est deja dans /data avec un mount sur un disque externe)  
