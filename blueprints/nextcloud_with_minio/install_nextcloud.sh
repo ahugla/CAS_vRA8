@@ -224,8 +224,8 @@ ln -s  /var/www/html/nextcloud/data/nextcloud.log  /var/log/nextcloud.log
 
 
 
-# Configuration HTTPS
-# -------------------
+# Configuration HTTPS in Apache
+# -----------------------------
 # path vers le certificat SSL d'apache:
 # grep SSLCertificateFile /etc/httpd/conf.d/ssl.conf | grep -v "#"
 #    =>   SSLCertificateFile /etc/pki/tls/certs/localhost.crt
@@ -244,10 +244,13 @@ mv privateKey.key /etc/pki/tls/private/localhost.key
 # on redirige les requetes entrantes HTTP en HTTPS  (ip et fqdn)
 cat <<EOF > /etc/httpd/conf.d/redirect_http.conf
 <VirtualHost *:80>
-   ServerName 10.11.10.39
-   Redirect permanent / https://10.11.10.39/
+   ServerName HOSTNAME
+   Redirect permanent / https://FQDN/
 </VirtualHost>
 EOF
+sed -i -e 's/HOSTNAME/'"$HOSTNAME"'/g'  /etc/httpd/conf.d/redirect_http.conf
+sed -i -e 's/FQDN/'"$nextcloud_FQDN"'/g'  /etc/httpd/conf.d/redirect_http.conf
+
 
 systemctl restart httpd
 
@@ -263,5 +266,5 @@ systemctl restart httpd
 #
 # - separer la DB  t-tiers => 3tiers
 # - variabiliser le niveau de log 
-# - acces a minio en https
+# - acces a minio en https   https://min.io/docs/minio/linux/operations/network-encryption.html
 
