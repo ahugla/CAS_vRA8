@@ -180,36 +180,6 @@ sed -i -e 's/MINIO_SECRET/'"$ACCESS_SECRET"'/g'  /var/www/html/nextcloud/config/
 chown -R apache:apache /var/www/html/nextcloud/
 
 
-
-# Configuration HTTPS dans Apache
-# -------------------------------
-# path vers le certificat SSL d'apache:
-# grep SSLCertificateFile /etc/httpd/conf.d/ssl.conf | grep -v "#"
-#    =>   SSLCertificateFile /etc/pki/tls/certs/localhost.crt
-#    =>   par defaut apache httpd recherche un /etc/pki/tls/certs/localhost.crt et la clé privée dans /etc/pki/tls/private/localhost.key
-
-# voir date d'expiration
-# openssl x509 -enddate -noout -in  /etc/pki/tls/certs/localhost.crt
-
-# Generate a self-signed certificate 
-cd /etc/pki/tls/certs/
-openssl req -x509 -sha256 -nodes -days 3650 -newkey rsa:2048 -keyout privateKey.key -out certificate.crt -subj "/C=XX/ST=FR/L=Paris/O=Broadcom/OU=CMPSE/CN=$nextcloud_FQDN"
-# on renomme et on met au bon endroit la clé privée
-mv certificate.crt localhost.crt
-mv privateKey.key /etc/pki/tls/private/localhost.key
-
-# on redirige les requetes entrantes HTTP en HTTPS  (ip et fqdn)
-cat <<EOF > /etc/httpd/conf.d/redirect_http.conf
-<VirtualHost *:80>
-   ServerName HOSTNAME
-   Redirect permanent / https://FQDN/
-</VirtualHost>
-EOF
-sed -i -e 's/HOSTNAME/'"$HOSTNAME"'/g'  /etc/httpd/conf.d/redirect_http.conf
-sed -i -e 's/FQDN/'"$nextcloud_FQDN"'/g'  /etc/httpd/conf.d/redirect_http.conf
-
-
-
 # restart apache
 systemctl start httpd
 
@@ -252,6 +222,36 @@ rm -f /var/www/html/nextcloud/config/CAN_INSTALL
 ln -s  /var/www/html/nextcloud/data/nextcloud.log  /var/log/nextcloud.log
 
 
+
+# Configuration HTTPS dans Apache
+# -------------------------------
+# path vers le certificat SSL d'apache:
+# grep SSLCertificateFile /etc/httpd/conf.d/ssl.conf | grep -v "#"
+#    =>   SSLCertificateFile /etc/pki/tls/certs/localhost.crt
+#    =>   par defaut apache httpd recherche un /etc/pki/tls/certs/localhost.crt et la clé privée dans /etc/pki/tls/private/localhost.key
+
+# voir date d'expiration
+# openssl x509 -enddate -noout -in  /etc/pki/tls/certs/localhost.crt
+
+# Generate a self-signed certificate 
+cd /etc/pki/tls/certs/
+openssl req -x509 -sha256 -nodes -days 3650 -newkey rsa:2048 -keyout privateKey.key -out certificate.crt -subj "/C=XX/ST=FR/L=Paris/O=Broadcom/OU=CMPSE/CN=$nextcloud_FQDN"
+# on renomme et on met au bon endroit la clé privée
+mv certificate.crt localhost.crt
+mv privateKey.key /etc/pki/tls/private/localhost.key
+
+# on redirige les requetes entrantes HTTP en HTTPS  (ip et fqdn)
+cat <<EOF > /etc/httpd/conf.d/redirect_http.conf
+<VirtualHost *:80>
+   ServerName HOSTNAME
+   Redirect permanent / https://FQDN/
+</VirtualHost>
+EOF
+sed -i -e 's/HOSTNAME/'"$HOSTNAME"'/g'  /etc/httpd/conf.d/redirect_http.conf
+sed -i -e 's/FQDN/'"$nextcloud_FQDN"'/g'  /etc/httpd/conf.d/redirect_http.conf
+
+# restart apache
+systemctl start httpd
 
 
 
