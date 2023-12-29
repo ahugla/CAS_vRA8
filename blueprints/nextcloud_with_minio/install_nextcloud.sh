@@ -47,7 +47,7 @@ cd /tmp
 
 # install apache wer server (httpd)
 # ---------------------------------
-dnf install -y httpd httpd-tools
+dnf install -y httpd httpd-tools mod_ssl 
 systemctl enable httpd
 systemctl start httpd
 systemctl status httpd
@@ -224,13 +224,44 @@ ln -s  /var/www/html/nextcloud/data/nextcloud.log  /var/log/nextcloud.log
 
 
 
+# Configuration HTTPS
+# -------------------
+# path vers le certificat SSL d'apache:
+# grep SSLCertificateFile /etc/httpd/conf.d/ssl.conf | grep -v "#"
+#    =>   SSLCertificateFile /etc/pki/tls/certs/localhost.crt
+#    =>   par defaut apache httpd recherche un /etc/pki/tls/certs/localhost.crt et la clé privée dans /etc/pki/tls/private/localhost.key
+
+# voir date d'expiration
+# openssl x509 -enddate -noout -in  /etc/pki/tls/certs/localhost.crt
+
+# Generate a self-signed certificate 
+cd /etc/pki/tls/certs/
+openssl req -x509 -sha256 -nodes -days 3650 -newkey rsa:2048 -keyout privateKey.key -out certificate.crt -subj "/C=XX/ST=FR/L=Paris/O=Broadcom/OU=CMPSE/CN=$nextcloud_FQDN"
+# on renomme et on met au bon endroit la clé privée
+mv certificate.crt localhost.crt
+mv privateKey.key /etc/pki/tls/private/localhost.key
+
+# on redirige les requetes entrantes HTTP en HTTPS  (ip et fqdn)
+cat <<EOF > /etc/httpd/conf.d/redirect_http.conf
+<VirtualHost *:80>
+   ServerName 10.11.10.39
+   Redirect permanent / https://10.11.10.39/
+</VirtualHost>
+EOF
+
+systemctl restart httpd
+
+
+
+
+
+
+
+
 
 # IDEE D'AMELIORATION
 #
 # - separer la DB  t-tiers => 3tiers
-# - https ?    https://docs.nextcloud.com/server/latest/admin_manual/installation/source_installation.html 
 # - variabiliser le niveau de log 
+# - acces a minio en https
 
-
-
- 
