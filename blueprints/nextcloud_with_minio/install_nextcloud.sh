@@ -36,7 +36,9 @@ redis_password=$7                                                   # password d
 # ----------
 redisServer=vra-009429.cpod-vrealize.az-fkd.cloud-garage.net
 redisPort=6379
-
+DomainName=cpod-vrealize.az-fkd.cloud-garage.net
+nextcloud_FQDN=$HOSTNAME.$DomainName                                # FQDN du serveur local (nextcloud)
+nextcloud_IP=$(hostname  -I | cut -f1 -d' ')                        # IP du serveur local (nextcloud)
 
 
 cd /tmp
@@ -168,11 +170,19 @@ cat <<EOF > /var/www/html/nextcloud/config/config.php
                 'use_path_style' => true,
         ],
      ],
+     'trusted_domains' =>
+      [
+        'localhost',
+        'NEXTCLOUD_FQDN',
+        'NEXTCLOUD_IP'
+      ],
 	);
 EOF
 sed -i -e 's/MINIO_SERVER/'"$minio_server_IP"'/g'  /var/www/html/nextcloud/config/config.php
 sed -i -e 's/MINIO_KEY/'"$ACCESS_KEY"'/g'  /var/www/html/nextcloud/config/config.php
 sed -i -e 's/MINIO_SECRET/'"$ACCESS_SECRET"'/g'  /var/www/html/nextcloud/config/config.php
+sed -i -e 's/NEXTCLOUD_FQDN/'"$nextcloud_FQDN"'/g'  /var/www/html/nextcloud/config/config.php
+sed -i -e 's/NEXTCLOUD_IP/'"$nextcloud_IP"'/g'  /var/www/html/nextcloud/config/config.php
 
 
 # BY DEFAULT FILE ARE STORED IN /var/www/html/nextcloud/data 
@@ -215,12 +225,37 @@ systemctl start httpd
 
 
 
+
+# install et config nextcloud  (equivalent a ce qui se passe lorsqu'on se connecte pour la premiere fois )
+# ----------------------------
+# https://docs.nextcloud.com/server/latest/admin_manual/configuration_server/occ_command.html#command-line-installation
+#sudo -u apache php /var/www/html/nextcloud/occ
+#sudo -u apache php /var/www/html/nextcloud/occ maintenance:install --help
+
+
+sudo -u apache php /var/www/html/nextcloud/occ maintenance:install --admin-pass=$nextcloud_admin_password
+
+
+rm -f /var/www/html/nextcloud//config/CAN_INSTALL
+rm -f /var/www/html/nextcloud//config/autoconfig.php
+
+
+# restart apache
+#systemctl start httpd
+
+
+
+
+
+
+
+
 # IDEE D'AMELIORATION
 #
 # - enlever l'autologon avec le compte 'admin'  (http://IP/nextcloud est logué la premiere fois)
 # - separer la DB  t-tiers => 3tiers
 # - Choix du path DATA pour le chemin nextcloud ??   (car pour minio c est deja dans /data avec un mount sur un disque externe)  
-# - https ?
+# - https ?    https://docs.nextcloud.com/server/latest/admin_manual/installation/source_installation.html 
 # - variabiliser le niveau de log 
 
 
