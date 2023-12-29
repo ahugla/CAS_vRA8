@@ -148,11 +148,10 @@ ACCESS_SECRET=`redis-cli $redis_auth $cmd2`
 dnf remove -y redis    # plus besoin
 
 
-# INUTILE
-# mv  /var/www/html/nextcloud/config/config.php    /var/www/html/nextcloud/config/_config.php.initial
 
 
-
+# config de l'acces au minio
+# --------------------------
 cat <<EOF > /var/www/html/nextcloud/config/config.php
 <?php
 	\$CONFIG = array (
@@ -177,46 +176,12 @@ sed -i -e 's/MINIO_KEY/'"$ACCESS_KEY"'/g'  /var/www/html/nextcloud/config/config
 sed -i -e 's/MINIO_SECRET/'"$ACCESS_SECRET"'/g'  /var/www/html/nextcloud/config/config.php
 
 
-<<comment
-# BY DEFAULT FILE ARE STORED IN /var/www/html/nextcloud/data 
-# WE CAN REPLACE WITH S3 LIKE MINIO, mounts a bucket on an S3 object storage 
-# To change data location update  /var/www/html/nextcloud/config/config.php
-# https://docs.nextcloud.com/server/latest/admin_manual/configuration_files/primary_storage.html
-# Setup (celui qu'on fait dans la web UI sinon) et qui associe la database et cree le compte d'admin de l'UI nextcloud
-# https://docs.nextcloud.com/server/latest/admin_manual/configuration_server/automatic_configuration.html
-# To automate install create a configuration file, called .../config/autoconfig.php, and set the file parameters as required
-# /var/www/html/nextcloud/config/autoconfig.php is automatically removed after the initial configuration has been applied.
-# Then all config is in /var/www/html/nextcloud/config/config.conf
-# loglevel : 0=DEBUG(All activity), 1=INFO, 2=WARN, 3=ERROR, 5=FATAL
-# log file : /var/www/html/nextcloud/data/nextcloud.log
-cat <<EOF > /var/www/html/nextcloud/config/autoconfig.php
-<?php
-\$AUTOCONFIG = array(
-  "dbtype"        => "mysql",
-  "dbname"        => "nextcloud_db",
-  "dbuser"        => "nextcloud-user",
-  "dbpass"        => "DB_NEXTCLOUD_USER_PASSWORD",
-  "dbhost"        => "localhost",
-  "dbtableprefix" => "",
-  "adminlogin"    => "admin",
-  "adminpass"     => "ADMIN_PASSWORD",
-  "directory"     => "/var/www/html/nextcloud/data/",
-  "loglevel"      => "2",
-);
-EOF
-sed -i -e 's/DB_NEXTCLOUD_USER_PASSWORD/'"$DB_nextcloud_user_password"'/g'  /var/www/html/nextcloud/config/autoconfig.php
-sed -i -e 's/ADMIN_PASSWORD/'"$nextcloud_admin_password"'/g'  /var/www/html/nextcloud/config/autoconfig.php
-comment
-
-
 # Enable permission for the Apache webserver user to access the NextCloud files
 chown -R apache:apache /var/www/html/nextcloud/
 
 
 # restart apache
 systemctl start httpd
-
-
 
 
 
@@ -238,34 +203,15 @@ sudo -u apache php /var/www/html/nextcloud/occ maintenance:install \
    --data-dir='/var/www/html/nextcloud/data/'
 
 
-
-
-# ajout des URL de connexion possibles
+# ajout des URL autorisées pour les connexions
 #sudo -u apache php /var/www/html/nextcloud/occ  config:system:get  nextcloud  trusted_domain
-sudo -u apache php /var/www/html/nextcloud/occ  config:system:set   trusted_domains  1 --value=nextcloud_IP
-sudo -u apache php /var/www/html/nextcloud/occ  config:system:set   trusted_domains  2 --value=nextcloud_FQDN
-
-
-
-<<comment
+sudo -u apache php /var/www/html/nextcloud/occ  config:system:set   trusted_domains  1 --value=$nextcloud_IP
+sudo -u apache php /var/www/html/nextcloud/occ  config:system:set   trusted_domains  2 --value=$nextcloud_FQDN
 rm -f /var/www/html/nextcloud/config/CAN_INSTALL
-rm -f /var/www/html/nextcloud/config/autoconfig.php
-comment
-
-
-# restart apache
-#systemctl start httpd
-
-
-
-
-
-
 
 
 # IDEE D'AMELIORATION
 #
-# - enlever l'autologon avec le compte 'admin'  (http://IP/nextcloud est logué la premiere fois)
 # - separer la DB  t-tiers => 3tiers
 # - Choix du path DATA pour le chemin nextcloud ??   (car pour minio c est deja dans /data avec un mount sur un disque externe)  
 # - https ?    https://docs.nextcloud.com/server/latest/admin_manual/installation/source_installation.html 
