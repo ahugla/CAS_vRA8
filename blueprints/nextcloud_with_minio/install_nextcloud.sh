@@ -6,7 +6,7 @@
 #   Install LAMP stack with mariaDB
 #
 #
-#   USAGE : ./script.sh  [DB_root_password]  [DB_nextcloud_user_password]  [minio_server]  [minio_root_password]  [nextcloud_admin_password]
+#   USAGE : ./script.sh  [DB_root_password]  [DB_nextcloud_user_password]  [minio_server_IP]  [minio_server_Hostname] [minio_root_password]  [nextcloud_admin_password]  [redis_password]
 #
 #
 #   ACCESS : IP/nextcloud avec le compte "admin" 
@@ -24,10 +24,18 @@ DB_root_password=$1
 #echo "DB_root_password = " $DB_root_password					    # full admin sur la DB
 DB_nextcloud_user_password=$2
 #echo "DB_nextcloud_user_password = " $DB_nextcloud_user_password   # compte qui a les droits sur la DB nextcloud
-minio_server=$3
-minio_root_password=$4
-nextcloud_admin_password=$5
+minio_server_IP=$3
+minio_server_Hostname=$4
+minio_root_password=$5
+nextcloud_admin_password=$6
 #echo "nextcloud_admin_password = " $nextcloud_admin_password       # compte admin de nextcloud (UI)
+redis_password=$7                                                   # password de la base externe redis dans laquelle on a mis le accessKey/secretKey pour minio
+
+
+# parametres
+# ----------
+redisServer=vra-009429.cpod-vrealize.az-fkd.cloud-garage.net
+redisPort=6379
 
 
 
@@ -116,13 +124,26 @@ chown -R apache:apache /var/www/html/nextcloud/
 systemctl restart httpd
 
 
+# OLD METHOD
+# ----------
 # On  recupere l'acces KEY/SECRET pour minio dans le fichier /root/minioTokenForNextcloud sur le serveur minio
-full_line=`sshpass -p $minio_root_password ssh -o StrictHostKeyChecking=no root@$minio_server 'cat /root/minioTokenForNextcloud'`
-#echo "full_line = $full_line"
-ACCESS_KEY=`echo $full_line | awk '{print $3}'`
-ACCESS_SECRET=`echo $full_line | awk '{print $6}'`
-#echo $ACCESS_KEY
-#echo $ACCESS_SECRET
+# full_line=`sshpass -p $minio_root_password ssh -o StrictHostKeyChecking=no root@$minio_server_IP 'cat /root/minioTokenForNextcloud'`
+# echo "full_line = $full_line"
+# ACCESS_KEY=`echo $full_line | awk '{print $3}'`
+# ACCESS_SECRET=`echo $full_line | awk '{print $6}'`
+# echo $ACCESS_KEY
+# echo $ACCESS_SECRET
+
+
+# On recupere sur le redis les key access/secret du minio
+# -------------------------------------------------------
+dnf install -y redis
+redis_auth=" -h $redisServer -p $redisPort --user dbadmin --pass $redis_password "
+cmd1=" get  Minio_Access_Key_$minio_server_Hostname " 
+ACCESS_KEY=`redis-cli $redis_auth $cmd1`
+cmd2=" get  Minio_Secret_Key_$minio_server_Hostname " 
+ACCESS_SECRET=`redis-cli $redis_auth $cmd2`
+dnf remove -y redis    # plus besoin
 
 
 # INUTILE
@@ -149,7 +170,7 @@ cat <<EOF > /var/www/html/nextcloud/config/config.php
      ],
 	);
 EOF
-sed -i -e 's/MINIO_SERVER/'"$minio_server"'/g'  /var/www/html/nextcloud/config/config.php
+sed -i -e 's/MINIO_SERVER/'"$minio_server_IP"'/g'  /var/www/html/nextcloud/config/config.php
 sed -i -e 's/MINIO_KEY/'"$ACCESS_KEY"'/g'  /var/www/html/nextcloud/config/config.php
 sed -i -e 's/MINIO_SECRET/'"$ACCESS_SECRET"'/g'  /var/www/html/nextcloud/config/config.php
 
@@ -202,3 +223,5 @@ systemctl start httpd
 # - Choix du path DATA pour le chemin nextcloud ??   (car pour minio c est deja dans /data avec un mount sur un disque externe)  
 # - https ?
 # - variabiliser le niveau de log 
+
+
