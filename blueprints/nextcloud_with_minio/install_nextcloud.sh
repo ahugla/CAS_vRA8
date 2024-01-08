@@ -39,7 +39,7 @@ redisPort=6379
 DomainName=cpod-vrealize.az-fkd.cloud-garage.net
 nextcloud_FQDN=$HOSTNAME.$DomainName                                # FQDN du serveur local (nextcloud)
 nextcloud_IP=$(hostname  -I | cut -f1 -d' ')                        # IP du serveur local (nextcloud)
-
+minio_FQDN=$minio_server_Hostname.$DomainName                       # FQDN du serveur minio
 
 cd /tmp
 
@@ -145,13 +145,16 @@ cmd1=" get  Minio_Access_Key_$minio_server_Hostname "
 ACCESS_KEY=`redis-cli $redis_auth $cmd1`
 cmd2=" get  Minio_Secret_Key_$minio_server_Hostname " 
 ACCESS_SECRET=`redis-cli $redis_auth $cmd2`
-dnf remove -y redis    # plus besoin
+
 
 
 
 
 # config de l'acces au minio
 # --------------------------
+# 'hostname' => 'MINIO_SERVER',      hostname, PAS IP (sinon pb avec certif en https)
+# 'port' =>  '9000'                  9000 est aussi le port API (et pas 40149)
+# 'use_ssl' => true,                 pour HTTPS
 cat <<EOF > /var/www/html/nextcloud/config/config.php
 <?php
 	\$CONFIG = array (
@@ -164,14 +167,14 @@ cat <<EOF > /var/www/html/nextcloud/config/config.php
                 'key' => 'MINIO_KEY',
                 'secret' => 'MINIO_SECRET',
                 'port' => 9000,
-                'use_ssl' => false,
+                'use_ssl' => true,
                 // required for some non-Amazon S3 implementations
                 'use_path_style' => true,
         ],
      ],
 	);
 EOF
-sed -i -e 's/MINIO_SERVER/'"$minio_server_IP"'/g'  /var/www/html/nextcloud/config/config.php
+sed -i -e 's/MINIO_SERVER/'"$minio_FQDN"'/g'  /var/www/html/nextcloud/config/config.php
 sed -i -e 's/MINIO_KEY/'"$ACCESS_KEY"'/g'  /var/www/html/nextcloud/config/config.php
 sed -i -e 's/MINIO_SECRET/'"$ACCESS_SECRET"'/g'  /var/www/html/nextcloud/config/config.php
 
@@ -256,6 +259,47 @@ systemctl start httpd
 
 
 
+<< COMMENTS
+# convert crt to pem:
+      openssl x509 -in cert.crt -out cert.pem
+
+# import certif
+sudo -u apache php /var/www/html/nextcloud/occ security:certificates:import /tmp/public.pem
+COMMENTS
+
+
+
+
+#  pour que nextcloud puisse communiquer avec Minio:
+# ----------------------------------------------------
+# dans /var/www/html/nextcloud/config/config.php:
+#   'hostname' => 'MINIO_SERVER',     =>  OUI: hostname  (PAS IP sinon pb avec certif en https)
+#   'port' =>  '9000'                 =>  OUI (9000 est aussi le port API et pas 40149)
+#   'use_ssl' => true,                =>  OUI pour HTTPS
+#  Ajouter le certificat (public.CRT) dans:  /var/www/html/nextcloud/resources/config/ca-bundle.crt
+#  Get public key for minio from redis:
+redis_auth=" -h $redisServer -p $redisPort --user dbadmin --pass $redis_password "
+cmd3=" get  Minio_PublicCRT_$minio_server_Hostname " 
+minio_publicCRT=`redis-cli $redis_auth $cmd3`
+#echo $minio_publicCRT >> /var/www/html/nextcloud/resources/config/ca-bundle.crt
+echo $minio_publicCRT >> /var/www/html/nextcloud/resources/config/temp
+
+# IL FAUT REVENIR A LA LIGNE QUAND NECESSAIRE: 
+#     apres le -----BEGIN CERTIFICATE----- 
+#     avant le -----END CERTIFICATE-----
+sed -i -e 's/-----BEGIN CERTIFICATE-----/-----BEGIN CERTIFICATE-----\n/g'  temp    
+sed -i -e 's/-----END CERTIFICATE-----/\n-----END CERTIFICATE-----/g'  temp    
+more  /var/www/html/nextcloud/resources/config/temp >> /var/www/html/nextcloud/resources/config/ca-bundle.crt
+rm -f /var/www/html/nextcloud/resources/config/temp
+
+
+
+# nettoyage
+dnf remove -y redis    # plus besoin
+
+
+
+
 
 
 
@@ -266,15 +310,3 @@ systemctl start httpd
 # - separer la DB  t-tiers => 3tiers
 # - variabiliser le niveau de log 
 # - acces a minio en https   https://min.io/docs/minio/linux/operations/network-encryption.html
-
-
-<< COMMENTS
-# convert crt to pem
-openssl x509 -in cert.crt -out cert.pem
-
-# import certif
-sudo -u apache php /var/www/html/nextcloud/occ security:certificates:import /tmp/public.pem
-
-
-
-COMMENTS

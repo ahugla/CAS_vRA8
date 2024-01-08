@@ -183,18 +183,30 @@ cmd1=" set  Minio_Access_Key_$HOSTNAME  $Access_Key  EX 1200 "    # supprimé de
 redis-cli $redis_auth $cmd1
 cmd2=" set  Minio_Secret_Key_$HOSTNAME  $Secret_Key  EX 1200 "    # supprimé de redis apres 1200 sec (temporaire)
 redis-cli $redis_auth $cmd2
-dnf remove -y redis    # plus besoin
 
 
 
-<<COMMENTS
-# By default, the MinIO server looks for the TLS keys and certificates
-# certif dans  :   /root/.minio/certs
+# Configuration de l'acces en HTTPS:
+# ---------------------------------
+# By default, the MinIO server looks for the TLS keys and certificates, mais si absent fonctionne en HTTP
+# Le certif est dans  :   /root/.minio/certs
 
 # Generate a self-signed certificate 
 cd /root/.minio/certs
 openssl req -x509 -sha256 -nodes -days 3650 -newkey rsa:2048 -keyout private.key -out public.crt -subj "/C=XX/ST=FR/L=Paris/O=Broadcom/OU=CMPSE/CN=$minio_FQDN"
+# crée : "private.key" et "public.crt"
+# il faut transferer la clé publique "public.crt" sur la VM nextcloud
+PublicCRT=`more public.crt`
+toto=`echo redis-cli $redis_auth set  Minio_PublicCRT_$HOSTNAME  \"$PublicCRT\"  EX 1200`
+eval $toto
+# necessite une config coté nextcloud pour communiquer avec minio
 
-# fonctionne pour minio mais nextcloud n y accede plus !
-COMMENTS
+#redemarrage de minio
+systemctl restart minio
+
+
+
+
+# nettoyage
+dnf remove -y redis    # plus besoin
 
