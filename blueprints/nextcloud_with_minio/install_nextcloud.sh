@@ -281,14 +281,13 @@ COMMENTS
 redis_auth=" -h $redisServer -p $redisPort --user dbadmin --pass $redis_password "
 cmd3=" get  Minio_PublicCRT_$minio_server_Hostname " 
 minio_publicCRT=`redis-cli $redis_auth $cmd3`
-#echo $minio_publicCRT >> /var/www/html/nextcloud/resources/config/ca-bundle.crt
 echo $minio_publicCRT >> /var/www/html/nextcloud/resources/config/temp
 
 # IL FAUT REVENIR A LA LIGNE QUAND NECESSAIRE: 
 #     apres le -----BEGIN CERTIFICATE----- 
 #     avant le -----END CERTIFICATE-----
-sed -i -e 's/-----BEGIN CERTIFICATE-----/-----BEGIN CERTIFICATE-----\n/g'  temp    
-sed -i -e 's/-----END CERTIFICATE-----/\n-----END CERTIFICATE-----/g'  temp    
+sed -i -e 's/-----BEGIN CERTIFICATE-----/-----BEGIN CERTIFICATE-----\n/g'  /var/www/html/nextcloud/resources/config/temp    
+sed -i -e 's/-----END CERTIFICATE-----/\n-----END CERTIFICATE-----/g'      /var/www/html/nextcloud/resources/config/temp    
 more  /var/www/html/nextcloud/resources/config/temp >> /var/www/html/nextcloud/resources/config/ca-bundle.crt
 rm -f /var/www/html/nextcloud/resources/config/temp
 
