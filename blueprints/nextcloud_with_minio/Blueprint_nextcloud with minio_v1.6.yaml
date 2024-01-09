@@ -1,0 +1,99 @@
+kformatVersion: 1
+inputs:
+  nextcloud_admin_password:
+    type: string
+    encrypted: true
+    title: password du compte admin dans nextcloud
+  minio_admin_password:
+    type: string
+    encrypted: true
+    title: password du compte minioadmin dans minio
+  DB_root_password:
+    type: string
+    encrypted: true
+    title: password du compte root pour la DB
+  DB_nextcloud-user_password:
+    type: string
+    encrypted: true
+    title: password du compte nextcloud-user pour la DB nextcloud
+  StorageSize:
+    type: integer
+    title: Volume de données attendu (Go)
+    default: 1
+    minimum: 1
+    maximum: 10
+  StorageClass:
+    type: string
+    default: storage:nfs
+    oneOf:
+      - title: Low perf (NFS)
+        const: storage:nfs
+      - title: High perf (VSAN)
+        const: storage:vsan
+resources:
+  DataStorage:
+    type: Cloud.Volume
+    metadata:
+      layoutPosition:
+        - 0
+        - 1
+    properties:
+      capacityGb: ${input.StorageSize}
+      constraints:
+        - tag: storage:nfs
+  minio:
+    type: Cloud.Machine
+    metadata:
+      layoutPosition:
+        - 1
+        - 1
+    properties:
+      image: Rocky Linux x64 9.x_mix
+      flavor: Small
+      customizationSpec: Linux
+      networks:
+        - network: ${resource.Cloud_Network_1.id}
+          assignment: static
+      cloudConfig: |
+        #cloud-config
+        runcmd:
+          - touch /etc/cloud/cloud-init.disabled
+          - cd /tmp
+          - curl -O https://raw.githubusercontent.com/ahugla/CAS_vRA8/master/blueprints/nextcloud_with_minio/install_minio_for_nextcloud.sh
+          - chmod 755 install_minio_for_nextcloud.sh
+          - ./install_minio_for_nextcloud.sh ${input.minio_admin_password}  ${secret.redis_password}
+      attachedDisks:
+        - source: ${resource.DataStorage.id}
+  nextcloud:
+    type: Cloud.Machine
+    dependsOn:
+      - minio
+    metadata:
+      layoutPosition:
+        - 1
+        - 2
+    properties:
+      image: Rocky Linux x64 9.x_mix
+      flavor: Small
+      customizationSpec: Linux
+      networks:
+        - network: ${resource.Cloud_Network_1.id}
+          assignment: static
+      cloudConfig: |
+        #cloud-config
+        runcmd:
+          - touch /etc/cloud/cloud-init.disabled
+          - cd /tmp
+          - curl -O https://raw.githubusercontent.com/ahugla/CAS_vRA8/master/blueprints/nextcloud_with_minio/install_nextcloud.sh
+          - chmod 755 install_nextcloud.sh
+          - ./install_nextcloud.sh ${input.DB_root_password}  ${input.DB_nextcloud-user_password} ${resource.minio.networks.address[0]} ${resource.minio.resourceName}  ${secret.DeployedVMDefaultPassword}  ${input.nextcloud_admin_password}  ${secret.redis_password}
+  Cloud_Network_1:
+    type: Cloud.Network
+    metadata:
+      layoutPosition:
+        - 2
+        - 0
+    properties:
+      networkType: existing
+      constraints:
+        - tag: net:nsx
