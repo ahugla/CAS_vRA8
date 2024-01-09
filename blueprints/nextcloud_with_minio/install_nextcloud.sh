@@ -254,85 +254,28 @@ sed -i -e 's/HOSTNAME/'"$HOSTNAME"'/g'  /etc/httpd/conf.d/redirect_http.conf
 sed -i -e 's/FQDN/'"$nextcloud_FQDN"'/g'  /etc/httpd/conf.d/redirect_http.conf
 
 # restart apache
-systemctl start httpd
-
-
-
-
-<< COMMENTS
-
-
-download a certif from a website:
-< /dev/null openssl s_client -connect 10.11.10.33:9000 -servername SSSSSSSSSSS | openssl x509 > certif.cert
-
-
-
-# convert crt to pem:
-      openssl x509 -in cert.crt -out cert.pem
-
-# import certif
-sudo -u apache php /var/www/html/nextcloud/occ security:certificates:import /tmp/public.pem
-
-
-
-Verifying a .crt certificate:
-openssl x509 -in public.crt -text -noout
+systemctl restart httpd
 
 
 
 
 
-COMMENTS
-
-
-
-
-#  pour que nextcloud puisse communiquer avec Minio:
-# ----------------------------------------------------
-# dans /var/www/html/nextcloud/config/config.php:
-#   'hostname' => 'MINIO_SERVER',     =>  OUI: hostname  (PAS IP sinon pb avec certif en https)
-#   'port' =>  '9000'                 =>  OUI (9000 est aussi le port API et pas 40149)
-#   'use_ssl' => true,                =>  OUI pour HTTPS
-#  Ajouter le certificat (public.CRT) dans:  /var/www/html/nextcloud/resources/config/ca-bundle.crt
-
-
-<< COMMENTS
-#  Get public key for minio from redis:
-redis_auth=" -h $redisServer -p $redisPort --user dbadmin --pass $redis_password "
-cmd3=" get  Minio_PublicCRT_$minio_server_Hostname " 
-minio_publicCRT=`redis-cli $redis_auth $cmd3`
-echo $minio_publicCRT >> /var/www/html/nextcloud/resources/config/temp
-
-cat /var/www/html/nextcloud/resources/config/temp >> /var/www/html/nextcloud/resources/config/ca-bundle.crt
-
-
-# IL FAUT REVENIR A LA LIGNE QUAND NECESSAIRE: 
-#     apres le -----BEGIN CERTIFICATE----- 
-#     avant le -----END CERTIFICATE-----
-sed -i -e 's/-----BEGIN CERTIFICATE-----/-----BEGIN CERTIFICATE-----\n/g'  /var/www/html/nextcloud/resources/config/temp    
-sed -i -e 's/-----END CERTIFICATE-----/\n-----END CERTIFICATE-----/g'      /var/www/html/nextcloud/resources/config/temp    
-more  /var/www/html/nextcloud/resources/config/temp >> /var/www/html/nextcloud/resources/config/ca-bundle.crt
-COMMENTS
-
-
-
-
+# Pour que nextcloud puisse communiquer avec Minio, il faut :
+# ---------------------------------------------------------
+# 1/ Dans /var/www/html/nextcloud/config/config.php:
+#     'hostname' => 'MINIO_SERVER',     =>  OUI: hostname  (PAS IP sinon pb avec certif en https)
+#     'port' =>  '9000'                 =>  OUI (9000 est aussi le port API et pas 40149)
+#     'use_ssl' => true,                =>  OUI pour HTTPS
+# 2/ Ajouter le certificat (public.crt) dans:  /var/www/html/nextcloud/resources/config/ca-bundle.crt
 # download the self-signed certif from minio website:
 < /dev/null openssl s_client -connect $minio_FQDN:9000  | openssl x509 > /var/www/html/nextcloud/resources/config/certifminio.crt
-
 # update du fichier dans leqyel on met les certifs utilisés par nextcloud
 cat /var/www/html/nextcloud/resources/config/certifminio.crt >> /var/www/html/nextcloud/resources/config/ca-bundle.crt
 
 
-
-
 # nettoyage
-
-#rm -f /var/www/html/nextcloud/resources/config/temp                  ########################
+rm -f /var/www/html/nextcloud/resources/config/certifminio.crt
 dnf remove -y redis    # plus besoin
-
-
-
 
 
 
@@ -343,21 +286,7 @@ dnf remove -y redis    # plus besoin
 #
 # - separer la DB  t-tiers => 3tiers
 # - variabiliser le niveau de log 
-# - acces a minio en https   https://min.io/docs/minio/linux/operations/network-encryption.html
+# - IP et hostname?
 
 
 
-
-<< COMMENTS
-----------
-
-download a certif from a website:
-< /dev/null openssl s_client -connect 10.11.10.33:9000 -servername SSSSSSSSSSS | openssl x509 > certif.cert
-
-openssl x509 -in certif.cert -out certif.pem
-
-
-
-sudo -u apache php /var/www/html/nextcloud/occ security:certificates:import /var/www/html/nextcloud/resources/config/certif.pem
-
-COMMENTS

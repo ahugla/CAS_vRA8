@@ -186,6 +186,7 @@ redis-cli $redis_auth $cmd2
 
 
 
+
 # Configuration de l'acces en HTTPS:
 # ---------------------------------
 # By default, the MinIO server looks for the TLS keys and certificates, mais si absent fonctionne en HTTP
@@ -195,13 +196,12 @@ redis-cli $redis_auth $cmd2
 cd /root/.minio/certs
 openssl req -x509 -sha256 -nodes -days 3650 -newkey rsa:2048 -keyout private.key -out public.crt -subj "/C=XX/ST=FR/L=Paris/O=Broadcom/OU=CMPSE/CN=$minio_FQDN"
 # crée : "private.key" et "public.crt"
-# il faut transferer "public.crt" sur la VM nextcloud et pour cela on va la mettre sur le redis 
-cat /root/.minio/certs/public.crt | redis-cli $redis_auth -x set  Minio_PublicCRT_$HOSTNAME       #  cree la variable sur redis
-redis-cli $redis_auth EXPIRE Minio_PublicCRT_$HOSTNAME 1200                                       #  met l'expiration à 1200 sec
-
 
 #redemarrage de minio
 systemctl restart minio
+
+
+
 
 
 # nettoyage
