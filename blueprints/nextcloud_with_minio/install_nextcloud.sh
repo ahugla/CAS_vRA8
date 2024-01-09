@@ -289,7 +289,8 @@ echo $minio_publicCRT >> /var/www/html/nextcloud/resources/config/temp
 sed -i -e 's/-----BEGIN CERTIFICATE-----/-----BEGIN CERTIFICATE-----\n/g'  /var/www/html/nextcloud/resources/config/temp    
 sed -i -e 's/-----END CERTIFICATE-----/\n-----END CERTIFICATE-----/g'      /var/www/html/nextcloud/resources/config/temp    
 more  /var/www/html/nextcloud/resources/config/temp >> /var/www/html/nextcloud/resources/config/ca-bundle.crt
-rm -f /var/www/html/nextcloud/resources/config/temp
+
+#rm -f /var/www/html/nextcloud/resources/config/temp                  ########################
 
 
 

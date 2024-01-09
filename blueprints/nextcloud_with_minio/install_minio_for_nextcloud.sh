@@ -198,6 +198,9 @@ openssl req -x509 -sha256 -nodes -days 3650 -newkey rsa:2048 -keyout private.key
 # il faut transferer la clé publique "public.crt" sur la VM nextcloud
 PublicCRT=`more public.crt`
 toto=`echo redis-cli $redis_auth set  Minio_PublicCRT_$HOSTNAME  \"$PublicCRT\"  EX 1200`
+
+echo $toto > /tmp/alexLOG.txt     ########################
+
 eval $toto
 # necessite une config coté nextcloud pour communiquer avec minio
 
