@@ -292,7 +292,9 @@ dnf remove -y redis    # plus besoin
 #
 # - separer la DB  t-tiers => 3tiers
 # - variabiliser le niveau de log 
-# - IP et hostname?
+# - retirer la vision d'apache /
+# - interface moche ????    =>  pas assez de memoire? 
+
 
 
 
