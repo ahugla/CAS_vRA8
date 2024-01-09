@@ -291,10 +291,16 @@ dnf remove -y redis    # plus besoin
 # IDEE D'AMELIORATION
 #
 # - separer la DB  t-tiers => 3tiers
-# - variabiliser le niveau de log 
-# - retirer la vision d'apache /
-# - interface moche ????    =>  pas assez de memoire? 
 
+# - variabiliser le niveau de log 
+
+# - retirer la vision d'apache / et rediriger vers /nextcloud/
+
+# - interface moche ????    =>  pas assez de memoire?   ajouter a PHP ??
+#             sudo -u apache php /var/www/html/nextcloud/occ   =>   The current PHP memory limit is below the recommended value of 512MB.
+#                           /etc/php.ini   => memory_limit = 512M  (au lieu de 128M)
+#              ou faire un update/upgrade des pachages?
+#              dependance manquante?
 
 
 
