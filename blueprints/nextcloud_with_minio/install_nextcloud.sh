@@ -318,10 +318,10 @@ COMMENTS
 
 
 # download the self-signed certif from minio website:
-< /dev/null openssl s_client -connect $minio_FQDN:9000  | openssl x509 > var/www/html/nextcloud/resources/config/certifminio.crt
+< /dev/null openssl s_client -connect $minio_FQDN:9000  | openssl x509 > /var/www/html/nextcloud/resources/config/certifminio.crt
 
 # update du fichier dans leqyel on met les certifs utilisés par nextcloud
-cat var/www/html/nextcloud/resources/config/certifminio.crt >> /var/www/html/nextcloud/resources/config/ca-bundle.crt
+cat /var/www/html/nextcloud/resources/config/certifminio.crt >> /var/www/html/nextcloud/resources/config/ca-bundle.crt
 
 
 
