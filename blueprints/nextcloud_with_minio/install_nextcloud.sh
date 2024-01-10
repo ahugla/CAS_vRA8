@@ -150,11 +150,29 @@ ACCESS_SECRET=`redis-cli $redis_auth $cmd2`
 
 
 
-# config de l'acces au minio
-# --------------------------
-# 'hostname' => 'MINIO_SERVER',      hostname, PAS IP (sinon pb avec certif en https)
-# 'port' =>  '9000'                  9000 est aussi le port API (et pas 40149)
-# 'use_ssl' => true,                 pour HTTPS
+# Config de l'acces au minio en https
+# -----------------------------------
+
+# Pour que nextcloud puisse communiquer avec Minio, il faut :
+#  1/ Dans /var/www/html/nextcloud/config/config.php:
+#     'hostname' => 'MINIO_SERVER',     =>  OUI: hostname  (PAS IP sinon pb avec certif en https)
+#     'port' =>  '9000'                 =>  OUI (9000 est aussi le port API et pas 40149)
+#     'use_ssl' => true,                =>  OUI pour HTTPS
+#  2/ Ajouter le certificat (public.crt) dans:  /var/www/html/nextcloud/resources/config/ca-bundle.crt
+# Download the self-signed certif from minio website:
+< /dev/null openssl s_client -connect $minio_FQDN:9000  | openssl x509 > /var/www/html/nextcloud/resources/config/certifminio.crt
+# update du fichier dans lequel on met les certifs utilisés par nextcloud
+echo " " >> /var/www/html/nextcloud/resources/config/ca-bundle.crt
+echo "Serveur minio pour nextcloud" >> /var/www/html/nextcloud/resources/config/ca-bundle.crt
+echo "============================" >> /var/www/html/nextcloud/resources/config/ca-bundle.crt
+cat /var/www/html/nextcloud/resources/config/certifminio.crt >> /var/www/html/nextcloud/resources/config/ca-bundle.crt
+
+# Pour que le code PHP (donc le systeme) puisse acceder en HTTPS il faut mettre a jour: /etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem  (Never upadate manually)
+# Il est fortement deconseillé d'ecrire directement ce fichier , il faut placer le certif dans '/usr/share/pki/ca-trust-source/anchors/' et faire 'update-ca-trust'
+cp  /var/www/html/nextcloud/resources/config/certifminio.crt  /usr/share/pki/ca-trust-source/anchors/ et faire 
+update-ca-trust
+
+# config acces minio
 cat <<EOF > /var/www/html/nextcloud/config/config.php
 <?php
 	\$CONFIG = array (
@@ -179,16 +197,19 @@ sed -i -e 's/MINIO_KEY/'"$ACCESS_KEY"'/g'  /var/www/html/nextcloud/config/config
 sed -i -e 's/MINIO_SECRET/'"$ACCESS_SECRET"'/g'  /var/www/html/nextcloud/config/config.php
 
 
+
+
+
 # Enable permission for the Apache webserver user to access the NextCloud files
 chown -R apache:apache /var/www/html/nextcloud/
-
 
 # restart apache
 systemctl start httpd
 
 
 
-# install et config nextcloud  (equivalent a ce qui se passe lorsqu'on se connecte pour la premiere fois )
+
+# Install et config nextcloud  (equivalent a ce qui se passe lorsqu'on se connecte pour la premiere fois )
 # ----------------------------
 # https://docs.nextcloud.com/server/latest/admin_manual/configuration_server/occ_command.html#command-line-installation
 #sudo -u apache php /var/www/html/nextcloud/occ
@@ -226,6 +247,7 @@ ln -s  /var/www/html/nextcloud/data/nextcloud.log  /var/log/nextcloud.log
 
 
 
+
 # Configuration HTTPS dans Apache
 # -------------------------------
 # path vers le certificat SSL d'apache:
@@ -260,25 +282,6 @@ systemctl restart httpd
 
 
 
-# Pour que nextcloud puisse communiquer avec Minio, il faut :
-# ---------------------------------------------------------
-# 1/ Dans /var/www/html/nextcloud/config/config.php:
-#     'hostname' => 'MINIO_SERVER',     =>  OUI: hostname  (PAS IP sinon pb avec certif en https)
-#     'port' =>  '9000'                 =>  OUI (9000 est aussi le port API et pas 40149)
-#     'use_ssl' => true,                =>  OUI pour HTTPS
-# 2/ Ajouter le certificat (public.crt) dans:  /var/www/html/nextcloud/resources/config/ca-bundle.crt
-# download the self-signed certif from minio website:
-< /dev/null openssl s_client -connect $minio_FQDN:9000  | openssl x509 > /var/www/html/nextcloud/resources/config/certifminio.crt
-# update du fichier dans lequel on met les certifs utilisés par nextcloud
-echo " " >> /var/www/html/nextcloud/resources/config/ca-bundle.crt
-echo "Serveur minio pour nextcloud" >> /var/www/html/nextcloud/resources/config/ca-bundle.crt
-echo "============================" >> /var/www/html/nextcloud/resources/config/ca-bundle.crt
-cat /var/www/html/nextcloud/resources/config/certifminio.crt >> /var/www/html/nextcloud/resources/config/ca-bundle.crt
-
-
-
-
-
 # nettoyage
 rm -f /var/www/html/nextcloud/resources/config/certifminio.crt
 dnf remove -y redis    # plus besoin
@@ -295,12 +298,5 @@ dnf remove -y redis    # plus besoin
 # - variabiliser le niveau de log 
 
 # - retirer la vision d'apache / et rediriger vers /nextcloud/
-
-# - interface moche ????    =>  pas assez de memoire?   ajouter a PHP ??
-#             sudo -u apache php /var/www/html/nextcloud/occ   =>   The current PHP memory limit is below the recommended value of 512MB.
-#                           /etc/php.ini   => memory_limit = 512M  (au lieu de 128M)
-#              ou faire un update/upgrade des pachages?
-#              dependance manquante?
-
 
 
