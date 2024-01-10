@@ -169,7 +169,7 @@ cat /var/www/html/nextcloud/resources/config/certifminio.crt >> /var/www/html/ne
 
 # Pour que le code PHP (donc le systeme) puisse acceder en HTTPS il faut mettre a jour: /etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem  (Never upadate manually)
 # Il est fortement deconseillé d'ecrire directement ce fichier , il faut placer le certif dans '/usr/share/pki/ca-trust-source/anchors/' et faire 'update-ca-trust'
-cp  /var/www/html/nextcloud/resources/config/certifminio.crt  /usr/share/pki/ca-trust-source/anchors/ et faire 
+cp /var/www/html/nextcloud/resources/config/certifminio.crt  /usr/share/pki/ca-trust-source/anchors/
 update-ca-trust
 
 # config acces minio
@@ -293,10 +293,12 @@ dnf remove -y redis    # plus besoin
 
 # IDEE D'AMELIORATION
 #
-# - separer la DB  t-tiers => 3tiers
+# - separer la DB  2-tiers => 3tiers
 
 # - variabiliser le niveau de log 
 
-# - retirer la vision d'apache / et rediriger vers /nextcloud/
+# - retirer la vision de la page d'accueil d'apache / et rediriger vers /nextcloud/
+
+# - Attendre la fin d'execution du script cloud init avec de marquer comme fini ??   vis une clé sur redis ?
 
 
