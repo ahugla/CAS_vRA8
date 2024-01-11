@@ -30,7 +30,7 @@ minio_root_password=$5
 nextcloud_admin_password=$6
 #echo "nextcloud_admin_password = " $nextcloud_admin_password       # compte admin de nextcloud (UI)
 redis_password=$7                                                   # password de la base externe redis dans laquelle on a mis le accessKey/secretKey pour minio
-loglevel = $8                                                       # loglevel ('debug', 'info' ou 'error') . Impacte httpd et nextcloud
+loglevel=$8                                                       # loglevel ('debug', 'info' ou 'error') . Impacte httpd et nextcloud
 
 
 
