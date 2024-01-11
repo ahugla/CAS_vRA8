@@ -6,7 +6,7 @@
 #   Install LAMP stack with mariaDB
 #
 #
-#   USAGE : ./script.sh  [DB_root_password]  [DB_nextcloud_user_password]  [minio_server_IP]  [minio_server_Hostname] [minio_root_password]  [nextcloud_admin_password]  [redis_password]
+#   USAGE : ./script.sh  [DB_root_password]  [DB_nextcloud_user_password]  [minio_server_IP]  [minio_server_Hostname] [minio_root_password]  [nextcloud_admin_password]  [redis_password]  [loglevel]
 #
 #
 #   ACCESS : IP/nextcloud avec le compte "admin" 
@@ -21,7 +21,7 @@
 # Recuperation des variables
 # --------------------------
 DB_root_password=$1
-#echo "DB_root_password = " $DB_root_password					    # full admin sur la DB
+#echo "DB_root_password = " $DB_root_password					        # full admin sur la DB
 DB_nextcloud_user_password=$2
 #echo "DB_nextcloud_user_password = " $DB_nextcloud_user_password   # compte qui a les droits sur la DB nextcloud
 minio_server_IP=$3
@@ -30,6 +30,8 @@ minio_root_password=$5
 nextcloud_admin_password=$6
 #echo "nextcloud_admin_password = " $nextcloud_admin_password       # compte admin de nextcloud (UI)
 redis_password=$7                                                   # password de la base externe redis dans laquelle on a mis le accessKey/secretKey pour minio
+loglevel = $8                                                       # loglevel ('debug', 'info' ou 'error') . Impacte httpd et nextcloud
+
 
 
 # parametres
@@ -40,6 +42,18 @@ DomainName=cpod-vrealize.az-fkd.cloud-garage.net
 nextcloud_FQDN=$HOSTNAME.$DomainName                                # FQDN du serveur local (nextcloud)
 nextcloud_IP=$(hostname  -I | cut -f1 -d' ')                        # IP du serveur local (nextcloud)
 minio_FQDN=$minio_server_Hostname.$DomainName                       # FQDN du serveur minio
+# parametres de log
+# ----------------
+#debug => {httpd=debug, nextcloud=0}      info => {httpd=info, nextcloud=1}       error => {httpd=error, nextcloud=3} 
+loglevel_httpd=$loglevel
+loglevel_nextcloud=1
+if [ "$loglevel" == "debug" ]; then loglevel_nextcloud=0; fi
+if [ "$loglevel" == "info" ];  then loglevel_nextcloud=1; fi
+if [ "$loglevel" == "error" ]; then loglevel_nextcloud=3; fi
+echo "loglevel_httpd = $loglevel_httpd"
+echo "loglevel_nextcloud = $loglevel_nextcloud"
+
+
 
 cd /tmp
 
@@ -203,6 +217,9 @@ sed -i -e 's/MINIO_SECRET/'"$ACCESS_SECRET"'/g'  /var/www/html/nextcloud/config/
 # Enable permission for the Apache webserver user to access the NextCloud files
 chown -R apache:apache /var/www/html/nextcloud/
 
+# changement du loglevel de httpd ('LogLevel warn' par defaut)
+sed -i -e 's/LogLevel warn/LogLevel '"$loglevel_httpd"'/g'  /etc/httpd/conf/httpd.conf
+
 # restart apache
 systemctl start httpd
 
@@ -233,9 +250,12 @@ sudo -u apache php /var/www/html/nextcloud/occ  config:system:set   trusted_doma
 sudo -u apache php /var/www/html/nextcloud/occ  config:system:set   trusted_domains  2 --value=$nextcloud_FQDN
 
 
-# Configurer le log level a 1
+# Configurer le log level de nextcloud 
 # loglevel : 0=DEBUG(All activity), 1=INFO, 2=WARN, 3=ERROR, 5=FATAL
-sudo -u apache php /var/www/html/nextcloud/occ  config:system:set   loglevel --value='1'
+#sudo -u apache php /var/www/html/nextcloud/occ  config:system:set   loglevel --value='1'
+sudo -u apache php /var/www/html/nextcloud/occ  config:system:set   loglevel --value=$loglevel_nextcloud
+
+
 
 
 # inutile desormais car install et conf effectuée
@@ -294,11 +314,12 @@ dnf remove -y redis    # plus besoin
 # IDEE D'AMELIORATION
 #
 # - separer la DB  2-tiers => 3tiers
-
-# - variabiliser le niveau de log 
-
-# - retirer la vision de la page d'accueil d'apache / et rediriger vers /nextcloud/
-
+#
 # - Attendre la fin d'execution du script cloud init avec de marquer comme fini ??   vis une clé sur redis ?
+#
+
+
+
+
 
 
