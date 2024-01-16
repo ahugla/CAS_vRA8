@@ -6,7 +6,7 @@
 #   Install LAMP stack with mariaDB
 #
 #
-#   USAGE : ./script.sh  [DB_root_password]  [DB_nextcloud_user_password]  [minio_server_IP]  [minio_server_Hostname] [minio_root_password]  [nextcloud_admin_password]  [redis_password]  [loglevel]
+#   USAGE : ./script.sh  [DB_nextcloud_user_password]  [minio_server_IP]  [minio_server_Hostname] [minio_root_password]  [nextcloud_admin_password]  [redis_password]  [loglevel]  [DB_server_Hostname]
 #
 #
 #   ACCESS : IP/nextcloud avec le compte "admin" 
@@ -20,17 +20,29 @@
 
 # Recuperation des variables
 # --------------------------
-DB_root_password=$1
-#echo "DB_root_password = " $DB_root_password					        # full admin sur la DB
-DB_nextcloud_user_password=$2
-#echo "DB_nextcloud_user_password = " $DB_nextcloud_user_password   # compte qui a les droits sur la DB nextcloud
-minio_server_IP=$3
-minio_server_Hostname=$4
-minio_root_password=$5
-nextcloud_admin_password=$6
-#echo "nextcloud_admin_password = " $nextcloud_admin_password       # compte admin de nextcloud (UI)
-redis_password=$7                                                   # password de la base externe redis dans laquelle on a mis le accessKey/secretKey pour minio
-loglevel=$8                                                       # loglevel ('debug', 'info' ou 'error') . Impacte httpd et nextcloud
+
+DB_nextcloud_user_password=$1                                       # compte de service qu'utilise nesxtcloud pour la DB
+minio_server_IP=$2
+minio_server_Hostname=$3
+minio_root_password=$4
+nextcloud_admin_password=$5                                         # compte admin de nextcloud (UI)
+redis_password=$6                                                   # password de la base externe redis dans laquelle on a mis le accessKey/secretKey pour minio
+loglevel=$7                                                         # loglevel ('debug', 'info' ou 'error') . Impacte httpd et nextcloud
+DB_server_Hostname=$8                                               # hostname de la database
+
+
+
+tempLogLocation="/tmp/script.log"
+
+echo "DB_nextcloud_user_password = " $DB_nextcloud_user_password    >>   $tempLogLocation
+echo "minio_server_IP = " $minio_server_IP                          >>   $tempLogLocation
+echo "minio_server_Hostname = " $minio_server_Hostname              >>   $tempLogLocation
+echo "minio_root_password = " $minio_root_password                  >>   $tempLogLocation
+echo "nextcloud_admin_password = " $nextcloud_admin_password        >>   $tempLogLocation
+echo "redis_password = " $redis_password                            >>   $tempLogLocation
+echo "loglevel = " $loglevel                                        >>   $tempLogLocation
+echo "DB_server_Hostname = " $DB_server_Hostname                    >>   $tempLogLocation
+
 
 
 
@@ -50,10 +62,9 @@ loglevel_nextcloud=1
 if [ "$loglevel" == "debug" ]; then loglevel_nextcloud=0; fi
 if [ "$loglevel" == "info" ];  then loglevel_nextcloud=1; fi
 if [ "$loglevel" == "error" ]; then loglevel_nextcloud=3; fi
-echo "loglevel_httpd = $loglevel_httpd"
-echo "loglevel_nextcloud = $loglevel_nextcloud"
-
-
+echo "loglevel_httpd = $loglevel_httpd"                              >>   $tempLogLocation
+echo "loglevel_nextcloud = $loglevel_nextcloud"                      >>   $tempLogLocation
+DB_server_FQDN=$DB_server_Hostname.$DomainName 
 
 cd /tmp
 
@@ -198,7 +209,7 @@ systemctl start httpd
 sudo -u apache php /var/www/html/nextcloud/occ maintenance:install \
    --admin-user='admin' \
    --admin-pass=$nextcloud_admin_password \
-   --database-host='localhost' \
+   --database-host=$DB_server_FQDN \
    --database='mysql' \
    --database-name='nextcloud_db' \
    --database-user='nextcloud-user' \
