@@ -317,7 +317,10 @@ dnf remove -y redis    # plus besoin
 #
 # - Attendre la fin d'execution du script cloud init avec de marquer comme fini ??   vis une clé sur redis ?
 #
-
+# - login de Minio aussi
+#
+# - integration dans Log Insight
+#
 
 
 
