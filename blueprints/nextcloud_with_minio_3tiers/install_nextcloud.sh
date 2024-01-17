@@ -6,10 +6,10 @@
 #   Install LAMP stack with mariaDB
 #
 #
-#   USAGE : ./script.sh  [DB_nextcloud_user_password]  [minio_server_IP]  [minio_server_Hostname] [minio_root_password]  [nextcloud_admin_password]  [redis_password]  [loglevel]  [DB_server_Hostname]
+#   USAGE : ./script.sh  [DB_nextcloud_user_password]  [minio_server_IP]  [minio_server_Hostname]  [nextcloud_admin_password]  [redis_password]  [loglevel]  [DB_server_Hostname]
 #
 #
-#   ACCESS : IP/nextcloud avec le compte "admin" 
+#   ACCESS : https://IP/nextcloud avec le compte "admin" 
 #	
 #   https://wiki.crowncloud.net/?How_to_Install_LAMP_Stack_on_Rocky_Linux_9
 #   https://wiki.crowncloud.net/?How_to_Install_NextCloud_on_Rocky_Linux_9
@@ -21,25 +21,22 @@
 # Recuperation des variables
 # --------------------------
 
-DB_nextcloud_user_password=$1                                       # compte de service qu'utilise nesxtcloud pour la DB
+DB_nextcloud_user_password=$1                                       # compte de service qu'utilise nextcloud pour la DB
 minio_server_IP=$2
 minio_server_Hostname=$3
-minio_root_password=$4
-nextcloud_admin_password=$5                                         # compte admin de nextcloud (UI)
-redis_password=$6                                                   # password de la base externe redis dans laquelle on a mis le accessKey/secretKey pour minio
-loglevel=$7                                                         # loglevel ('debug', 'info' ou 'error') . Impacte httpd et nextcloud
-DB_server_Hostname=$8                                               # hostname de la database
+nextcloud_admin_password=$4                                         # compte admin de nextcloud (UI)
+redis_password=$5                                                   # password de la base externe redis dans laquelle on a mis le accessKey/secretKey pour minio
+loglevel=$6                                                         # loglevel ('debug', 'info' ou 'error') . Impacte httpd et nextcloud
+DB_server_Hostname=$7                                               # hostname de la database
 
 
 
-<< COMMENTS
 
-tempLogLocation="/tmp/script.log"
-
+tempLogLocation="/tmp/install_script_variables.log"
+# log des variables d'entree
 echo "DB_nextcloud_user_password = " $DB_nextcloud_user_password    >>   $tempLogLocation
 echo "minio_server_IP = " $minio_server_IP                          >>   $tempLogLocation
 echo "minio_server_Hostname = " $minio_server_Hostname              >>   $tempLogLocation
-echo "minio_root_password = " $minio_root_password                  >>   $tempLogLocation
 echo "nextcloud_admin_password = " $nextcloud_admin_password        >>   $tempLogLocation
 echo "redis_password = " $redis_password                            >>   $tempLogLocation
 echo "loglevel = " $loglevel                                        >>   $tempLogLocation
@@ -56,6 +53,7 @@ DomainName=cpod-vrealize.az-fkd.cloud-garage.net
 nextcloud_FQDN=$HOSTNAME.$DomainName                                # FQDN du serveur local (nextcloud)
 nextcloud_IP=$(hostname  -I | cut -f1 -d' ')                        # IP du serveur local (nextcloud)
 minio_FQDN=$minio_server_Hostname.$DomainName                       # FQDN du serveur minio
+DB_server_FQDN=$DB_server_Hostname.$DomainName                      # FQDN de la Database
 # parametres de log
 # ----------------
 #debug => {httpd=debug, nextcloud=0}      info => {httpd=info, nextcloud=1}       error => {httpd=error, nextcloud=3} 
@@ -64,9 +62,21 @@ loglevel_nextcloud=1
 if [ "$loglevel" == "debug" ]; then loglevel_nextcloud=0; fi
 if [ "$loglevel" == "info" ];  then loglevel_nextcloud=1; fi
 if [ "$loglevel" == "error" ]; then loglevel_nextcloud=3; fi
-echo "loglevel_httpd = $loglevel_httpd"                              >>   $tempLogLocation
-echo "loglevel_nextcloud = $loglevel_nextcloud"                      >>   $tempLogLocation
-DB_server_FQDN=$DB_server_Hostname.$DomainName 
+
+
+
+# log des parametres etablis
+echo "redisServer = " $redisServer                                  >>   $tempLogLocation  
+echo "redisPort = " $redisPort                                      >>   $tempLogLocation  
+echo "DomainName = " $DomainName                                    >>   $tempLogLocation  
+echo "nextcloud_IP = " $nextcloud_IP                                >>   $tempLogLocation  
+echo "minio_FQDN = " $minio_FQDN                                    >>   $tempLogLocation  
+echo "DB_server_FQDN = " $DB_server_FQDN                            >>   $tempLogLocation  
+echo "nextcloud_FQDN = " $nextcloud_FQDN                            >>   $tempLogLocation  
+echo "loglevel_httpd = $loglevel_httpd"                             >>   $tempLogLocation
+echo "loglevel_nextcloud = $loglevel_nextcloud"                     >>   $tempLogLocation
+
+
 
 cd /tmp
 
@@ -110,15 +120,6 @@ chown -R apache:apache /var/www/html/nextcloud/
 systemctl restart httpd
 
 
-# OLD METHOD (sshpass)
-# ----------
-# On  recupere l'acces KEY/SECRET pour minio dans le fichier /root/minioTokenForNextcloud sur le serveur minio
-# full_line=`sshpass -p $minio_root_password ssh -o StrictHostKeyChecking=no root@$minio_server_IP 'cat /root/minioTokenForNextcloud'`
-# echo "full_line = $full_line"
-# ACCESS_KEY=`echo $full_line | awk '{print $3}'`
-# ACCESS_SECRET=`echo $full_line | awk '{print $6}'`
-# echo $ACCESS_KEY
-# echo $ACCESS_SECRET
 
 
 # On recupere sur le redis les key access/secret du minio
@@ -285,17 +286,13 @@ dnf remove -y redis    # plus besoin
 
 # IDEE D'AMELIORATION
 #
-# - separer la DB  2-tiers => 3tiers
 #
 # - Attendre la fin d'execution du script cloud init avec de marquer comme fini ??   vis une clé sur redis ?
 #
-# - login de Minio aussi
-#
 # - integration dans Log Insight
 #
+#
 
 
 
 
-
-COMMENTS
