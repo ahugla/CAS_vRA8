@@ -62,7 +62,10 @@ mysql -u root  --password=$DB_root_password -e "FLUSH PRIVILEGES;"
 
 
 # Enable remote connection
-sed -i -e '/bind-address/s/^#//' /etc/my.cnf.d/mariadb-server.cnf     # enleve le signe de commentaire en debut de ligne
+# sed -i -e '/bind-address/s/^#//' /etc/my.cnf.d/mariadb-server.cnf     # enleve le signe de commentaire en debut de ligne
+echo "[mysqld]"  >>  /etc/my.cnf.d/50-server.cnf
+echo "bind-address=0.0.0.0"  >>  /etc/my.cnf.d/50-server.cnf
+
 
 
 systemctl restart mariadb

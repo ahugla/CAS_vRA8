@@ -88,11 +88,6 @@ php -v
 
 
 
-##### CONFIGURE CONNEXION TO MARIA DB
-
-
-
-
 # install nextcloud
 # -----------------
 systemctl stop httpd
@@ -201,6 +196,7 @@ systemctl start httpd
 
 # Install et config nextcloud  (equivalent a ce qui se passe lorsqu'on se connecte pour la premiere fois )
 # ----------------------------
+# sudo -u apache php /var/www/html/nextcloud/occ   status   => status (installé ou pas)
 # https://docs.nextcloud.com/server/latest/admin_manual/configuration_server/occ_command.html#command-line-installation
 #sudo -u apache php /var/www/html/nextcloud/occ
 #sudo -u apache php /var/www/html/nextcloud/occ maintenance:install --help
@@ -210,6 +206,7 @@ sudo -u apache php /var/www/html/nextcloud/occ maintenance:install \
    --admin-user='admin' \
    --admin-pass=$nextcloud_admin_password \
    --database-host=$DB_server_FQDN \
+   #--database-port='3306' \
    --database='mysql' \
    --database-name='nextcloud_db' \
    --database-user='nextcloud-user' \
