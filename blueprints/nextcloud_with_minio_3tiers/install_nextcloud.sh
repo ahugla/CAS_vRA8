@@ -32,6 +32,8 @@ DB_server_Hostname=$8                                               # hostname d
 
 
 
+<< COMMENTS
+
 tempLogLocation="/tmp/script.log"
 
 echo "DB_nextcloud_user_password = " $DB_nextcloud_user_password    >>   $tempLogLocation
@@ -296,3 +298,4 @@ dnf remove -y redis    # plus besoin
 
 
 
+COMMENTS
