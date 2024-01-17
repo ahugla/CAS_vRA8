@@ -16,6 +16,17 @@ inputs:
     type: string
     encrypted: true
     title: password du compte de service nextcloud-user qu'utilise nextcloud
+  nextcloudSize:
+    type: string
+    description: Dimension de la VM nextcloud
+    default: small
+    oneOf:
+      - title: 1 vcpu - 2 Go
+        const: small
+      - title: 2 vcpu - 4 Go
+        const: medium
+      - title: 4 vcpu - 8 Go
+        const: large
   StorageSize:
     type: integer
     title: Volume de données attendu (Go)
@@ -86,7 +97,7 @@ resources:
         - 2
     properties:
       image: Rocky Linux x64 9.x_mix
-      flavor: Small
+      flavor: ${input.nextcloudSize}
       customizationSpec: Linux
       networks:
         - network: ${resource.Cloud_Network_1.id}
