@@ -57,14 +57,17 @@ mysql -u root  --password=$DB_root_password -e  "CREATE DATABASE nextcloud_db;"
 #4 rows in set (0.00 sec)
 
 #Create a User called nextcloud-user and grant permissions on the nextcloud_db database
-mysql -u root  --password=$DB_root_password -e "GRANT ALL ON nextcloud_db.* TO 'nextcloud-user'@'localhost' IDENTIFIED BY '$DB_nextcloud_user_password';"
+mysql -u root  --password=$DB_root_password -e "GRANT ALL ON nextcloud_db.* TO 'nextcloud-user'@'%' IDENTIFIED BY '$DB_nextcloud_user_password';"
 mysql -u root  --password=$DB_root_password -e "FLUSH PRIVILEGES;"
 
 
 # Enable remote connection
-# sed -i -e '/bind-address/s/^#//' /etc/my.cnf.d/mariadb-server.cnf     # enleve le signe de commentaire en debut de ligne
-echo "[mysqld]"  >>  /etc/my.cnf.d/50-server.cnf
-echo "bind-address=0.0.0.0"  >>  /etc/my.cnf.d/50-server.cnf
+
+sed -i -e '/bind-address/s/^#//' /etc/my.cnf.d/mariadb-server.cnf     # enleve le signe de commentaire en debut de ligne
+
+#echo "[mysqld]"  >>  /etc/my.cnf.d/50-server.cnf
+#echo "bind-address=0.0.0.0"  >>  /etc/my.cnf.d/50-server.cnf
+
 
 
 
