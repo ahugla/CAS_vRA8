@@ -13,11 +13,11 @@ resources:
         - 0
         - 0
     properties:
-      image: CentOS7.6
+      image: Rocky Linux x64 9.x_mix
       flavor: Small
       customizationSpec: Linux
       networks:
-        - network: '${resource.Cloud_Network_1.id}'
+        - network: ${resource.Cloud_Network_1.id}
           assignment: static
       cloudConfig: |
         #cloud-config
