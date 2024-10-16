@@ -23,12 +23,18 @@ curl -O https://raw.githubusercontent.com/ahugla/CAS_vRA8/master/blueprints/mari
 
 # install MySLQ
 yum install -y  git wget vim mariadb-server
-systemctl start mariadb
-systemctl enable mariadb
 
 
 # Allow remote connections
-# /etc/mysql/mysql.conf.d/mysqld.cnf
+# /etc/mysql/mysql.conf.d/mysqld.cnf    or   /etc/my.cnf
+# normalement ce fichier est créé par defaut a l install
+# Ajouter [mysql] au debut pour pas que ca plante
+sed -i '1i [mysqld]' /etc/my.cnf
+
+
+# Enable and Start 
+systemctl start mariadb
+systemctl enable mariadb
 
 
 # set password for root
