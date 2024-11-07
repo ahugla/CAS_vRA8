@@ -74,7 +74,7 @@ echo "PATH = $PATH"
 
 # kubeadm avec config file et policy de logging
 # ---------------------------------------------
-curl -O https://raw.githubusercontent.com/ahugla/CAS_vRA8/master/blueprints/Kubernetes/kubeadm_config_file_template.yaml
+curl -O https://raw.githubusercontent.com/ahugla/CAS_vRA8/master/blueprints/Kubernetes/Rocky/kubeadm_config_file_template.yaml
 mv kubeadm_config_file_template.yaml kubeadm_config_file.yaml 
 
 # update du fichier de config:
