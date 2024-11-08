@@ -127,6 +127,7 @@ exclude=kubelet kubeadm kubectl cri-tools kubernetes-cni
 EOF
 # to see all available version : dnf --showduplicates list 'kube*' --disableexcludes=kubernetes
 # Exemple : dnf install -y kubelet-1.28.13  --disableexcludes=kubernetes
+dnf update -y 
 dnf install -y kubelet-$kubeVersion   kubeadm-$kubeVersion   kubectl-$kubeVersion  --disableexcludes=kubernetes  --rpmverbosity=debug
 systemctl enable --now kubelet
 
