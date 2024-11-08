@@ -216,3 +216,4 @@ echo "K8S_VERSION = $K8S_VERSION_WITHv"  >> /tmp/K8S_INSTALL.LOG
 # - enlever les commentaires
 # - variabiliser la version de docker
 # - variabiliser la version de Kubernetes
+# - docker ou containerd ?
