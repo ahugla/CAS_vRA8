@@ -70,15 +70,38 @@ sudo sed -i '/ swap / s/^\(.*\)$/#\1/g' /etc/fstab
 
 
 # Enable bridged networking
+# These parameters determine whether packets crossing a bridge are sent to iptables for processing
+# Used to add a loadable module into the Linux kernel 
 # Set iptables
 # Prerequis à l'init  :  sysctl net.ipv4.ip_forward=1 
-cat <<EOF > /etc/sysctl.d/k8s.conf
-net.bridge.bridge-nf-call-iptables=1
-net.bridge.bridge-nf-call-ip6tables=1
-net.ipv4.ip_forward=1
+#cat <<EOF > /etc/sysctl.d/k8s.conf
+#net.bridge.bridge-nf-call-iptables=1
+#net.bridge.bridge-nf-call-ip6tables=1
+#net.ipv4.ip_forward=1
+#EOF
+#modprobe br_netfilter
+#sysctl --system
+
+
+# Used to add a loadable module into the Linux kernel
+cat <<EOF | sudo tee /etc/modules-load.d/k8s.conf
+overlay
+br_netfilter
 EOF
+modprobe overlay
 modprobe br_netfilter
-sysctl --system
+
+# These parameters determine whether packets crossing a bridge are sent to iptables for processing
+# sysctl params required by setup, params persist across reboots
+cat <<EOF | sudo tee /etc/sysctl.d/k8s.conf
+net.bridge.bridge-nf-call-iptables  = 1
+net.bridge.bridge-nf-call-ip6tables = 1
+net.ipv4.ip_forward                 = 1
+EOF
+# Apply sysctl params without reboot
+sudo sysctl --system
+
+
 
 
 
