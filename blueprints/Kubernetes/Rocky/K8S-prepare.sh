@@ -23,7 +23,12 @@
 
 
 # Wait
-sleep 300
+total=300 # en seconde
+for ((i = 0; i < total; ++i)); do
+    echo "${i}"
+    sleep 1
+done
+
 
 
 # LOGGING DANS /tmp/K8S_INSTALL.LOG
