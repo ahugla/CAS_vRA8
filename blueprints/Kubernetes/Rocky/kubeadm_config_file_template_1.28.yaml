@@ -31,7 +31,7 @@ apiServer:
     name: apiserver-log
     pathType: DirectoryOrCreate
   timeoutForControlPlane: 4m0s
-#apiVersion: kubeadm.k8s.io/v1beta3
+apiVersion: kubeadm.k8s.io/v1beta3
 certificatesDir: /etc/kubernetes/pki
 clusterName: K8S_CLUSTER_NAME                                # clusterName: k8s-alex
 controllerManager: {}

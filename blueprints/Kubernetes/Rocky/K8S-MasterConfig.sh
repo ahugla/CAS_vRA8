@@ -124,7 +124,7 @@ mkdir /etc/kubernetes/audit-policies
 
 # Creation de la policy de logging
 # Log verbs 'create' and 'delete' at the 'Metadata' level.
-curl -O https://raw.githubusercontent.com/ahugla/CAS_vRA8/master/blueprints/Kubernetes/audit_policy.yaml
+curl -O https://raw.githubusercontent.com/ahugla/CAS_vRA8/master/blueprints/Kubernetes/Rocky/audit_policy.yaml
 mv audit_policy.yaml /etc/kubernetes/audit-policies/policy.yaml 
 
 
