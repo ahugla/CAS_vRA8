@@ -18,6 +18,7 @@
 #
 
 
+# Install old version of K8S, get binaries:  https://flex-solution.com/page/blog/install-k8s-lower-than-1_24
 
 
 # LOGGING DANS /tmp/K8S_INSTALL.LOG
@@ -80,7 +81,7 @@ mv kubeadm_config_file_template.yaml kubeadm_config_file.yaml
 # update du fichier de config:
 sed -i -e 's/A.B.C.D/'$var_myIP'/g'  /tmp/kubeadm_config_file.yaml   #  on met l'IP du master
 sed -i -e 's/K8S_VERSION/'$K8S_VERSION'/g'  /tmp/kubeadm_config_file.yaml   #  on indique la version de kubernetes a installer (la meme que kubeadm; kubectl et kubelet)
-sed -i -e 's/k8s_cluter_name/'$k8s_cluter_name'/g'  /tmp/kubeadm_config_file.yaml   #  on met le nom du cluster K8S
+sed -i -e 's/K8S_CLUSTER_NAME/'$k8s_cluter_name'/g'  /tmp/kubeadm_config_file.yaml   #  on met le nom du cluster K8S
 
 # EXEMPLE D'UN FICHIER DE CONFIG POUR KUBEADM INIT:
 # apiVersion: kubeadm.k8s.io/v1.22

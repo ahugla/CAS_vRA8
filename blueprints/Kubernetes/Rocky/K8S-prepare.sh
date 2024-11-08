@@ -17,6 +17,9 @@
 # rm -f K8S-prepare.sh
 
 
+# Install old version of K8S, get bianries:  https://flex-solution.com/page/blog/install-k8s-lower-than-1_24
+
+
 # LOGGING DANS /tmp/K8S_INSTALL.LOG
 # ----------------------------------
 echo "Phase K8S-prepare debut"  >> /tmp/K8S_INSTALL.LOG
