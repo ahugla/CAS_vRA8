@@ -21,6 +21,11 @@
 # Install old version of K8S, get bianries:  https://flex-solution.com/page/blog/install-k8s-lower-than-1_24
 
 
+
+# Wait
+sleep 300
+
+
 # LOGGING DANS /tmp/K8S_INSTALL.LOG
 # ----------------------------------
 echo "Phase K8S-prepare debut"  >> /tmp/K8S_INSTALL.LOG
@@ -122,7 +127,6 @@ exclude=kubelet kubeadm kubectl cri-tools kubernetes-cni
 EOF
 # to see all available version : dnf --showduplicates list 'kube*' --disableexcludes=kubernetes
 # Exemple : dnf install -y kubelet-1.28.13  --disableexcludes=kubernetes
-dnf update -y 
 dnf install -y kubelet-$kubeVersion   kubeadm-$kubeVersion   kubectl-$kubeVersion  --disableexcludes=kubernetes  --rpmverbosity=debug
 systemctl enable --now kubelet
 
