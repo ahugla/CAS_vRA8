@@ -126,37 +126,7 @@ dnf update -y
 dnf install -y kubelet-$kubeVersion   kubeadm-$kubeVersion   kubectl-$kubeVersion  --disableexcludes=kubernetes  --rpmverbosity=debug
 systemctl enable --now kubelet
 
-
-
-
-
-
-:'
-# Install kubernetes repo comme indiqué: "https://kubernetes.io/docs/setup/independent/install-kubeadm/"
-cat <<EOF > /etc/yum.repos.d/kubernetes.repo
-[kubernetes]
-name=Kubernetes
-baseurl=https://packages.cloud.google.com/yum/repos/kubernetes-el7-x86_64
-enabled=1
-gpgcheck=1
-gpgkey=https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg
-exclude=kube*
-EOF
-
-
-# Install Kubernetes and start it
-
-#yum install -y kubelet kubeadm kubectl --disableexcludes=kubernetes
-# pour voir toutes les versions dispos: 
-#    yum --showduplicates list 'kube*' --disableexcludes=kubernetes
-#    yum list --showduplicates kube* --disableexcludes=kubernetes
-# kubeVersion=1.17.8   # 1.16.12, 1.17.8, 1.18.5   1.19.1   1.20.7  1.21.1
-yum install -y kubelet-$kubeVersion   kubeadm-$kubeVersion   kubectl-$kubeVersion  --disableexcludes=kubernetes
-
-systemctl enable --now kubelet
-
 #The kubelet is now restarting every few seconds, as it waits in a crashloop for kubeadm to tell it what to do.
-'
 
 
 
