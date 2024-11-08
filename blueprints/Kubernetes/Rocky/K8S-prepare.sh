@@ -69,19 +69,6 @@ swapoff -a
 sudo sed -i '/ swap / s/^\(.*\)$/#\1/g' /etc/fstab
 
 
-# Enable bridged networking
-# These parameters determine whether packets crossing a bridge are sent to iptables for processing
-# Used to add a loadable module into the Linux kernel 
-# Set iptables
-# Prerequis à l'init  :  sysctl net.ipv4.ip_forward=1 
-#cat <<EOF > /etc/sysctl.d/k8s.conf
-#net.bridge.bridge-nf-call-iptables=1
-#net.bridge.bridge-nf-call-ip6tables=1
-#net.ipv4.ip_forward=1
-#EOF
-#modprobe br_netfilter
-#sysctl --system
-
 
 # Used to add a loadable module into the Linux kernel
 cat <<EOF | sudo tee /etc/modules-load.d/k8s.conf
@@ -90,6 +77,7 @@ br_netfilter
 EOF
 modprobe overlay
 modprobe br_netfilter
+
 
 # These parameters determine whether packets crossing a bridge are sent to iptables for processing
 # sysctl params required by setup, params persist across reboots
@@ -103,49 +91,8 @@ sudo sysctl --system
 
 
 
-
-
 #Update all (before docker install to avoid last docker version compatibility issue with K8S)
 dnf update -y 
-
-
-
-
-: '
-# Install docker : based on "https://kubernetes.io/docs/setup/cri/"
-dnf install -y yum-utils device-mapper-persistent-data lvm2
-yum-config-manager \
-    --add-repo \
-    https://download.docker.com/linux/centos/docker-ce.repo
-
-#Update all (before docker install to avoid last docker version compatibility issue with K8S)
-dnf update -y 
-
-# to see all available version for a package:  yum list docker-ce --showduplicates | sort -r
-#yum install -y docker-ce-18.09.9-3.el7   # derniere version supportée à cette date
-#yum install -y docker-ce-19.03.13-3.el7.x86_64   # derniere version supportée à cette date  => a utiliser avec K8S 1.19
-dnf install -y docker-ce-$dockerVersion   # derniere version supportée à cette date  => a utiliser avec K8S 1.19
-
-mkdir /etc/docker
-cat > /etc/docker/daemon.json <<EOF
-{
-  "exec-opts": ["native.cgroupdriver=systemd"],
-  "log-driver": "json-file",
-  "log-opts": {
-    "max-size": "100m"
-  },
-  "storage-driver": "overlay2",
-  "storage-opts": [
-    "overlay2.override_kernel_check=true"
-  ]
-}
-EOF
-mkdir -p /etc/systemd/system/docker.service.d
-systemctl daemon-reload
-systemctl restart docker
-systemctl enable docker
-'
-
 
 
 
@@ -175,6 +122,7 @@ exclude=kubelet kubeadm kubectl cri-tools kubernetes-cni
 EOF
 # to see all available version : dnf --showduplicates list 'kube*' --disableexcludes=kubernetes
 # Exemple : dnf install -y kubelet-1.28.13  --disableexcludes=kubernetes
+dnf update -y 
 dnf install -y kubelet-$kubeVersion   kubeadm-$kubeVersion   kubectl-$kubeVersion  --disableexcludes=kubernetes
 systemctl enable --now kubelet
 
