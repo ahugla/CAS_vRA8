@@ -1,12 +1,12 @@
 apiVersion: kubeadm.k8s.io/v1beta3
-bootstrapTokens:
-- groups:
-  - system:bootstrappers:kubeadm:default-node-token
-  token: 7h9me4.lt8vaqgm4pj1hgat
-  ttl: 24h0m0s
-  usages:
-  - signing
-  - authentication
+#bootstrapTokens:
+#- groups:
+#  - system:bootstrappers:kubeadm:default-node-token
+#  token: 7h9me4.lt8vaqgm4pj1hgat
+#  ttl: 24h0m0s
+#  usages:
+#  - signing
+#  - authentication
 kind: InitConfiguration
 localAPIEndpoint:
   advertiseAddress: A.B.C.D                                  # advertiseAddress: 172.17.1.74
@@ -39,7 +39,6 @@ dns: {}
 etcd:
   local:
     dataDir: /var/lib/etcd
-imageRepository: k8s.gcr.io
 kind: ClusterConfiguration
 kubernetesVersion: K8S_VERSION                               # kubernetesVersion: v1.28.15
 networking:
