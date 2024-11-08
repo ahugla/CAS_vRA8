@@ -4,7 +4,9 @@
 # ALEX H.
 # 11 Nov 2024
 # OS : Rocky Linux
-# v2.0
+# Kubernetes : v1.28.
+# file version : v2.0
+
 
 
 # USAGE
@@ -38,19 +40,22 @@ cd /tmp
 LB_IPrange=172.17.1.238-172.17.1.239
 cadvisor_version=v0.34.0
 k8s_cluter_name=alex-k8s
+kubeadm_config_file=kubeadm_config_file_template_1.28.yaml
 LIserver=vrli.cpod-vrealizesuite.az-demo.shwrfr.com
 versionLI=v8.4.0
-
 echo "LB_IPrange = $LB_IPrange"
 echo "cadvisor_version = $cadvisor_version"
 echo "k8s_cluter_name = $k8s_cluter_name"
+echo "kubeadm_config_file = $kubeadm_config_file"
 echo "LIserver = $LIserver"
 echo "versionLI = $versionLI"
+
 
 # recuperer la version de Kubernetes
 K8S_VERSION_WITHv=`kubelet --version | awk '{print $2}'`
 K8S_VERSION=`echo ${K8S_VERSION_WITHv:1:20}`
 echo "K8S_VERSION = $K8S_VERSION"
+
 
 # get and check the ip-address:
 # "hostname --ip-address" peut donner "172.17.1.54" ou "::1 172.17.1.54"  =>  on prefere la commande "hostname -I | awk '{print $1}'"
@@ -75,13 +80,13 @@ echo "PATH = $PATH"
 
 # kubeadm avec config file et policy de logging
 # ---------------------------------------------
-curl -O https://raw.githubusercontent.com/ahugla/CAS_vRA8/master/blueprints/Kubernetes/Rocky/kubeadm_config_file_template.yaml
-mv kubeadm_config_file_template.yaml kubeadm_config_file.yaml 
+
+curl -O https://raw.githubusercontent.com/ahugla/CAS_vRA8/master/blueprints/Kubernetes/Rocky/$kubeadm_config_file
 
 # update du fichier de config:
-sed -i -e 's/A.B.C.D/'$var_myIP'/g'  /tmp/kubeadm_config_file.yaml   #  on met l'IP du master
-sed -i -e 's/K8S_VERSION/'$K8S_VERSION'/g'  /tmp/kubeadm_config_file.yaml   #  on indique la version de kubernetes a installer (la meme que kubeadm; kubectl et kubelet)
-sed -i -e 's/K8S_CLUSTER_NAME/'$k8s_cluter_name'/g'  /tmp/kubeadm_config_file.yaml   #  on met le nom du cluster K8S
+sed -i -e 's/A.B.C.D/'$var_myIP'/g'  /tmp/$kubeadm_config_file                   #  on met l'IP du master
+sed -i -e 's/K8S_VERSION/'$K8S_VERSION'/g'  /tmp/$kubeadm_config_file            #  on indique la version de kubernetes a installer (la meme que kubeadm; kubectl et kubelet)
+sed -i -e 's/K8S_CLUSTER_NAME/'$k8s_cluter_name'/g'  /tmp/$kubeadm_config_file   #  on met le nom du cluster K8S
 
 # EXEMPLE D'UN FICHIER DE CONFIG POUR KUBEADM INIT:
 # apiVersion: kubeadm.k8s.io/v1.22
@@ -138,9 +143,15 @@ mv audit_policy.yaml /etc/kubernetes/audit-policies/policy.yaml
 
 
 
+# Eviter le message d'erreur lors de kubeadm init :  [ERROR CRI]: container runtime is not running   
+rm -f /etc/containerd/config.toml
+systemctl enable containerd
+systemctl restart containerd
+
+
 # init du cluster
 echo "kubeadm init ... starting ..."
-kubeadm init --config /tmp/kubeadm_config_file.yaml
+kubeadm init --config /tmp/$kubeadm_config_file
 
 
 # EXEMPLE D'OUTPUT:
@@ -434,7 +445,6 @@ systemctl enable liagentd
 
 # reste a aller sur le serveur LI et l'associer avec l'agent linux.
 echo "LOG INSIGHT : reste a aller sur le serveur LI et l'associer avec l'agent linux."
-
 
 
 

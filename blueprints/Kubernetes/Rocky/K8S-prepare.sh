@@ -4,7 +4,8 @@
 # ALEX H.
 # 11 Nov 2024
 # OS : Rocky Linux
-# v2.0
+# Kubernetes : v1.28.
+# file version : v2.0
 
 
 # USAGE
@@ -13,7 +14,7 @@
 # cd /tmp
 # curl -O https://raw.githubusercontent.com/ahugla/CAS_vRA8/master/blueprints/Kubernetes/K8S-prepare.sh
 # chmod 755 K8S-prepare.sh
-# ./K8S-prepare.sh  $kubeVersion
+# ./K8S-prepare.sh 
 # rm -f K8S-prepare.sh
 
 
@@ -76,6 +77,7 @@ net.bridge.bridge-nf-call-iptables=1
 net.bridge.bridge-nf-call-ip6tables=1
 net.ipv4.ip_forward=1
 EOF
+modprobe br_netfilter
 sysctl --system
 
 
@@ -131,6 +133,7 @@ dnf check-update
 dnf config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
 dnf install -y docker-ce docker-ce-cli containerd.io
 systemctl enable docker
+systemctl enable containerd
 systemctl start docker
 
 
