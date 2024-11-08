@@ -12,9 +12,7 @@ localAPIEndpoint:
   advertiseAddress: A.B.C.D                                  # advertiseAddress: 172.17.1.74
   bindPort: 6443
 nodeRegistration:
-  criSocket: unix:///var/run/dockershim.sock
   imagePullPolicy: IfNotPresent
-  name: vra-009590
   taints:
   - effect: NoSchedule
     key: node-role.kubernetes.io/master
@@ -33,7 +31,7 @@ apiServer:
     name: apiserver-log
     pathType: DirectoryOrCreate
   timeoutForControlPlane: 4m0s
-apiVersion: kubeadm.k8s.io/v1beta3
+#apiVersion: kubeadm.k8s.io/v1beta3
 certificatesDir: /etc/kubernetes/pki
 clusterName: K8S_CLUSTER_NAME                                # clusterName: k8s-alex
 controllerManager: {}
