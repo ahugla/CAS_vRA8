@@ -23,11 +23,11 @@
 
 
 # Wait
-total=300 # en seconde
-for ((i = 0; i < total; ++i)); do
-    echo "${i}"
-    sleep 1
-done
+#total=300 # en seconde
+#for ((i = 0; i < total; ++i)); do
+#    echo "${i}"
+#    sleep 1
+#done
 
 
 
@@ -120,7 +120,7 @@ systemctl start docker
 
 # INSTALL KUBERNETES ON ROCKY
 # --------------------------
-echo "Install kubelet, kubeadm et kubectl" >> /tmp/K8S_INSTALL.LOG
+echo "Add repo for kubelet, kubeadm et kubectl" >> /tmp/K8S_INSTALL.LOG
 cat <<EOF | sudo tee /etc/yum.repos.d/kubernetes.repo
 [kubernetes]
 name=Kubernetes
@@ -132,8 +132,12 @@ exclude=kubelet kubeadm kubectl cri-tools kubernetes-cni
 EOF
 # to see all available version : dnf --showduplicates list 'kube*' --disableexcludes=kubernetes
 # Exemple : dnf install -y kubelet-1.28.13  --disableexcludes=kubernetes
+echo "dnf update before kubelet, kubeadm et kubectl install" >> /tmp/K8S_INSTALL.LOG
 dnf update -y 
-dnf install -y kubelet-$kubeVersion   kubeadm-$kubeVersion   kubectl-$kubeVersion  --disableexcludes=kubernetes  --rpmverbosity=debug
+echo "Install kubelet, kubeadm et kubectl" >> /tmp/K8S_INSTALL.LOG
+dnf install -y kubelet-$kubeVersion kubeadm-$kubeVersion   kubectl-$kubeVersion  --disableexcludes=kubernetes  --rpmverbosity=debug
+#dnf install -y kubelet-$kubeVersion kubeadm-$kubeVersion   kubectl-$kubeVersion  --disableexcludes=kubernetes 
+echo "Enable kubelet" >> /tmp/K8S_INSTALL.LOG
 systemctl enable --now kubelet
 
 #The kubelet is now restarting every few seconds, as it waits in a crashloop for kubeadm to tell it what to do.
