@@ -130,6 +130,10 @@ gpgcheck=1
 gpgkey=https://pkgs.k8s.io/core:/stable:/v1.28/rpm/repodata/repomd.xml.key
 exclude=kubelet kubeadm kubectl cri-tools kubernetes-cni
 EOF
+# clean out all your DNF cache (for all repos, even those configured as 'disabled' by default)
+dnf --enablerepo=\* clean all
+# rebuild the RPM Database indexes
+rpm -vv --rebuilddb
 # to see all available version : dnf --showduplicates list 'kube*' --disableexcludes=kubernetes
 # Exemple : dnf install -y kubelet-1.28.13  --disableexcludes=kubernetes
 #echo "dnf update before kubelet, kubeadm et kubectl install" >> /tmp/K8S_INSTALL.LOG
