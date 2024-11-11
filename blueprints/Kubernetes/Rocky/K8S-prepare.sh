@@ -102,7 +102,7 @@ sudo sysctl --system
 
 
 #Update all (before docker install to avoid last docker version compatibility issue with K8S)
-dnf update -y 
+#dnf update -y 
 
 
 
@@ -132,8 +132,8 @@ exclude=kubelet kubeadm kubectl cri-tools kubernetes-cni
 EOF
 # to see all available version : dnf --showduplicates list 'kube*' --disableexcludes=kubernetes
 # Exemple : dnf install -y kubelet-1.28.13  --disableexcludes=kubernetes
-echo "dnf update before kubelet, kubeadm et kubectl install" >> /tmp/K8S_INSTALL.LOG
-dnf update -y 
+#echo "dnf update before kubelet, kubeadm et kubectl install" >> /tmp/K8S_INSTALL.LOG
+#dnf update -y 
 echo "Install kubelet, kubeadm et kubectl" >> /tmp/K8S_INSTALL.LOG
 dnf install -y kubelet-$kubeVersion kubeadm-$kubeVersion   kubectl-$kubeVersion  --disableexcludes=kubernetes  --rpmverbosity=debug
 #dnf install -y kubelet-$kubeVersion kubeadm-$kubeVersion   kubectl-$kubeVersion  --disableexcludes=kubernetes 
