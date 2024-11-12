@@ -18,6 +18,13 @@
 # ex : ./K8S-JoinCluster.sh  172.19.5.4  my_pass!  vrli.cpod-vrealizesuite.az-demo.shwrfr.com  v8.4.0
 # rm -f K8S-JoinCluster.sh
 
+
+
+# LOGGING DANS /tmp/K8S_INSTALL.LOG
+# ----------------------------------
+echo "Phase K8S-JoinCluster debut"  >> /tmp/K8S_INSTALL.LOG
+
+
 # Set and display paramaters
 MasterNode=$1
 MasterPassword=$2
@@ -27,9 +34,9 @@ versionLI=$4
 #MasterPassword=changeme
 #LIserver=vrli.cpod-vrealizesuite.az-demo.shwrfr.com
 #versionLI=v8.4.0
-echo "MasterNode in 'K8S-JoinCluster.sh' : $MasterNode"
-echo "LIserver : $LIserver"
-echo "versionLI : $versionLI"
+echo "MasterNode in 'K8S-JoinCluster.sh' : $MasterNode"  >> /tmp/K8S_INSTALL.LOG
+echo "LIserver : $LIserver"    >> /tmp/K8S_INSTALL.LOG
+echo "versionLI : $versionLI"  >> /tmp/K8S_INSTALL.LOG
 
 
 # Log $PATH
@@ -50,6 +57,8 @@ while [[ "$isMasterReady" -ne 1 ]]; do
   isMasterReady=`sshpass -p $MasterPassword ssh -o StrictHostKeyChecking=no root@$MasterNode 'ls /tmp' | grep k8stoken | wc -l`
   echo "isMasterReady = $isMasterReady"
 done
+echo "Master ready to be joined" >> /tmp/K8S_INSTALL.LOG
+
 
 # On  recupere le Token dans le fichier /tmp/k8stoken sur le master
 varTokenToJoin=`sshpass -p $MasterPassword ssh -o StrictHostKeyChecking=no root@$MasterNode 'cat /tmp/k8stoken'`
@@ -63,6 +72,7 @@ systemctl restart containerd
 
 
 #A FAIRE SUR LES NODES:  
+echo "kubeadm join starting ..." >> /tmp/K8S_INSTALL.LOG
 # Necessite d'avoir dans le software component une property varTokenToJoin
 kubeadm join $MasterNode:6443 --discovery-token-unsafe-skip-ca-verification --token $varTokenToJoin
 # CA PREND 20 s pour apparaitre 
@@ -80,7 +90,7 @@ kubeadm join $MasterNode:6443 --discovery-token-unsafe-skip-ca-verification --to
 
 # Installation et configuration de Log Insight
 # --------------------------------------------
-
+echo "install vRLI Agent" >> /tmp/K8S_INSTALL.LOG
 # Installation de l'agent Log Insight
 cd /tmp
 git clone https://github.com/ahugla/LogInsight.git  /tmp/li

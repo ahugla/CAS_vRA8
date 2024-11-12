@@ -159,8 +159,9 @@ systemctl enable --now kubelet
 # LOGGING DANS /tmp/K8S_INSTALL.LOG
 # ----------------------------------
 K8S_VERSION_WITHv=`kubelet --version | awk '{print $2}'`
-echo "Phase K8S-prepare terminé"  >> /tmp/K8S_INSTALL.LOG
 echo "K8S_VERSION = $K8S_VERSION_WITHv"  >> /tmp/K8S_INSTALL.LOG
+echo "Phase K8S-prepare terminé"  >> /tmp/K8S_INSTALL.LOG
+
 
 
 
@@ -183,4 +184,3 @@ echo "K8S_VERSION = $K8S_VERSION_WITHv"  >> /tmp/K8S_INSTALL.LOG
 # - enlever les commentaires
 # - variabiliser la version de docker
 # - variabiliser la version de Kubernetes
-# - docker ou containerd ?
