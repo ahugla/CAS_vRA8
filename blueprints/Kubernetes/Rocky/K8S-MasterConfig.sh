@@ -201,9 +201,20 @@ done
 
 
 
+# Retrait du taint sur le mgmt node:
+# By default, your cluster will not schedule Pods on the control plane nodes for security reasons
+# Voir le Taint d'un node:  kubectl describe node vra-009612 | grep  Taint     #  =>  node-role.kubernetes.io/master:NoSchedule
+# On retire le taint pour pouvoir scheduler sur le control plane
+# Le '-' a la fin de la ligne est pour enlever le taint
+kubectl taint nodes --all node-role.kubernetes.io/master:NoSchedule-
+
+
+
+
 # Install Flannel for network
 # Doc: https://kubernetes.io/docs/setup/independent/create-cluster-kubeadm/#before-you-begin
 kubectl apply -f  https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml
+
 
 
 # ATTENDRE QUE TOUT SOIT UP :  il y a 8 pods a demarrer, mais on attend que tous les pods soient up
@@ -361,10 +372,14 @@ do
   echo "dashboard_svc_ip=$dashboard_svc_ip"
 done
 
+# create token pour le compte 'default' du namespace 'default', qui a tout les droits:
+# et on la mappe sur la variable dashboard_token
+dashboard_token=`kubectl create token default -n default`
+
 # Affichage de l'URL du Dashboard et du token
 dashboard_svc_ip=`kubectl get services -n kubernetes-dashboard | grep service-dashboard | awk '{print $4}'`
 dashboard_svc_port=`kubectl get services -n kubernetes-dashboard| grep service-dashboard | awk '{print $5}' | awk -F: '{print $1}'`
-dashboard_token=`kubectl get secret $(kubectl get serviceaccount default -n default -o jsonpath="{.secrets[0].name}") -n default -o jsonpath="{.data.token}" | base64 --decode`
+#dashboard_token=`kubectl get secret $(kubectl get serviceaccount default -n default -o jsonpath="{.secrets[0].name}") -n default -o jsonpath="{.data.token}" | base64 --decode`
 echo "-------------------------------------------------------------------------------------"
 echo "                                                                                     "
 echo "Access to Kubernetes Dashboard using:   https://$dashboard_svc_ip:$dashboard_svc_port"
