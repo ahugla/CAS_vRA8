@@ -105,6 +105,17 @@ sudo sysctl --system
 # dnf update -y 
 
 
+# En version 8 il faut supprimer des packages qui entrent en conflit avant l'install de docker
+isRocky8=`more /etc/os-release  | grep VERSION_ID | grep 8. | wc -l` 
+if [ $isRocky8 -eq '1' ] 
+then
+  echo "C'est un rocky v8"  >> /tmp/K8S_INSTALL.LOG
+  dnf -y remove buildah
+  dnf -y remove containers-common
+else
+  echo "C'est pas un rocky v8"  >> /tmp/K8S_INSTALL.LOG
+fi
+
 
 # INSTALL DOCKER ON ROCKY
 # --------------------------
