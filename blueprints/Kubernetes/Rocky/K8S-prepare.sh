@@ -31,9 +31,9 @@
 
 
 # clean out all your DNF cache (for all repos, even those configured as 'disabled' by default)
-dnf --enablerepo=\* clean all
+#dnf --enablerepo=\* clean all
 # rebuild the RPM Database indexes
-rpm -vv --rebuilddb
+#rpm -vv --rebuilddb
 
 
 
@@ -107,8 +107,9 @@ sudo sysctl --system
 
 
 
-#Update all (before docker install to avoid last docker version compatibility issue with K8S)
-#dnf update -y 
+# Update all 
+# ATTENTION: DANGEREUX DE LE FAIRE CAR PEUT CONDUIRE A UNE VERSION NON SUPPORTEE PAR VRA/VSPHERE
+# dnf update -y 
 
 
 
