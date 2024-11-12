@@ -31,18 +31,21 @@ echo "Phase K8S-MasterConfig debut"  >> /tmp/K8S_INSTALL.LOG
 cd /tmp
 
 
-# display input parameters
-#LB_IPrange=$1                               #LB_IPrange=172.17.1.236-172.17.1.239
-#cadvisor_version=$2                         #cadvisor_version=v0.34.0
-#k8s_cluter_name=$3                          #k8s_cluter_name=alex-k8s
-#LIserver=$4                                 #LIserver=vrli.cpod-vrealizesuite.az-demo.shwrfr.com
-#versionLI=$5                                #versionLI=v8.4.0
-LB_IPrange=172.17.1.238-172.17.1.239
-cadvisor_version=v0.34.0
-k8s_cluter_name=alex-k8s
+# set global parameters
 kubeadm_config_file=kubeadm_config_file_template_1.28.yaml
-LIserver=vrli.cpod-vrealizesuite.az-demo.shwrfr.com
-versionLI=v8.4.0
+
+
+# display input parameters
+LB_IPrange=$1                               #LB_IPrange=172.17.1.236-172.17.1.239
+cadvisor_version=$2                         #cadvisor_version=v0.34.0
+k8s_cluter_name=$3                          #k8s_cluter_name=alex-k8s
+LIserver=$4                                 #LIserver=vrli.cpod-vrealizesuite.az-demo.shwrfr.com
+versionLI=$5                                #versionLI=v8.4.0
+#LB_IPrange=172.17.1.238-172.17.1.239
+#cadvisor_version=v0.34.0
+#k8s_cluter_name=alex-k8s
+#LIserver=vrli.cpod-vrealizesuite.az-demo.shwrfr.com
+#versionLI=v8.4.0
 echo "LB_IPrange = $LB_IPrange"
 echo "cadvisor_version = $cadvisor_version"
 echo "k8s_cluter_name = $k8s_cluter_name"

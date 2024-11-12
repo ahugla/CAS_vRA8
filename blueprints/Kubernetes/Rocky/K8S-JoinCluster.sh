@@ -2,8 +2,11 @@
 #SOURCE : https://mapr.com/blog/making-data-actionable-at-scale-part-2-of-3/
 
 # ALEX H.
-# 23 Juin 2021
-# v1.51
+# 11 Nov 2024
+# OS : Rocky Linux
+# Kubernetes : v1.28.
+# file version : v2.0
+
 
 # USAGE
 # -----
@@ -20,6 +23,10 @@ MasterNode=$1
 MasterPassword=$2
 LIserver=$3
 versionLI=$4
+#MasterNode=172.17.1.61
+#MasterPassword=changeme
+#LIserver=vrli.cpod-vrealizesuite.az-demo.shwrfr.com
+#versionLI=v8.4.0
 echo "MasterNode in 'K8S-JoinCluster.sh' : $MasterNode"
 echo "LIserver : $LIserver"
 echo "versionLI : $versionLI"
@@ -47,6 +54,12 @@ done
 # On  recupere le Token dans le fichier /tmp/k8stoken sur le master
 varTokenToJoin=`sshpass -p $MasterPassword ssh -o StrictHostKeyChecking=no root@$MasterNode 'cat /tmp/k8stoken'`
 echo "varTokenToJoin = $varTokenToJoin"
+
+
+# Eviter le message d'erreur lors de kubeadm join :  [ERROR CRI]: container runtime is not running   
+rm -f /etc/containerd/config.toml
+systemctl enable containerd
+systemctl restart containerd
 
 
 #A FAIRE SUR LES NODES:  
