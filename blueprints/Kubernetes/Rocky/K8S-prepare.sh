@@ -18,16 +18,9 @@
 # rm -f K8S-prepare.sh
 
 
-# Install old version of K8S, get bianries:  https://flex-solution.com/page/blog/install-k8s-lower-than-1_24
+# Install old version of K8S, get binaries:  https://flex-solution.com/page/blog/install-k8s-lower-than-1_24
 
 
-
-# Wait
-#total=300 # en seconde
-#for ((i = 0; i < total; ++i)); do
-#    echo "${i}"
-#    sleep 1
-#done
 
 
 # clean out all your DNF cache (for all repos, even those configured as 'disabled' by default)
@@ -127,6 +120,7 @@ systemctl start docker
 
 # INSTALL KUBERNETES ON ROCKY
 # --------------------------
+# Install old version of K8S, get binaries:  https://flex-solution.com/page/blog/install-k8s-lower-than-1_24
 echo "Add repo for kubelet, kubeadm et kubectl" >> /tmp/K8S_INSTALL.LOG
 cat <<EOF | sudo tee /etc/yum.repos.d/kubernetes.repo
 [kubernetes]
