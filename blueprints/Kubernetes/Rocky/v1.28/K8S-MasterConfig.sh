@@ -264,7 +264,10 @@ echo "alias kk='kubectl'" >> /root/.bash_profile
 # see:    https://metallb.universe.tf/installation/   
 #
 # install metallb
-kubectl apply -f https://raw.githubusercontent.com/metallb/metallb/v0.13.10/config/manifests/metallb-native.yaml
+kubectl apply -f  https://raw.githubusercontent.com/metallb/metallb/v0.14.8/config/manifests/metallb-native.yaml
+# old : https://raw.githubusercontent.com/metallb/metallb/v0.13.10/config/manifests/metallb-native.yaml
+
+
 
 # On attend que metallb soit demarré avant de le configurer
 nb_metallb=`kubectl get pods -n metallb-system | grep / | wc -l` 
@@ -286,8 +289,6 @@ kind: IPAddressPool
 metadata:
   namespace: metallb-system
   name: pool1
-  labels: 
-    zone: east
 spec:
   addresses:
   - $LB_IPrange
