@@ -12,7 +12,7 @@
 # -----
 #
 # cd /tmp
-# curl -O https://raw.githubusercontent.com/ahugla/CAS_vRA8/master/blueprints/Kubernetes/K8S-JoinCluster.sh
+# curl -O https://raw.githubusercontent.com/ahugla/CAS_vRA8/master/blueprints/Kubernetes/Rocky/v1.28/K8S-JoinCluster.sh
 # chmod 755 K8S-JoinCluster.sh
 # ./$K8S-JoinCluster.sh  $MasterNode  $MasterPassword  $LIserver  $versionLI
 # ex : ./K8S-JoinCluster.sh  172.19.5.4  my_pass!  vrli.cpod-vrealizesuite.az-demo.shwrfr.com  v8.4.0

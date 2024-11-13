@@ -13,7 +13,7 @@
 # -----
 # 
 # cd /tmp
-# curl -O https://raw.githubusercontent.com/ahugla/CAS_vRA8/master/blueprints/Kubernetes/K8S-MasterConfig.sh
+# curl -O https://raw.githubusercontent.com/ahugla/CAS_vRA8/master/blueprints/Kubernetes/Rocky/v1.28/K8S-MasterConfig.sh
 # chmod 755 K8S-MasterConfig.sh
 # ./K8S-MasterConfig.sh $LB_IPrange  $cadvisor_version $k8s_cluter_name $LIserver $versionLI    # ex : ./K8S-MasterConfig.sh  172.17.1.226-172.17.1.239   v0.34.0   k8s_alex  vrli.cpod-vrealizesuite.az-demo.shwrfr.com  v8.4.0
 # rm -f K8S-MasterConfig.sh
@@ -84,7 +84,7 @@ echo "PATH = $PATH"
 # kubeadm avec config file et policy de logging
 # ---------------------------------------------
 
-curl -O https://raw.githubusercontent.com/ahugla/CAS_vRA8/master/blueprints/Kubernetes/Rocky/$kubeadm_config_file
+curl -O https://raw.githubusercontent.com/ahugla/CAS_vRA8/master/blueprints/Kubernetes/Rocky/v1.28/$kubeadm_config_file
 
 # update du fichier de config:
 sed -i -e 's/A.B.C.D/'$var_myIP'/g'  /tmp/$kubeadm_config_file                   #  on met l'IP du master
@@ -127,7 +127,7 @@ mkdir /etc/kubernetes/audit-policies
 
 # Creation de la policy de logging
 # Log verbs 'create' and 'delete' at the 'Metadata' level.
-curl -O https://raw.githubusercontent.com/ahugla/CAS_vRA8/master/blueprints/Kubernetes/Rocky/audit_policy.yaml
+curl -O https://raw.githubusercontent.com/ahugla/CAS_vRA8/master/blueprints/Kubernetes/Rocky/v1.28/audit_policy.yaml
 mv audit_policy.yaml /etc/kubernetes/audit-policies/policy.yaml 
 
 
@@ -416,7 +416,7 @@ git clone https://github.com/google/cadvisor.git
 cd cadvisor/deploy/kubernetes/base
 
 # on remplace le daemonset de cadvisor par celui pour vRops,
-curl -O https://raw.githubusercontent.com/ahugla/CAS_vRA8/master/blueprints/Kubernetes/cadvisor_for_vRops_daemonset.yaml
+curl -O https://raw.githubusercontent.com/ahugla/CAS_vRA8/master/blueprints/Kubernetes/Rocky/v1.28/cadvisor_for_vRops_daemonset.yaml
 # configuration  de la version de cadvisor
 sed -i -e 's/{{cadvisor_version}}/'"$cadvisor_version"'/g'  cadvisor_for_vRops_daemonset.yaml
 
@@ -465,6 +465,13 @@ systemctl enable liagentd
 # reste a aller sur le serveur LI et l'associer avec l'agent linux.
 echo "LOG INSIGHT : reste a aller sur le serveur LI et l'associer avec l'agent linux."
 
+
+
+# Copie du contenu d exemple
+# ---------------------------
+cd /root
+git clone https://github.com/ahugla/K8S_yaml.git
+cd /tmp
 
 
 # LOGGING DANS /tmp/K8S_INSTALL.LOG

@@ -12,7 +12,7 @@
 # -----
 #
 # cd /tmp
-# curl -O https://raw.githubusercontent.com/ahugla/CAS_vRA8/master/blueprints/Kubernetes/K8S-prepare.sh
+# curl -O https://raw.githubusercontent.com/ahugla/CAS_vRA8/master/blueprints/Kubernetes/Rocky/v1.28/K8S-prepare.sh
 # chmod 755 K8S-prepare.sh
 # ./K8S-prepare.sh 
 # rm -f K8S-prepare.sh
