@@ -108,6 +108,19 @@ sysctl --system
 
 
 
+# kubeproxy mode ( dans notre cas le kube proxy mode utilise iptables)
+# --------------
+# mask other FW to make impossible to load
+systemctl mask firewalld
+systemctl mask nftables
+#install iptables et iproute-tc
+dnf install -y iptables  iptables-services  iproute-tc
+systemctl enable iptables.service
+#systemctl start iptables.service
+#systemctl stop iptables.service
+
+
+
 
 # INSTALL CONTAINERD (via DOCKER) ON ROCKY
 # ---------------------------------------
@@ -215,3 +228,7 @@ echo "Phase K8S-prepare terminé"  >> /tmp/K8S_INSTALL.LOG
 # - enlever les commentaires
 # - variabiliser la version de docker
 # - variabiliser la version de Kubernetes
+
+
+
+
