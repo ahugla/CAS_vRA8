@@ -149,7 +149,7 @@ dnf install  -y containerd.io
 containerd config default | tee /etc/containerd/config.toml
 
 # update le registry dans le fichier de config de containerd
-sed -i -e 's/registry.k8s.io/pause:3.6/registry.k8s.io/pause:3.9/g'  /etc/containerd/config.toml
+sed -i -e 's/pause:3.6/pause:3.9/g'  /etc/containerd/config.toml
 
 # on met SystemdCgroup à 'true'
 sed -i -e 's/SystemdCgroup = false/SystemdCgroup = true/g'  /etc/containerd/config.toml
