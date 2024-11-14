@@ -259,6 +259,22 @@ echo "alias kk='kubectl'" >> /root/.bash_profile
 
 
 
+# Proxy modes (default: 'iptables mode' )
+# https://kubernetes.io/docs/reference/networking/virtual-ips/
+# -----------
+# If you’re using kube-proxy in IPVS mode, since Kubernetes v1.14.2 you have to enable strict ARP mode
+# check if IPVS is configured :  kubectl get configmap kube-proxy -n kube-system | grep mode
+# Verify kube-proxy is started with ipvs proxier :   kubectl logs [kube-proxy pod] | grep "Using ipvs Proxier"
+# Kill kubelet pour prendre en compte un changement :  kubectl get pod -n kube-system  puis  kubectl delete pod -n kube-system <pod-name>
+# kubectl edit configmap -n kube-system kube-proxy
+#     apiVersion: kubeproxy.config.k8s.io/v1alpha1
+#     kind: KubeProxyConfiguration
+#     mode: "ipvs"
+#     ipvs:
+#       strictARP: true
+
+
+
 # MetalLB install and config in Layer 2 Mode
 #-------------------------------------------
 # see:    https://metallb.universe.tf/installation/   
