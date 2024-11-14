@@ -217,7 +217,7 @@ dnf install -y iproute-tc
 
 # INUTILE pull des imges containers
 # sandbox image "registry.k8s.io/pause:3.6" of the container runtime is inconsistent with that used by kubeadm. It is recommended that using "registry.k8s.io/pause:3.9" as the CRI sandbox image
-#kubeadm config images pull
+# kubeadm config images pull
 
 
 
@@ -334,13 +334,9 @@ echo "alias kk='kubectl'" >> /root/.bash_profile
 # see:    https://metallb.universe.tf/installation/   
 #
 # install metallb
-kubectl apply -f  https://raw.githubusercontent.com/metallb/metallb/v0.14.8/config/manifests/metallb-native.yaml
-#old : kubectl apply -f  https://raw.githubusercontent.com/metallb/metallb/v0.13.10/config/manifests/metallb-native.yaml
-
-# test de connexion au clusterIP de K8S: wget https://10.96.0.1:443/api  (metallb contoller doit pouvoir acceder à 10.96.0.1:443/api)
-
-
-
+kubectl apply -f  https://raw.githubusercontent.com/metallb/metallb/v0.13.10/config/manifests/metallb-native.yaml
+# nook : kubectl apply -f  https://raw.githubusercontent.com/metallb/metallb/v0.14.8/config/manifests/metallb-native.yaml
+# pas possible d'acceder au dashboard depuis le LB avec la v0.14.8
 
 
 # On attend que metallb soit demarré avant de le configurer
@@ -573,4 +569,5 @@ echo "Phase K8S-MasterConfig terminé"  >> /tmp/K8S_INSTALL.LOG
 #
 #   kubeadm init phase certs all   utile ?
 
-
+#   voir si le K8S via clusterIP interne repond :  wget https://10.96.0.1:443/api
+#   test de connexion au clusterIP de K8S: wget https://10.96.0.1:443/api  (metallb contoller doit pouvoir acceder à 10.96.0.1:443/api)
