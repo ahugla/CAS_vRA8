@@ -145,8 +145,11 @@ dnf config-manager --add-repo=https://download.docker.com/linux/centos/docker-ce
 #dnf -y update
 dnf install  -y containerd.io
 
-# On genere le fichier de configuration
+# On genere le fichier de configuration de containerd
 containerd config default | tee /etc/containerd/config.toml
+
+# update le registry dans le fichier de config de containerd
+sed -i -e 's/registry.k8s.io/pause:3.6/registry.k8s.io/pause:3.9/g'  /etc/containerd/config.toml
 
 # on met SystemdCgroup à 'true'
 sed -i -e 's/SystemdCgroup = false/SystemdCgroup = true/g'  /etc/containerd/config.toml

@@ -329,8 +329,8 @@ echo "alias kk='kubectl'" >> /root/.bash_profile
 # see:    https://metallb.universe.tf/installation/   
 #
 # install metallb
-# kubectl apply -f  https://raw.githubusercontent.com/metallb/metallb/v0.14.8/config/manifests/metallb-native.yaml
-kubectl apply -f  https://raw.githubusercontent.com/metallb/metallb/v0.13.10/config/manifests/metallb-native.yaml
+kubectl apply -f  https://raw.githubusercontent.com/metallb/metallb/v0.14.8/config/manifests/metallb-native.yaml
+#old : kubectl apply -f  https://raw.githubusercontent.com/metallb/metallb/v0.13.10/config/manifests/metallb-native.yaml
 
 # test de connexion au clusterIP de K8S: wget https://10.96.0.1:443/api  (metallb contoller doit pouvoir acceder à 10.96.0.1:443/api)
 
@@ -567,11 +567,3 @@ echo "Phase K8S-MasterConfig terminé"  >> /tmp/K8S_INSTALL.LOG
 #   kubeadm init phase certs all   utile ?
 
 
-# A AMELIORER:
-#  ----------
-#  You can also perform this action in beforehand using 'kubeadm config images pull'
-#W1114 18:27:36.227155    4311 checks.go:835] detected that the sandbox image "registry.k8s.io/pause:3.6" of the container runtime is inconsistent with that used by kubeadm. It is recommended that using "registry.k8s.io/pause:3.9" as the CRI sandbox image.
-#[certs] Using certificateDir folder "/etc/kubernetes/pki"
-#
-#
-#  warnings.go:70] metallb.io v1beta1 AddressPool is deprecated, consider using IPAddressPool
