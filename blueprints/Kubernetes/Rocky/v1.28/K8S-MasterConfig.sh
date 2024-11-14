@@ -350,6 +350,8 @@ do
 done
 echo " metallb: $nb_metallb_running / $nb_metallb"
 
+
+
 # IP Pool configuration
 cat <<EOF > /tmp/IPAddressPool.yaml
 apiVersion: metallb.io/v1beta1
@@ -365,6 +367,8 @@ EOF
  # apply IP Pool configuration
 kubectl apply -f /tmp/IPAddressPool.yaml
 
+
+
 # On attend que IPpool soit present  (ne fonctionne qu'avec un seul ip pool)
 IPpoolCheck=`kubectl get IPAddressPool -n metallb-system | wc -l`
 echo " metallb: IPAddressPool = $IPpoolCheck"
@@ -377,6 +381,8 @@ do
   kubectl apply -f ./IPAddressPool.yaml   #  car meme si les pods sont up, qq fois le service met 10s a monter et la commande precedente ne passe pas.
 done
 echo " metallb: IPAddressPool OK"
+
+
 
 # L2 Advertisement config
 cat <<EOF > /tmp/L2Advertisement.yaml
@@ -392,6 +398,8 @@ EOF
 
  # apply L2 Advertisement configuration
 kubectl apply -f /tmp/L2Advertisement.yaml
+
+
 
 # On attend que L2Advertisement soit present (ne fonctionne qu'avec un seul advertisement)
 L2AdvertisementCheck=`kubectl get L2Advertisement -n metallb-system | wc -l`
@@ -557,3 +565,12 @@ echo "Phase K8S-MasterConfig terminé"  >> /tmp/K8S_INSTALL.LOG
 
 #   kubeadm init phase certs all   utile ?
 
+
+# A AMELIORER:
+#  ----------
+#  You can also perform this action in beforehand using 'kubeadm config images pull'
+#W1114 18:27:36.227155    4311 checks.go:835] detected that the sandbox image "registry.k8s.io/pause:3.6" of the container runtime is inconsistent with that used by kubeadm. It is recommended that using "registry.k8s.io/pause:3.9" as the CRI sandbox image.
+#[certs] Using certificateDir folder "/etc/kubernetes/pki"
+#
+#
+#  warnings.go:70] metallb.io v1beta1 AddressPool is deprecated, consider using IPAddressPool
