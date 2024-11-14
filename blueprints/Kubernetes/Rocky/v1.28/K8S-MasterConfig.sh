@@ -211,6 +211,7 @@ mv audit_policy.yaml /etc/kubernetes/audit-policies/policy.yaml
 
 
 # Eviter le warning :   [WARNING FileExisting-tc]: tc not found in system path
+# The Traffic Control utility manages queueing disciplines, their classes and attached filters and actions
 dnf install -y iproute-tc
 
 
