@@ -90,13 +90,15 @@ modprobe br_netfilter
 
 # These parameters determine whether packets crossing a bridge are sent to iptables for processing
 # sysctl params required by setup, params persist across reboots
-cat <<EOF | sudo tee /etc/sysctl.d/k8s.conf
-net.bridge.bridge-nf-call-iptables  = 1
-net.bridge.bridge-nf-call-ip6tables = 1
-net.ipv4.ip_forward                 = 1
+# net.bridge.bridge-nf-call-ip6tables=1
+cat <<EOF | sudo tee /etc/sysctl.d/98-k8s.conf
+net.ipv4.ip_forward=1
+net.ipv4.ip_nonlocal_bind=1
+net.bridge.bridge-nf-call-iptables=1
+net.netfilter.nf_conntrack_max=1000000
 EOF
 # Apply sysctl params without reboot
-sudo sysctl --system
+sysctl --system
 
 
 
@@ -104,6 +106,29 @@ sudo sysctl --system
 # ATTENTION: DANGEREUX DE LE FAIRE CAR PEUT CONDUIRE A UNE VERSION NON SUPPORTEE PAR VRA/VSPHERE
 # dnf update -y 
 
+
+
+
+# INSTALL CONTAINERD (via DOCKER) ON ROCKY
+# ---------------------------------------
+#echo "Install Docker" >> /tmp/K8S_INSTALL.LOG
+#dnf check-update
+#dnf config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
+#dnf install -y docker-ce docker-ce-cli containerd.io
+#systemctl enable docker
+#systemctl enable containerd
+
+# systemctl start docker
+# The Kubernetes v1.24 release actually removed the dockershim from Kubernetes.
+
+
+
+# INSTALL CONTAINERD ON ROCKY
+# ---------------------------
+# The Kubernetes v1.24 release actually removed the dockershim from Kubernetes.
+# https://www.be-root.com/2022/05/17/installation-dun-cluster-kubernetes-sur-rocky-linux-8/
+# https://kubeedge.io/docs/setup/prerequisites/runtime/
+echo "Install Containerd" >> /tmp/K8S_INSTALL.LOG
 
 # En version 8 il faut supprimer des packages qui entrent en conflit avant l'install de docker
 isRocky8=`more /etc/os-release  | grep VERSION_ID | grep 8. | wc -l` 
@@ -116,24 +141,19 @@ else
   echo "C'est pas un rocky v8"  >> /tmp/K8S_INSTALL.LOG
 fi
 
+dnf config-manager --add-repo=https://download.docker.com/linux/centos/docker-ce.repo
+#dnf -y update
+dnf install  -y containerd.io
 
-# INSTALL CONTAINERD (via DOCKER) ON ROCKY
-# ---------------------------------------
-# The Kubernetes v1.24 release actually removed the dockershim from Kubernetes.
-echo "Install Docker" >> /tmp/K8S_INSTALL.LOG
-dnf check-update
-dnf config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
-dnf install -y docker-ce docker-ce-cli containerd.io
-systemctl enable docker
-systemctl enable containerd
+# On genere le fichier de configuration
+containerd config default | tee /etc/containerd/config.toml
 
-# systemctl start docker
-# The Kubernetes v1.24 release actually removed the dockershim from Kubernetes.
+# on met SystemdCgroup à 'true'
+sed -i -e 's/SystemdCgroup = false/SystemdCgroup = true/g'  /etc/containerd/config.toml
+
+systemctl enable --now containerd
 
 
-# install que de containerd:  
-# https://www.be-root.com/2022/05/17/installation-dun-cluster-kubernetes-sur-rocky-linux-8/
-# https://kubeedge.io/docs/setup/prerequisites/runtime/
 
 
 # INSTALL KUBERNETES ON ROCKY
@@ -154,7 +174,7 @@ EOF
 #echo "dnf update before kubelet, kubeadm et kubectl install" >> /tmp/K8S_INSTALL.LOG
 #dnf update -y 
 echo "Install kubelet, kubeadm et kubectl" >> /tmp/K8S_INSTALL.LOG
-dnf install -y kubelet-$kubeVersion kubeadm-$kubeVersion   kubectl-$kubeVersion  --disableexcludes=kubernetes  --rpmverbosity=debug
+dnf install -y kubelet-$kubeVersion kubeadm-$kubeVersion   kubectl-$kubeVersion  --disableexcludes=kubernetes    # --rpmverbosity=debug
 #dnf install -y kubelet-$kubeVersion kubeadm-$kubeVersion   kubectl-$kubeVersion  --disableexcludes=kubernetes 
 echo "Enable kubelet" >> /tmp/K8S_INSTALL.LOG
 systemctl enable --now kubelet
