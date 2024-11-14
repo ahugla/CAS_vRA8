@@ -82,9 +82,18 @@ echo "PATH = $PATH"
 
 # kubeproxy mode
 # --------------
+# mask other FW to make impossible to load
+systemctl mask firewalld
+systemctl mask nftables
+
+#install iptables
 dnf install -y iptables  iptables-services
 systemctl enable iptables.service
-systemctl start iptables.service
+#systemctl start iptables.service
+#systemctl stop iptables.service
+
+
+
 
 # Rocky 8 uses "nftables" as the backend by default, whereas "Centos 7" uses iptables 
 # Kubernetes supports "nftables" a partir de la v1.31, default is "iptables"
@@ -200,44 +209,15 @@ mv audit_policy.yaml /etc/kubernetes/audit-policies/policy.yaml
 
 
 
-# Eviter le message d'erreur lors de kubeadm init :  [ERROR CRI]: container runtime is not running   
-rm -f /etc/containerd/config.toml
-systemctl enable containerd
-systemctl restart containerd
+
+# Eviter le warning :   [WARNING FileExisting-tc]: tc not found in system path
+dnf install -y iproute-tc
+
 
 
 # init du cluster
 echo "kubeadm init ... starting ..."
 kubeadm init --config /tmp/$kubeadm_config_file
-
-
-
-
-##########TO DO############################################################################################################
-[root@vra-009623 tmp]# kubeadm init --config /tmp/$kubeadm_config_file
-[init] Using Kubernetes version: v1.28.13
-[preflight] Running pre-flight checks
-        [WARNING FileExisting-tc]: tc not found in system path
-[preflight] Pulling images required for setting up a Kubernetes cluster
-[preflight] This might take a minute or two, depending on the speed of your internet connection
-[preflight] You can also perform this action in beforehand using 'kubeadm config images pull'
-W1114 14:43:16.620860   12258 checks.go:835] detected that the sandbox image "registry.k8s.io/pause:3.6" of the container runtime is inconsistent with that used by kubeadm. 
-                                                It is recommended that using "registry.k8s.io/pause:3.9" as the CRI sandbox image.
-[certs] Using certificateDir folder "/etc/kubernetes/pki"
-[certs] Generating "ca" certificate and key
-[certs] Generating "apiserver" certificate and key
-
-=>   VOIR   https://www.be-root.com/2022/05/17/installation-dun-cluster-kubernetes-sur-rocky-linux-8/
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -348,8 +328,12 @@ echo "alias kk='kubectl'" >> /root/.bash_profile
 # see:    https://metallb.universe.tf/installation/   
 #
 # install metallb
-kubectl apply -f  https://raw.githubusercontent.com/metallb/metallb/v0.14.8/config/manifests/metallb-native.yaml
-# old : https://raw.githubusercontent.com/metallb/metallb/v0.13.10/config/manifests/metallb-native.yaml
+# kubectl apply -f  https://raw.githubusercontent.com/metallb/metallb/v0.14.8/config/manifests/metallb-native.yaml
+kubectl apply -f  https://raw.githubusercontent.com/metallb/metallb/v0.13.10/config/manifests/metallb-native.yaml
+
+# test de connexion au clusterIP de K8S: wget https://10.96.0.1:443/api  (metallb contoller doit pouvoir acceder à 10.96.0.1:443/api)
+
+
 
 
 
@@ -566,4 +550,10 @@ echo "Phase K8S-MasterConfig terminé"  >> /tmp/K8S_INSTALL.LOG
 
 
 
+# COMMANDS
+# --------
+#   Check certificates :   kubeadm certs check-expiration
+#
+
+#   kubeadm init phase certs all   utile ?
 
