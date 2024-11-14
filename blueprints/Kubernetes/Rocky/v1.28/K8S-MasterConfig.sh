@@ -245,12 +245,14 @@ kubeadm init --config /tmp/$kubeadm_config_file
 
 
 # start the cluster 
+echo "Demarrage du cluster ..."
 mkdir -p $HOME/.kube
 sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config    # admin.conf est créé par "kubeadm init".
 sudo chown $(id -u):$(id -g) $HOME/.kube/config
 
 
 # MUST wait for K8S to start (on attend un running au moins) 
+echo "Wait for K8S to start ..."
 # Si pas de $HOME=/root  alors  errormsg : The connection to the server localhost:8080 was refused
 isRunning=`kubectl get pods --all-namespaces | grep Running | wc -l`
 while [ $isRunning -lt 1 ]
@@ -285,12 +287,14 @@ kubectl taint nodes --all node-role.kubernetes.io/master:NoSchedule-
 
 # Install Flannel for network
 # Doc: https://kubernetes.io/docs/setup/independent/create-cluster-kubeadm/#before-you-begin
+echo "Install de Flannel ..."
 kubectl apply -f  https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml
 
 
 
 # ATTENDRE QUE TOUT SOIT UP :  il y a 8 pods a demarrer, mais on attend que tous les pods soient up
 # Si pas de $HOME=/root  alors  errormsg : The connection to the server localhost:8080 was refused
+echo "On attend que les pods soient running (8) ..."
 nbRunning=`kubectl get pods --all-namespaces | grep Running | wc -l`
 nbLigne=`kubectl get pods --all-namespaces | wc -l`
 nbTarget=`echo $(($nbLigne-1))`
@@ -334,13 +338,23 @@ echo "alias kk='kubectl'" >> /root/.bash_profile
 # see:    https://metallb.universe.tf/installation/   
 #
 # install metallb
+echo "Install de metallb ..."
 kubectl apply -f  https://raw.githubusercontent.com/metallb/metallb/v0.13.10/config/manifests/metallb-native.yaml
 # nook : kubectl apply -f  https://raw.githubusercontent.com/metallb/metallb/v0.14.8/config/manifests/metallb-native.yaml
 # pas possible d'acceder au dashboard depuis le LB avec la v0.14.8
 
 
 # On attend que metallb soit demarré avant de le configurer
+echo "on attend que metallb soit demarré avant de le configurer ..."
+# on attend que les premiers pods existent avant de les compter
 nb_metallb=`kubectl get pods -n metallb-system | grep / | wc -l` 
+while [ "$nb_metallb" = "0" ]
+do
+  echo "Pas de pod metallb encore, on attend 2s ..."
+  sleep 2
+  nb_metallb=`kubectl get pods -n metallb-system | grep / | wc -l` 
+done
+# y a des pods metallb, on attends qu'ils soient Running
 nb_metallb_running=`kubectl get pods -n metallb-system | grep Running | grep / | wc -l` 
 echo " metallb: $nb_metallb_running / $nb_metallb"
 while [ "$nb_metallb_running" != "$nb_metallb" ]
@@ -355,6 +369,7 @@ echo " metallb: $nb_metallb_running / $nb_metallb"
 
 
 # IP Pool configuration
+echo "metallb : IP pool configuration ..."
 cat <<EOF > /tmp/IPAddressPool.yaml
 apiVersion: metallb.io/v1beta1
 kind: IPAddressPool
@@ -387,6 +402,7 @@ echo " metallb: IPAddressPool OK"
 
 
 # L2 Advertisement config
+echo "metallb : L2 Advertisement configuration ..."
 cat <<EOF > /tmp/L2Advertisement.yaml
 apiVersion: metallb.io/v1beta1
 kind: L2Advertisement
@@ -424,6 +440,7 @@ rm -f /tmp/L2Advertisement.yaml
 # ---------------------
 # Le Kubernetes Dashboard depend de metrics-server, il faut l'installer
 # -L car redirection
+echo "Install du Dashboard Kubernetes ..."
 curl -LO  https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml
 # comme on est dans un env de test, les certificates sont pas configurés, si on rajoute pas --kubelet-insecure-tls, le pod metrics-server ne demarre pas
 sed -i '/kubelet-use-node-status-port/a \        - --kubelet-insecure-tls\' components.yaml
