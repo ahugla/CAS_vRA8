@@ -117,16 +117,23 @@ else
 fi
 
 
-# INSTALL DOCKER ON ROCKY
-# --------------------------
+# INSTALL CONTAINERD (via DOCKER) ON ROCKY
+# ---------------------------------------
+# The Kubernetes v1.24 release actually removed the dockershim from Kubernetes.
 echo "Install Docker" >> /tmp/K8S_INSTALL.LOG
 dnf check-update
 dnf config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
 dnf install -y docker-ce docker-ce-cli containerd.io
 systemctl enable docker
 systemctl enable containerd
-systemctl start docker
 
+# systemctl start docker
+# The Kubernetes v1.24 release actually removed the dockershim from Kubernetes.
+
+
+# install que de containerd:  
+# https://www.be-root.com/2022/05/17/installation-dun-cluster-kubernetes-sur-rocky-linux-8/
+# https://kubeedge.io/docs/setup/prerequisites/runtime/
 
 
 # INSTALL KUBERNETES ON ROCKY
@@ -180,7 +187,7 @@ echo "Phase K8S-prepare terminé"  >> /tmp/K8S_INSTALL.LOG
 #  TO DO
 # --------
 
-
+# - installer only containerd (pas docker)
 # - enlever les commentaires
 # - variabiliser la version de docker
 # - variabiliser la version de Kubernetes

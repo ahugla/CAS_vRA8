@@ -9,6 +9,8 @@ nodeRegistration:
   - effect: NoSchedule
     key: node-role.kubernetes.io/master
 ---
+apiVersion: kubeadm.k8s.io/v1beta3
+kind: ClusterConfiguration
 apiServer:
   extraArgs:
     audit-log-path: /k8s-logs/apiserver/audit.log
@@ -23,7 +25,6 @@ apiServer:
     name: apiserver-log
     pathType: DirectoryOrCreate
   timeoutForControlPlane: 4m0s
-apiVersion: kubeadm.k8s.io/v1beta3
 certificatesDir: /etc/kubernetes/pki
 clusterName: K8S_CLUSTER_NAME                                # clusterName: k8s-alex
 controllerManager: {}
@@ -31,10 +32,13 @@ dns: {}
 etcd:
   local:
     dataDir: /var/lib/etcd
-kind: ClusterConfiguration
 kubernetesVersion: K8S_VERSION                               # kubernetesVersion: v1.28.15
 networking:
   dnsDomain: cluster.local
   podSubnet: 10.244.0.0/16
   serviceSubnet: 10.96.0.0/12
 scheduler: {}
+---
+apiVersion: kubeproxy.config.k8s.io/v1alpha1
+kind: KubeProxyConfiguration
+mode: iptables

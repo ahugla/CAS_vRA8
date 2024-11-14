@@ -41,7 +41,7 @@ cadvisor_version=$2                         #cadvisor_version=v0.34.0
 k8s_cluter_name=$3                          #k8s_cluter_name=alex-k8s
 LIserver=$4                                 #LIserver=vrli.cpod-vrealizesuite.az-demo.shwrfr.com
 versionLI=$5                                #versionLI=v8.4.0
-#LB_IPrange=172.17.1.238-172.17.1.239
+#LB_IPrange=172.17.1.237-172.17.1.239
 #cadvisor_version=v0.34.0
 #k8s_cluter_name=alex-k8s
 #LIserver=vrli.cpod-vrealizesuite.az-demo.shwrfr.com
@@ -80,10 +80,44 @@ echo "PATH = $PATH"
 
 
 
+# kubeproxy mode
+# --------------
+dnf install -y iptables  iptables-services
+systemctl enable iptables.service
+systemctl start iptables.service
 
-# kubeadm avec config file et policy de logging
-# ---------------------------------------------
+# Rocky 8 uses "nftables" as the backend by default, whereas "Centos 7" uses iptables 
+# Kubernetes supports "nftables" a partir de la v1.31, default is "iptables"
+#
+#   =>  pour K8S <  1.31 il faut installer iptables sur Rocky
+#   =>  pour K8S >= 1.31 il faut configurer le fichier "kubeadm_config_file" en rajoutant :
+#          apiVersion: kubeproxy.config.k8s.io/v1alpha1
+#          kind: KubeProxyConfiguration
+#          mode: nftables
+#
+# nftables commands (kubernetes >= 1.31)
+# ------------------
+#    nft list ruleset
+#    systemctl status nftables
+#
+# Proxy modes (default: 'iptables mode' )
+# https://kubernetes.io/docs/reference/networking/virtual-ips/
+# -----------
+# If you’re using kube-proxy in IPVS mode, since Kubernetes v1.14.2 you have to enable strict ARP mode
+# check if IPVS is configured :  kubectl get configmap kube-proxy -n kube-system | grep mode
+# Verify kube-proxy is started with ipvs proxier :   kubectl logs [kube-proxy pod] | grep "Using ipvs Proxier"
+# Kill kubelet pour prendre en compte un changement :  kubectl get pod -n kube-system  puis  kubectl delete pod -n kube-system <pod-name>
+# kubectl edit configmap -n kube-system kube-proxy
+#     apiVersion: kubeproxy.config.k8s.io/v1alpha1
+#     kind: KubeProxyConfiguration
+#     mode: "ipvs"
+#     ipvs:
+#       strictARP: true
 
+
+
+# Fichdier de config de kubeadm
+# ------------------------------
 curl -O https://raw.githubusercontent.com/ahugla/CAS_vRA8/master/blueprints/Kubernetes/Rocky/v1.28/$kubeadm_config_file
 
 # update du fichier de config:
@@ -92,34 +126,54 @@ sed -i -e 's/K8S_VERSION/'$K8S_VERSION'/g'  /tmp/$kubeadm_config_file           
 sed -i -e 's/K8S_CLUSTER_NAME/'$k8s_cluter_name'/g'  /tmp/$kubeadm_config_file   #  on met le nom du cluster K8S
 
 # EXEMPLE D'UN FICHIER DE CONFIG POUR KUBEADM INIT:
-# apiVersion: kubeadm.k8s.io/v1.22
-# kind: InitConfiguration
-# localAPIEndpoint:
-#   advertiseAddress: 172.17.1.74
-#   bindPort: 6443
-# apiServer:
-#   extraArgs:
-#     audit-policy-file: /k8s-policy/policy.yaml
-#     audit-log-path: /k8s-logs/apiserver/audit.log
-#   extraVolumes:
-#   - name: "policy-conf"
-#     hostPath: "/etc/kubernetes/audit-policies/"
-#     mountPath: "/k8s-policy/"
-#     pathType: DirectoryOrCreate
-#   - name: "apiserver-log"
-#     hostPath: "/var/log/kubernetes/apiserver/"
-#     mountPath: "/k8s-logs/apiserver/"
-#     pathType: DirectoryOrCreate
-#   timeoutForControlPlane: 4m0s
-# kind: ClusterConfiguration
-# kubernetesVersion: 1.21.1
-# clusterName: kubernetes
-# networking:
-#   dnsDomain: cluster.local
-#   podSubnet: 10.244.0.0/16
-#   serviceSubnet: 10.96.0.0/12
-# scheduler: {}
+#apiVersion: kubeadm.k8s.io/v1beta3
+#kind: InitConfiguration
+#localAPIEndpoint:
+#  advertiseAddress: 172.17.1.54                                  # advertiseAddress: 172.17.1.74
+#  bindPort: 6443
+#nodeRegistration:
+#  imagePullPolicy: IfNotPresent
+#  taints:
+#  - effect: NoSchedule
+#    key: node-role.kubernetes.io/master
+#---
+#apiVersion: kubeadm.k8s.io/v1beta3
+#kind: ClusterConfiguration
+#apiServer:
+#  extraArgs:
+#    audit-log-path: /k8s-logs/apiserver/audit.log
+#    audit-policy-file: /k8s-policy/policy.yaml
+#  extraVolumes:
+#  - hostPath: /etc/kubernetes/audit-policies/
+#    mountPath: /k8s-policy/
+#    name: policy-conf
+#    pathType: DirectoryOrCreate
+#  - hostPath: /var/log/kubernetes/apiserver/
+#    mountPath: /k8s-logs/apiserver/
+#    name: apiserver-log
+#    pathType: DirectoryOrCreate
+#  timeoutForControlPlane: 4m0s
+#certificatesDir: /etc/kubernetes/pki
+#clusterName: alex-k8s                                # clusterName: k8s-alex
+#controllerManager: {}
+#dns: {}
+#etcd:
+#  local:
+#    dataDir: /var/lib/etcd
+#kubernetesVersion: 1.28.13                               # kubernetesVersion: v1.28.15
+#networking:
+#  dnsDomain: cluster.local
+#  podSubnet: 10.244.0.0/16
+#  serviceSubnet: 10.96.0.0/12
+#scheduler: {}
+#---
+#apiVersion: kubeproxy.config.k8s.io/v1alpha1
+#kind: KubeProxyConfiguration
+#mode: iptables
 
+
+# Policy de logging
+# -----------------
 # creation des repertoires pour les logs et pour le fichier de policy de log d'audit 
 mkdir /var/log/kubernetes
 mkdir /var/log/kubernetes/apiserver
@@ -155,6 +209,35 @@ systemctl restart containerd
 # init du cluster
 echo "kubeadm init ... starting ..."
 kubeadm init --config /tmp/$kubeadm_config_file
+
+
+
+
+##########TO DO############################################################################################################
+[root@vra-009623 tmp]# kubeadm init --config /tmp/$kubeadm_config_file
+[init] Using Kubernetes version: v1.28.13
+[preflight] Running pre-flight checks
+        [WARNING FileExisting-tc]: tc not found in system path
+[preflight] Pulling images required for setting up a Kubernetes cluster
+[preflight] This might take a minute or two, depending on the speed of your internet connection
+[preflight] You can also perform this action in beforehand using 'kubeadm config images pull'
+W1114 14:43:16.620860   12258 checks.go:835] detected that the sandbox image "registry.k8s.io/pause:3.6" of the container runtime is inconsistent with that used by kubeadm. 
+                                                It is recommended that using "registry.k8s.io/pause:3.9" as the CRI sandbox image.
+[certs] Using certificateDir folder "/etc/kubernetes/pki"
+[certs] Generating "ca" certificate and key
+[certs] Generating "apiserver" certificate and key
+
+=>   VOIR   https://www.be-root.com/2022/05/17/installation-dun-cluster-kubernetes-sur-rocky-linux-8/
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -259,21 +342,6 @@ echo "alias kk='kubectl'" >> /root/.bash_profile
 
 
 
-# Proxy modes (default: 'iptables mode' )
-# https://kubernetes.io/docs/reference/networking/virtual-ips/
-# -----------
-# If you’re using kube-proxy in IPVS mode, since Kubernetes v1.14.2 you have to enable strict ARP mode
-# check if IPVS is configured :  kubectl get configmap kube-proxy -n kube-system | grep mode
-# Verify kube-proxy is started with ipvs proxier :   kubectl logs [kube-proxy pod] | grep "Using ipvs Proxier"
-# Kill kubelet pour prendre en compte un changement :  kubectl get pod -n kube-system  puis  kubectl delete pod -n kube-system <pod-name>
-# kubectl edit configmap -n kube-system kube-proxy
-#     apiVersion: kubeproxy.config.k8s.io/v1alpha1
-#     kind: KubeProxyConfiguration
-#     mode: "ipvs"
-#     ipvs:
-#       strictARP: true
-
-
 
 # MetalLB install and config in Layer 2 Mode
 #-------------------------------------------
@@ -366,7 +434,7 @@ curl -LO  https://github.com/kubernetes-sigs/metrics-server/releases/latest/down
 # comme on est dans un env de test, les certificates sont pas configurés, si on rajoute pas --kubelet-insecure-tls, le pod metrics-server ne demarre pas
 sed -i '/kubelet-use-node-status-port/a \        - --kubelet-insecure-tls\' components.yaml
 kubectl apply -f components.yaml
-rm components.yaml
+rm -f components.yaml
 
 # deploy K8S Dashboard
 kubectl apply -f https://raw.githubusercontent.com/kubernetes/dashboard/v2.7.0/aio/deploy/recommended.yaml
@@ -415,7 +483,7 @@ echo "With token pour namespace 'default':                                      
 echo "$dashboard_token                                                                     " >> /tmp/K8S_Dashboard_Access.info
 echo "                                                                                     " >> /tmp/K8S_Dashboard_Access.info
 echo "-------------------------------------------------------------------------------------" >> /tmp/K8S_Dashboard_Access.info
-cp /tmp/K8S_Dashboard_Access.info /root/K8S_Dashboard_Access.info
+cp /tmp/K8S_Dashboard_Access.info  /root/K8S_Dashboard_Access.info
 
 
 
