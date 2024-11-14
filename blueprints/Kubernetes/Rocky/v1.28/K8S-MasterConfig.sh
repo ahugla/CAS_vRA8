@@ -215,10 +215,10 @@ mv audit_policy.yaml /etc/kubernetes/audit-policies/policy.yaml
 dnf install -y iproute-tc
 
 
-
-
-kubeadm config images pull
+# INUTILE pull des imges containers
 # sandbox image "registry.k8s.io/pause:3.6" of the container runtime is inconsistent with that used by kubeadm. It is recommended that using "registry.k8s.io/pause:3.9" as the CRI sandbox image
+#kubeadm config images pull
+
 
 
 # init du cluster
@@ -569,7 +569,7 @@ echo "Phase K8S-MasterConfig terminé"  >> /tmp/K8S_INSTALL.LOG
 #   Check certificates :   kubeadm certs check-expiration
 #
 #   Pull des images containers :  kubeadm config images pull
-#   Voir les images containers :  kubeadm config images list
+#   Voir les images containers prevues :  kubeadm config images list
 #
 #   kubeadm init phase certs all   utile ?
 
