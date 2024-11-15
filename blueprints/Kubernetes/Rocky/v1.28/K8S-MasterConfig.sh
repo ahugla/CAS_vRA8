@@ -320,7 +320,8 @@ echo "alias kk='kubectl'" >> /root/.bash_profile
 #
 # install metallb
 echo "Install de metallb ..."
-# v0.14.8 : NO OK : ne fonctionne pas ...
+# metallb.io v1beta1 AddressPool is deprecated, consider using IPAddressPool  =>     passer en 0.14.8
+# OR v0.14.8 : NO OK : ne fonctionne pas ...
 # wget https://raw.githubusercontent.com/metallb/metallb/v0.14.8/config/manifests/metallb-native.yaml
 wget https://raw.githubusercontent.com/metallb/metallb/v0.13.10/config/manifests/metallb-native.yaml
 # Pour eviter pb avec IPAddressPool qui ne se cree pas ensuite:
@@ -585,14 +586,6 @@ echo "Phase K8S-MasterConfig terminé"  >> /tmp/K8S_INSTALL.LOG
 
 # pq nc ne fonctionne pas en K8S ?
 
-
- metallb.io v1beta1 AddressPool is deprecated, consider using IPAddressPool
-
-     passer en 0.14.8
- 
-         mais pb avec IPAddressPool qui se cree pas: 
-                - metallb-native-0.14.8.yaml , passer a Ignore et pas Fail sur les policy
-                  sed -i -e 's/failurePolicy: Fail/failurePolicy: Ignore/g'  metallb-native-0.14.8.yaml    OK !!!
 
 
 
