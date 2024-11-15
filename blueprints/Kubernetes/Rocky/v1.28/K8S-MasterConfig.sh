@@ -287,8 +287,10 @@ kubectl taint nodes --all node-role.kubernetes.io/master:NoSchedule-
 
 # Install Flannel for network
 # Doc: https://kubernetes.io/docs/setup/independent/create-cluster-kubeadm/#before-you-begin
+# https://github.com/flannel-io/flannel#deploying-flannel-manually
 echo "Install de Flannel ..."
-kubectl apply -f  https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml
+kubectl apply -f https://github.com/flannel-io/flannel/releases/latest/download/kube-flannel.yml
+# old: kubectl apply -f  https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml
 
 
 
@@ -588,3 +590,14 @@ echo "Phase K8S-MasterConfig terminé"  >> /tmp/K8S_INSTALL.LOG
 
 #   voir si le K8S via clusterIP interne repond :  wget https://10.96.0.1:443/api
 #   test de connexion au clusterIP de K8S: wget https://10.96.0.1:443/api  (metallb contoller doit pouvoir acceder à 10.96.0.1:443/api)
+
+
+
+# necessite de redeployer le dashbaord ???
+#   -  delete
+#   -  apply 
+#   -  service dashboard delete
+#   -  service dashboard recreate
+
+
+# pq nc ne fonctionne pas en K8S ?

@@ -85,8 +85,8 @@ overlay
 br_netfilter
 EOF
 modprobe overlay
-modprobe br_netfilter
-
+modprobe br_netfilter     # indispensable pour flannel
+                          # https://docs.microfocus.com/doc/AMX/24.2/SetSystemParameters
 
 # These parameters determine whether packets crossing a bridge are sent to iptables for processing
 # sysctl params required by setup, params persist across reboots
