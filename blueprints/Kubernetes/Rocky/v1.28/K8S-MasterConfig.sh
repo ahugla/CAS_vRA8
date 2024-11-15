@@ -80,21 +80,6 @@ echo "PATH = $PATH"
 
 
 
-# kubeproxy mode
-# --------------
-# mask other FW to make impossible to load
-systemctl mask firewalld
-systemctl mask nftables
-
-#install iptables
-dnf install -y iptables  iptables-services
-systemctl enable iptables.service
-#systemctl start iptables.service
-#systemctl stop iptables.service
-
-
-
-
 # Rocky 8 uses "nftables" as the backend by default, whereas "Centos 7" uses iptables 
 # Kubernetes supports "nftables" a partir de la v1.31, default is "iptables"
 #
@@ -207,12 +192,6 @@ mv audit_policy.yaml /etc/kubernetes/audit-policies/policy.yaml
 # --token-ttl 0 permet de faire que le token du bootstrap n'expire jamais (on 
 # peut tj faire des add nodes sans avoir a recreer un token)
 
-
-
-
-# Eviter le warning :   [WARNING FileExisting-tc]: tc not found in system path
-# The Traffic Control utility manages queueing disciplines, their classes and attached filters and actions
-dnf install -y iproute-tc
 
 
 # INUTILE pull des imges containers
@@ -341,9 +320,13 @@ echo "alias kk='kubectl'" >> /root/.bash_profile
 #
 # install metallb
 echo "Install de metallb ..."
-kubectl apply -f  https://raw.githubusercontent.com/metallb/metallb/v0.13.10/config/manifests/metallb-native.yaml
-# nook : kubectl apply -f  https://raw.githubusercontent.com/metallb/metallb/v0.14.8/config/manifests/metallb-native.yaml
-# pas possible d'acceder au dashboard depuis le LB avec la v0.14.8
+# v0.14.8 : NO OK : ne fonctionne pas ...
+# wget https://raw.githubusercontent.com/metallb/metallb/v0.14.8/config/manifests/metallb-native.yaml
+wget https://raw.githubusercontent.com/metallb/metallb/v0.13.10/config/manifests/metallb-native.yaml
+# Pour eviter pb avec IPAddressPool qui ne se cree pas ensuite:
+sed -i -e 's/failurePolicy: Fail/failurePolicy: Ignore/g'  metallb-native.yaml 
+kubectl apply -f metallb-native.yaml
+# rm -f metallb-native.yaml
 
 
 # On attend que metallb soit demarré avant de le configurer
@@ -601,3 +584,15 @@ echo "Phase K8S-MasterConfig terminé"  >> /tmp/K8S_INSTALL.LOG
 
 
 # pq nc ne fonctionne pas en K8S ?
+
+
+ metallb.io v1beta1 AddressPool is deprecated, consider using IPAddressPool
+
+     passer en 0.14.8
+ 
+         mais pb avec IPAddressPool qui se cree pas: 
+                - metallb-native-0.14.8.yaml , passer a Ignore et pas Fail sur les policy
+                  sed -i -e 's/failurePolicy: Fail/failurePolicy: Ignore/g'  metallb-native-0.14.8.yaml    OK !!!
+
+
+

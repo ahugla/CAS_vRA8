@@ -103,7 +103,7 @@ sysctl --system
 
 
 # Update all 
-# ATTENTION: DANGEREUX DE LE FAIRE CAR PEUT CONDUIRE A UNE VERSION NON SUPPORTEE PAR VRA/VSPHERE
+# ATTENTION: DANGEREUX DE LE FAIRE CAR PEUT CONDUIRE A UNE VERSION D'OS NON SUPPORTEE PAR VRA/VSPHERE ET PROVOQUER DES PB DE CLOUD-INIT (ROCKY 9)
 # dnf update -y 
 
 
@@ -114,10 +114,15 @@ sysctl --system
 systemctl mask firewalld
 systemctl mask nftables
 #install iptables et iproute-tc
-dnf install -y iptables  iptables-services  iproute-tc
+dnf install -y iptables  iptables-services
 systemctl enable iptables.service
 #systemctl start iptables.service
 #systemctl stop iptables.service
+
+
+# Eviter le warning :   [WARNING FileExisting-tc]: tc not found in system path
+# The Traffic Control utility manages queueing disciplines, their classes and attached filters and actions
+dnf install -y  iproute-tc
 
 
 
@@ -224,9 +229,7 @@ echo "Phase K8S-prepare terminé"  >> /tmp/K8S_INSTALL.LOG
 #  TO DO
 # --------
 
-# - installer only containerd (pas docker)
 # - enlever les commentaires
-# - variabiliser la version de docker
 # - variabiliser la version de Kubernetes
 
 

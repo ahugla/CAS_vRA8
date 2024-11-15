@@ -66,9 +66,9 @@ echo "varTokenToJoin = $varTokenToJoin"
 
 
 # Eviter le message d'erreur lors de kubeadm join :  [ERROR CRI]: container runtime is not running   
-rm -f /etc/containerd/config.toml
-systemctl enable containerd
-systemctl restart containerd
+#rm -f /etc/containerd/config.toml
+#systemctl enable containerd
+#systemctl restart containerd
 
 
 #A FAIRE SUR LES NODES:  
