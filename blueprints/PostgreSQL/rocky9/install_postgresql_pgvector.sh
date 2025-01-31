@@ -21,13 +21,15 @@ cd /tmp
 pass=$1                # password du compte 'postgres' créé par defaut lors de l'install de poostgreSQL
 pgVersion=$2           # version de postgreSQL
 pgVectorVersion=$3     # version de pgvector
+echo "pgVersion = $pgVersion"
+echo "pgVectorVersion = $pgVectorVersion"
 
 
 # dnf module list postgresql   : voir la lisye des versions dispo et celle par defaut
 
 
 # install and update the repo
-dnf install -y https://download.postgresql.org/pub/repos/yum/reporpms/EL-8-x86_64/pgdg-redhat-repo-latest.noarch.rpm
+dnf install -y https://download.postgresql.org/pub/repos/yum/reporpms/EL-9-x86_64/pgdg-redhat-repo-latest.noarch.rpm
 dnf update -y
 
 # disable the default PostgreSQL repo 
