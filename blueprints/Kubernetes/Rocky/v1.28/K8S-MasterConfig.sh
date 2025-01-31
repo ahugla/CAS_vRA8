@@ -587,5 +587,22 @@ echo "Phase K8S-MasterConfig terminé"  >> /tmp/K8S_INSTALL.LOG
 # pq nc ne fonctionne pas en K8S ?
 
 
+Metal LB doir etre deployé en Layer2 mode =>  regarder le excludeL2config dnas le fichier de conf)
+              =>  pb dans la 'configmap' avec un L2 exclude...
+              devrait etre: 
+                      apiVersion: v1
+                      kind: ConfigMap
+                      metadata:
+                        namespace: metallb-system
+                        name: config
+                      data:
+                        config: |
+                          address-pools:
+                          - name: default
+                            protocol: layer2
+                            addresses:
+                            - 192.168.10.240-192.168.10.250
 
 
+
+Previous versions of MetalLB are configurable via a configmap. However, starting from the version v0.13.0, it will be possible to configure it only via CRs

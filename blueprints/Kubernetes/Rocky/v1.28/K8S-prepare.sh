@@ -111,6 +111,7 @@ sysctl --system
 # kubeproxy mode ( dans notre cas le kube proxy mode utilise iptables)
 # --------------
 # mask other FW to make impossible to load
+# Rocky 8 uses "nftables" as the backend by default, whereas "Centos 7" uses iptables.
 systemctl mask firewalld
 systemctl mask nftables
 #install iptables et iproute-tc

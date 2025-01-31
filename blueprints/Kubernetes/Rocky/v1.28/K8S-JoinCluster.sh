@@ -19,6 +19,9 @@
 # rm -f K8S-JoinCluster.sh
 
 
+cd /tmp
+
+
 
 # LOGGING DANS /tmp/K8S_INSTALL.LOG
 # ----------------------------------
