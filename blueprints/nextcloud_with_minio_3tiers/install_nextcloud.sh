@@ -47,7 +47,7 @@ echo "DB_server_Hostname = " $DB_server_Hostname                    >>   $tempLo
 
 # parametres
 # ----------
-redisServer=vra-009429.cpod-vrealize.az-fkd.cloud-garage.net
+redisServer=vra-000013.cpod-aria.az-lab.cloud-garage.net
 redisPort=6379
 DomainName=cpod-vrealize.az-fkd.cloud-garage.net
 nextcloud_FQDN=$HOSTNAME.$DomainName                                # FQDN du serveur local (nextcloud)

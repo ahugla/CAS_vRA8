@@ -18,7 +18,7 @@ redis_password=$2
 
 
 # Set parameters
-redisServer=vra-009429.cpod-vrealize.az-fkd.cloud-garage.net
+redisServer=vra-000013.cpod-aria.az-lab.cloud-garage.net
 redisPort=6379
 export MINIO_ACCESS_KEY=minioadmin
 export MINIO_VOLUMES="/data"

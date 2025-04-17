@@ -33,7 +33,7 @@ echo "requirepass $mypass"   >> /etc/redis/redis.conf
 
 
 # creation de l'ACL d'admin 
-echo "user dbadmin on +@all ~*  >VMware1!"  >> /etc/redis/redis.conf
+echo "user dbadmin on +@all ~*  >THEPASSWORD"  >> /etc/redis/redis.conf
 
 
 systemctl restart redis
