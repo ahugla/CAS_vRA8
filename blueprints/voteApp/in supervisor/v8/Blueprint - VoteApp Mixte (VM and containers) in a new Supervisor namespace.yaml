@@ -1,0 +1,131 @@
+formatVersion: 1
+inputs:
+  namespace-name:
+    type: string
+    title: Nom du namespace
+  nbre-front:
+    type: integer
+    title: Nombre Replicas Front
+    default: 2
+    minimum: 1
+    maximum: 10
+resources:
+  Supervisor_Namespace:
+    type: CCI.Supervisor.Namespace
+    metadata:
+      layoutPosition:
+        - 0
+        - 0
+    properties:
+      name: ${input.namespace-name}
+      className: default-ns-class
+      regionName: region-france
+  backend-svc:
+    type: CCI.Supervisor.Resource
+    dependsOn:
+      - backend-VM
+    metadata:
+      layoutPosition:
+        - 0
+        - 1
+    properties:
+      context: ${resource.Supervisor_Namespace.id}
+      manifest:
+        apiVersion: vmoperator.vmware.com/v1alpha1
+        kind: VirtualMachineService
+        metadata:
+          name: vote-backend
+        spec:
+          selector:
+            app: vote-backend
+          type: LoadBalancer
+          ports:
+            - name: ssh
+              protocol: TCP
+              port: 22
+              targetPort: 22
+            - name: redis
+              protocol: TCP
+              port: 6379
+              targetPort: 6379
+  front-svc:
+    type: CCI.Supervisor.Resource
+    dependsOn:
+      - front
+    metadata:
+      layoutPosition:
+        - 0
+        - 2
+    properties:
+      context: ${resource.Supervisor_Namespace.id}
+      manifest:
+        apiVersion: v1
+        kind: Service
+        metadata:
+          name: vote-frontend
+        spec:
+          type: LoadBalancer
+          ports:
+            - port: 80
+          selector:
+            app: vote-frontend
+  backend-VM:
+    type: CCI.Supervisor.Resource
+    metadata:
+      layoutPosition:
+        - 1
+        - 1
+    properties:
+      context: ${resource.Supervisor_Namespace.id}
+      manifest:
+        apiVersion: vmoperator.vmware.com/v1alpha1
+        kind: VirtualMachine
+        metadata:
+          name: redis
+          labels:
+            app: vote-backend
+        spec:
+          className: best-effort-small
+          imageName: vmi-17c26fd51f9928bc3
+          storageClass: vsan-default-storage-policy
+          powerState: poweredOn
+  front:
+    type: CCI.Supervisor.Resource
+    dependsOn:
+      - backend-svc
+    metadata:
+      layoutPosition:
+        - 1
+        - 2
+    properties:
+      context: ${resource.Supervisor_Namespace.id}
+      manifest:
+        apiVersion: apps/v1
+        kind: Deployment
+        metadata:
+          name: vote-frontend
+        spec:
+          replicas: ${input.nbre-front}
+          selector:
+            matchLabels:
+              app: vote-frontend
+          template:
+            metadata:
+              labels:
+                app: vote-frontend
+            spec:
+              containers:
+                - name: vote-frontend
+                  image: vra-000027.cpod-aria.az-lab.cloud-garage.net/cmp-se/vote-app-frontend:v1.0
+                  resources:
+                    requests:
+                      cpu: 100m
+                      memory: 128Mi
+                    limits:
+                      cpu: 250m
+                      memory: 256Mi
+                  ports:
+                    - containerPort: 80
+                  env:
+                    - name: REDIS
+                      value: vote-backend

@@ -1,0 +1,137 @@
+#----------------------
+# MIXTE VOTE APP - V8
+#---------------------
+
+
+
+  
+# Back-end Cloud-init   en v8
+# -------------------
+#apiVersion: v1
+#kind: Secret
+#metadata:
+#  name: redis-cloudinit
+#  labels:
+#    app: vote-backend
+#stringData:
+#  user-data: |
+#    #cloud-config
+#    packages:
+#    runcmd:
+#      - touch /etc/cloud/cloud-init.disabled
+
+
+
+        
+# Back-end VM
+# -----------
+apiVersion: vmoperator.vmware.com/v1alpha1
+kind: VirtualMachine
+metadata:
+  name: redis
+  labels:
+    app: vote-backend
+spec:
+  className: best-effort-small
+  imageName: vmi-17c26fd51f9928bc3         # tpl-rocky-redis
+  # imageName: vmi-0e65b95fa547d3641       # Template_RockyLinux-x64-v9.x_cloud-init
+  storageClass: vsan-default-storage-policy
+  powerState: poweredOn
+  
+  #vmMetadata:                      # en v8
+  #  secretName: redis-cloudinit
+  #  transport: CloudInit
+  
+  #bootstrap:                       # en v9 ?
+    #cloudInit:
+      #cloudConfig:
+        #timezone: Europe/Paris
+        #defaultUserEnabled: false
+        #ssh_pwauth: true
+        #packages:
+          #- wget
+        #runcmd:
+          #- touch /etc/cloud/cloud-init.disabled
+          #- wget https://raw.githubusercontent.com/ahugla/K8S_yaml/main/DEMO_Mixte_VM_K8S/Vote_App_Mixte/install_redis_rocky.sh
+          #- chmod 755 install_redis_rocky.sh
+          #- ./install_redis_rocky.sh
+
+
+
+# Back-end Service
+# ----------------
+apiVersion: vmoperator.vmware.com/v1alpha1
+kind: VirtualMachineService
+metadata:
+  name: vote-backend
+spec:
+  selector:
+    app: vote-backend
+  type: LoadBalancer
+  ports:
+    - name: ssh
+      protocol: TCP
+      port: 22
+      targetPort: 22
+    - name: redis
+      protocol: TCP
+      port: 6379
+      targetPort: 6379
+
+
+
+
+
+# Front-end 
+# ---------
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: vote-frontend
+spec:
+  replicas: ${input.nbre-front}
+  selector:
+    matchLabels:
+      app: vote-frontend
+  template:
+    metadata:
+      labels:
+        app: vote-frontend
+    spec:
+      containers:
+        - name: vote-frontend
+          image: vra-000027.cpod-aria.az-lab.cloud-garage.net/cmp-se/vote-app-frontend:v1.0
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 250m
+              memory: 256Mi
+          ports:
+            - containerPort: 80
+          env:
+            - name: REDIS
+              value: vote-backend
+
+
+
+
+# Front-end Service
+# -----------------
+apiVersion: v1
+kind: Service
+metadata:
+  name: vote-frontend
+spec:
+  type: LoadBalancer
+  ports:
+    - port: 80
+  selector:
+    app: vote-frontend
+
+
+
+    
+
+
