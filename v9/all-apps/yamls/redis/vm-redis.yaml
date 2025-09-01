@@ -1,0 +1,71 @@
+apiVersion: vmoperator.vmware.com/v1alpha3
+kind: VirtualMachine
+metadata:
+  name: vm-redis
+  namespace: cmp-se-ns1-mr9b9
+  labels:
+    vm-selector: vm-redis
+    lb-vm-redis: vm-lb-selector
+spec:
+  className: best-effort-small
+  # Friendly image name: Template_RockyLinux-x64-v9.x_cloud-init
+  imageName: vmi-0eecb55dff866c417
+  storageClass: vsan-default-storage-policy
+  powerState: PoweredOn
+  network:
+    domainName: mydomain.fr
+    nameservers:
+      - 8.8.8.8
+  bootstrap:
+    cloudInit:
+      rawCloudConfig:
+        name: vm-redis-bootstrap-secret
+        key: user-data
+
+
+---
+
+
+apiVersion: v1
+kind: Secret
+metadata:
+  name: vm-redis-bootstrap-secret
+  namespace: cmp-se-ns1-mr9b9
+  labels:
+    vm-selector: vm-redis
+stringData:
+  user-data: |
+    #cloud-config
+    packages:
+      - wget
+    runcmd:
+      - touch /etc/cloud/cloud-init.disabled
+      - cd /tmp
+      - wget https://raw.githubusercontent.com/ahugla/CAS_vRA8/refs/heads/master/blueprints/redis/Script-install_redis_rocky.sh
+      - chmod 755 Script-install_redis_rocky.sh
+      - ./Script-install_redis_rocky.sh
+      
+
+---
+
+apiVersion: vmoperator.vmware.com/v1alpha3
+kind: VirtualMachineService
+metadata:
+  name: lb-vm-redis
+  namespace: cmp-se-ns1-mr9b9
+spec:
+  selector:
+    lb-vm-redis: vm-lb-selector
+  type: LoadBalancer
+  ports:
+    - name: redis
+      protocol: TCP
+      port: 6379
+      targetPort: 6379
+    - name: ssh
+      protocol: TCP
+      port: 22
+      targetPort: 22
+
+
+
