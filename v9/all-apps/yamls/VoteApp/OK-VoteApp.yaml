@@ -1,0 +1,104 @@
+#  Basé sur :  https://docs.microsoft.com/en-us/azure/aks/kubernetes-walkthrough
+#        Front: nginx: mcr.microsoft.com/azuredocs/azure-vote-front:v1
+#        Back:  redis: mcr.microsoft.com/oss/bitnami/redis:6.0.8
+
+#  frontend : nginx
+#  backend  : redis:6.0.8
+
+# Acces via service K8S :   http://[IP LB]
+
+# Appli dans:  /app
+# Fichier de conf : /app/config_file.cfg  :   permet d'afficher le nom du pod ou pas avec la variable "hostname"
+# Configurer l'affichage de la version de l'appli dans le portail web : dans /app/main.py
+
+# Installer vim dans le container:
+#  - apt update
+#  - apt install vim
+
+#  kubectl scale deployment vote-frontend --replicas=2
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: vote-backend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: vote-backend
+  template:
+    metadata:
+      labels:
+        app: vote-backend
+    spec:
+      containers:
+      - name: vote-backend
+        image: alexfr75/vote-app-backend:v1.0
+        env:
+        - name: ALLOW_EMPTY_PASSWORD
+          value: "yes"
+        ports:
+        - containerPort: 6379
+          name: redis
+
+
+---
+
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: vote-backend
+spec:
+  ports:
+  - port: 6379
+  selector:
+    app: vote-backend
+
+
+---
+
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: vote-frontend
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: vote-frontend
+  template:
+    metadata:
+      labels:
+        app: vote-frontend
+    spec:
+      containers:
+      - name: vote-frontend
+        image: alexfr75/vote-app-frontend:v1.0
+        ports:
+        - containerPort: 80
+        env:
+        - name: REDIS
+          value: "vote-backend"
+
+
+---
+
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: vote-frontend
+spec:
+  type: LoadBalancer
+  ports:
+  - port: 80
+  selector:
+    app: vote-frontend
+
+
+
+
+
+
