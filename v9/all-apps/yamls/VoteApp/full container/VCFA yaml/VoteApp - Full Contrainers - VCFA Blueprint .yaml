@@ -1,0 +1,127 @@
+formatVersion: 2
+outputs:
+  __deploymentOverview:
+    value: |-
+
+      ## VOTE APP APPLICATION
+      Full container based
+                      
+                      
+      ### Architecture
+                                
+      base on redis and nginx
+                                            
+                                            
+      ### Credits
+      - https://www.broadcom.com       
+inputs: {}
+resources:
+  Supervisor_Namespace_1:
+    type: CCI.Supervisor.Namespace
+    metadata:
+      layoutPosition:
+        - 0
+        - 0
+    properties:
+      name: demo-namespace-vkrcg
+      existing: true
+  SVC-DB:
+    type: CCI.Supervisor.Resource
+    metadata:
+      layoutPosition:
+        - 1
+        - 0
+    properties:
+      context: ${resource.Supervisor_Namespace_1.id}
+      manifest:
+        apiVersion: v1
+        kind: Service
+        metadata:
+          name: vote-backend
+        spec:
+          ports:
+            - port: 6379
+          selector:
+            app: vote-backend
+  SVC-Frontend:
+    type: CCI.Supervisor.Resource
+    metadata:
+      layoutPosition:
+        - 1
+        - 1
+    properties:
+      context: ${resource.Supervisor_Namespace_1.id}
+      manifest:
+        apiVersion: v1
+        kind: Service
+        metadata:
+          name: vote-frontend
+        spec:
+          type: LoadBalancer
+          ports:
+            - port: 80
+          selector:
+            app: vote-frontend
+  DB:
+    type: CCI.Supervisor.Resource
+    metadata:
+      layoutPosition:
+        - 2
+        - 0
+    properties:
+      context: ${resource.Supervisor_Namespace_1.id}
+      manifest:
+        apiVersion: apps/v1
+        kind: Deployment
+        metadata:
+          name: vote-backend
+        spec:
+          replicas: 1
+          selector:
+            matchLabels:
+              app: vote-backend
+          template:
+            metadata:
+              labels:
+                app: vote-backend
+            spec:
+              containers:
+                - name: vote-backend
+                  image: alexfr75/vote-app-backend:v1.0
+                  env:
+                    - name: ALLOW_EMPTY_PASSWORD
+                      value: 'yes'
+                  ports:
+                    - containerPort: 6379
+                      name: redis
+  Frontend:
+    type: CCI.Supervisor.Resource
+    metadata:
+      layoutPosition:
+        - 2
+        - 1
+    properties:
+      context: ${resource.Supervisor_Namespace_1.id}
+      manifest:
+        apiVersion: apps/v1
+        kind: Deployment
+        metadata:
+          name: vote-frontend
+        spec:
+          replicas: 2
+          selector:
+            matchLabels:
+              app: vote-frontend
+          template:
+            metadata:
+              labels:
+                app: vote-frontend
+            spec:
+              containers:
+                - name: vote-frontend
+                  image: alexfr75/vote-app-frontend:v1.0
+                  ports:
+                    - containerPort: 80
+                  env:
+                    - name: REDIS
+                      value: vote-backend
