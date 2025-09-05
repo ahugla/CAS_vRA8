@@ -1,0 +1,178 @@
+formatVersion: 2
+outputs:
+  __deploymentOverview:
+    value: |-
+
+      ## VOTE APP APPLICATION
+      Full container based
+
+                      
+      ### Architecture
+                                
+      base on redis and nginx
+                                            
+                                            
+      ### Credits
+      - https://www.broadcom.com       
+inputs: {}
+resources:
+  Supervisor_Namespace_1:
+    type: CCI.Supervisor.Namespace
+    metadata:
+      layoutPosition:
+        - 0
+        - 0
+    properties:
+      name: demo-namespace-vkrcg
+      existing: true
+  VM SVC:
+    type: CCI.Supervisor.Resource
+    dependsOn:
+      - VM
+    metadata:
+      layoutPosition:
+        - 0
+        - 0
+    properties:
+      context: ${resource.Supervisor_Namespace_1.id}
+      manifest:
+        apiVersion: vmoperator.vmware.com/v1alpha3
+        kind: VirtualMachineService
+        metadata:
+          name: lb-vm-redis
+        spec:
+          selector:
+            lb-vm-redis: vm-lb-selector
+          type: LoadBalancer
+          ports:
+            - name: redis
+              protocol: TCP
+              port: 6379
+              targetPort: 6379
+            - name: ssh
+              protocol: TCP
+              port: 22
+              targetPort: 22
+  Frontend SVC:
+    type: CCI.Supervisor.Resource
+    dependsOn:
+      - Frontend
+    metadata:
+      layoutPosition:
+        - 0
+        - 1
+    properties:
+      context: ${resource.Supervisor_Namespace_1.id}
+      manifest:
+        apiVersion: v1
+        kind: Service
+        metadata:
+          name: vote-frontend
+        spec:
+          type: LoadBalancer
+          ports:
+            - port: 80
+          selector:
+            app: vote-frontend
+  VM:
+    type: CCI.Supervisor.Resource
+    dependsOn:
+      - VM cloud-init
+    metadata:
+      layoutPosition:
+        - 1
+        - 0
+    properties:
+      wait:
+        conditions:
+          - type: VirtualMachineCreated
+            status: 'True'
+      context: ${resource.Supervisor_Namespace_1.id}
+      manifest:
+        apiVersion: vmoperator.vmware.com/v1alpha3
+        kind: VirtualMachine
+        metadata:
+          name: vm-redis
+          labels:
+            vm-selector: vm-redis
+            lb-vm-redis: vm-lb-selector
+        spec:
+          className: best-effort-small
+          imageName: vmi-c78caac515de5f728
+          storageClass: cluster-wld01-01a-vsan-storage-policy
+          powerState: PoweredOn
+          network:
+            domainName: mydomain.fr
+            nameservers:
+              - 8.8.8.8
+          bootstrap:
+            cloudInit:
+              rawCloudConfig:
+                name: vm-redis-bootstrap-secret
+                key: user-data
+  Frontend:
+    type: CCI.Supervisor.Resource
+    dependsOn:
+      - VM SVC
+    metadata:
+      layoutPosition:
+        - 1
+        - 1
+    properties:
+      context: ${resource.Supervisor_Namespace_1.id}
+      manifest:
+        apiVersion: apps/v1
+        kind: Deployment
+        metadata:
+          name: vote-frontend
+        spec:
+          replicas: 2
+          selector:
+            matchLabels:
+              app: vote-frontend
+          template:
+            metadata:
+              labels:
+                app: vote-frontend
+            spec:
+              containers:
+                - name: vote-frontend
+                  image: alexfr75/vote-app-frontend:v1.0
+                  resources: null
+                    #requests:
+                    #  cpu: 100
+                    #  memory: 128Mi
+                    #limits:
+                    #  cpu: 250m
+                    #  memory: 256Mi
+                  ports:
+                    - containerPort: 80
+                  env:
+                    - name: REDIS
+                      value: lb-vm-redis
+  VM cloud-init:
+    type: CCI.Supervisor.Resource
+    metadata:
+      layoutPosition:
+        - 2
+        - 0
+    properties:
+      context: ${resource.Supervisor_Namespace_1.id}
+      manifest:
+        apiVersion: v1
+        kind: Secret
+        metadata:
+          name: vm-redis-bootstrap-secret
+          labels:
+            vm-selector: vm-redis
+        stringData:
+          user-data: |
+            #cloud-config
+            packages:
+              - wget
+            runcmd:
+              - touch /etc/cloud/cloud-init.disabled
+              - cd /tmp
+              - wget https://raw.githubusercontent.com/ahugla/CAS_vRA8/refs/heads/master/v9/all-apps/yamls/VoteApp/Mix%20Archi/VCFA%20blueprint/install_redis_rocky-NOPASS.sh
+              - chmod 755 install_redis_rocky-NOPASS.sh
+              - ./install_redis_rocky-NOPASS.sh

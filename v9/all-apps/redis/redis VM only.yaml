@@ -1,0 +1,122 @@
+formatVersion: 2
+outputs:
+  __deploymentOverview:
+    value: |-
+
+      ## VOTE APP APPLICATION
+      VM based redis 
+                     
+      ### Auth
+      requirepass configured
+      'dbadmin' account uses user's input password
+                      
+      ### Architecture
+                                
+      base on redis
+                                            
+                                            
+      ### Credits
+      - https://www.broadcom.com       
+inputs:
+  dbAdminPass:
+    type: string
+    encrypted: true
+    description: password for dbadmin account
+resources:
+  Supervisor_Namespace_1:
+    type: CCI.Supervisor.Namespace
+    metadata:
+      layoutPosition:
+        - 0
+        - 0
+    properties:
+      name: demo-namespace-vkrcg
+      existing: true
+  VM SVC:
+    type: CCI.Supervisor.Resource
+    metadata:
+      layoutPosition:
+        - 0
+        - 0
+    properties:
+      context: ${resource.Supervisor_Namespace_1.id}
+      manifest:
+        apiVersion: vmoperator.vmware.com/v1alpha3
+        kind: VirtualMachineService
+        metadata:
+          name: lb-vm-redis
+        spec:
+          selector:
+            lb-vm-redis: vm-lb-selector
+          type: LoadBalancer
+          ports:
+            - name: redis
+              protocol: TCP
+              port: 6379
+              targetPort: 6379
+            - name: ssh
+              protocol: TCP
+              port: 22
+              targetPort: 22
+  VM:
+    type: CCI.Supervisor.Resource
+    dependsOn:
+      - VM cloud-init
+    metadata:
+      layoutPosition:
+        - 1
+        - 0
+    properties:
+      wait:
+        conditions:
+          - type: VirtualMachineCreated
+            status: 'True'
+      context: ${resource.Supervisor_Namespace_1.id}
+      manifest:
+        apiVersion: vmoperator.vmware.com/v1alpha3
+        kind: VirtualMachine
+        metadata:
+          name: vm-redis
+          labels:
+            vm-selector: vm-redis
+            lb-vm-redis: vm-lb-selector
+        spec:
+          className: best-effort-small
+          imageName: vmi-c78caac515de5f728
+          storageClass: cluster-wld01-01a-vsan-storage-policy
+          powerState: PoweredOn
+          network:
+            domainName: mydomain.fr
+            nameservers:
+              - 8.8.8.8
+          bootstrap:
+            cloudInit:
+              rawCloudConfig:
+                name: vm-redis-bootstrap-secret
+                key: user-data
+  VM cloud-init:
+    type: CCI.Supervisor.Resource
+    metadata:
+      layoutPosition:
+        - 2
+        - 0
+    properties:
+      context: ${resource.Supervisor_Namespace_1.id}
+      manifest:
+        apiVersion: v1
+        kind: Secret
+        metadata:
+          name: vm-redis-bootstrap-secret
+          labels:
+            vm-selector: vm-redis
+        stringData:
+          user-data: |
+            #cloud-config
+            packages:
+              - wget
+            runcmd:
+              - touch /etc/cloud/cloud-init.disabled
+              - cd /tmp
+              - wget https://raw.githubusercontent.com/ahugla/CAS_vRA8/refs/heads/master/v9/all-apps/yamls/redis/install_redis_rocky.sh
+              - chmod 755 install_redis_rocky.sh
+              - ./install_redis_rocky.sh ${input.dbAdminPass}
