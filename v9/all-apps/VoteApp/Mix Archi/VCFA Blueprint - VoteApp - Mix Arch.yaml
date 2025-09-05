@@ -173,6 +173,6 @@ resources:
             runcmd:
               - touch /etc/cloud/cloud-init.disabled
               - cd /tmp
-              - wget https://raw.githubusercontent.com/ahugla/CAS_vRA8/refs/heads/master/v9/all-apps/yamls/VoteApp/Mix%20Archi/VCFA%20blueprint/install_redis_rocky-NOPASS.sh
+              - wget https://raw.githubusercontent.com/ahugla/CAS_vRA8/refs/heads/master/v9/all-apps/VoteApp/Mix%20Archi/install_redis_rocky-NOPASS.sh
               - chmod 755 install_redis_rocky-NOPASS.sh
               - ./install_redis_rocky-NOPASS.sh
