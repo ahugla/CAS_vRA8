@@ -1,0 +1,34 @@
+#!/bin/bash
+
+
+
+#dnf module list redis
+dnf -y install redis
+
+systemctl enable --now redis
+
+# Enable Redis Service to listen on all interfaces - By default, Redis service listens on 127.0.0.1.
+ss -tunelp | grep 6379
+
+# Accepter les connections remotes
+# Pour voir la config en masquant les commentaires:    grep ^[^#]  /etc/redis.conf
+# OLD : sed -i -e 's/bind 127.0.0.1/bind 0.0.0.0/g'  /etc/redis.conf    
+# default :  bind 127.0.0.1 -::1 
+sed -i -e 's/bind 127.0.0.1 -::1/bind * -::*/g'  /etc/redis/redis.conf
+
+
+
+#redis-cli 
+#127.0.0.1:6379> ping
+#PONG
+
+
+# config NO PASSWORD
+# En fait utilise le compte 'default' sans password
+# Imcompatible avec le 'requirepass' et 'ACL' 
+echo "#    Env Parameter     " >>  /root/.bashrc
+echo "export ALLOW_EMPTY_PASSWORD=yes" >>  /root/.bashrc
+
+
+systemctl  restart redis
+systemctl status redis
