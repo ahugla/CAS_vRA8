@@ -6,6 +6,9 @@
 #----------------------------------------
 
 
+cd /tmp
+
+
 # Paramaters
 NFSshare=$1
 #NFSshare="/nfsshare"
