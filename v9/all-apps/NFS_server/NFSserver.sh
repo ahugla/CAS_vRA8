@@ -1,9 +1,13 @@
-# 
+#----------------------------------------------- 
+#
 #   DEPLOY NFS SERVER ON ROCKY 9 
 #
-#   usage:    ./NFSserver.sh   /myshare
+#   use TCP:2049
 #
-#----------------------------------------
+#   usage: ./NFSserver.sh  [/myshare]
+#   -----
+#
+#-----------------------------------------------
 
 
 cd /tmp
@@ -54,6 +58,7 @@ sudo systemctl start nfs-server
 #
 # test 
 # ----
+# Verifier que le port TCP:2049 est open
 # sudo mkdir /localDir
 # sudo chmod 777 /localDir
 # sudo mount -t nfs [IP]:[/share]   /localDir
