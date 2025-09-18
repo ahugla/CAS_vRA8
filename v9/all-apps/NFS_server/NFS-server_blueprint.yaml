@@ -1,0 +1,123 @@
+formatVersion: 2
+outputs:
+  __deploymentOverview:
+    value: |-
+
+      ## SERVER NFS
+      VM based NFS server 
+                     
+      ### Architecture
+                                
+      shared directory is user input
+                                            
+                                            
+      ### Credits
+      - https://www.broadcom.com       
+inputs:
+  sharePath:
+    type: string
+    default: /myshare
+    description: 'path du partage nfs. Ex: /data/nfsshare'
+resources:
+  Supervisor_Namespace_1:
+    type: CCI.Supervisor.Namespace
+    metadata:
+      layoutPosition:
+        - 0
+        - 0
+    properties:
+      name: demo-namespace-vkrcg
+      existing: true
+  VM SVC:
+    type: CCI.Supervisor.Resource
+    metadata:
+      layoutPosition:
+        - 0
+        - 0
+    properties:
+      context: ${resource.Supervisor_Namespace_1.id}
+      manifest:
+        apiVersion: vmoperator.vmware.com/v1alpha3
+        kind: VirtualMachineService
+        metadata:
+          name: lb-vm-nfs-server
+        spec:
+          selector:
+            lb-vm-nfs-server: lb-vm-nfs-server
+          type: LoadBalancer
+          ports:
+            - name: nfs
+              protocol: TCP
+              port: 2049
+              targetPort: 2049
+            - name: ssh
+              protocol: TCP
+              port: 22
+              targetPort: 22
+  VM:
+    type: CCI.Supervisor.Resource
+    dependsOn:
+      - VM cloud-init
+    metadata:
+      layoutPosition:
+        - 1
+        - 0
+    properties:
+      wait:
+        conditions:
+          - type: GuestBootstrap
+            status: 'True'
+          - type: GuestBootstrap
+            status: 'False'
+            reason: Failure
+            indicatesFailure: true
+      context: ${resource.Supervisor_Namespace_1.id}
+      manifest:
+        apiVersion: vmoperator.vmware.com/v1alpha3
+        kind: VirtualMachine
+        metadata:
+          name: nfs-server
+          labels:
+            lb-vm-nfs-server: lb-vm-nfs-server
+        spec:
+          className: best-effort-small
+          imageName: vmi-3c1cffa00cf8d44f0
+          storageClass: cluster-wld01-01a-vsan-storage-policy
+          powerState: PoweredOn
+          network:
+            domainName: mydomain.fr
+            nameservers:
+              - 8.8.8.8
+          bootstrap:
+            cloudInit:
+              rawCloudConfig:
+                name: vm-nfs-server-bootstrap-secret
+                key: user-data
+  VM cloud-init:
+    type: CCI.Supervisor.Resource
+    metadata:
+      layoutPosition:
+        - 2
+        - 0
+    properties:
+      context: ${resource.Supervisor_Namespace_1.id}
+      manifest:
+        apiVersion: v1
+        kind: Secret
+        metadata:
+          name: vm-nfs-server-bootstrap-secret
+          labels:
+            vm-selector: vm-nfs-server
+        stringData:
+          user-data: |
+            #cloud-config
+            packages:
+              - wget
+            runcmd:
+              - touch /etc/cloud/cloud-init.disabled
+              - cd /tmp
+              - wget https://raw.githubusercontent.com/ahugla/CAS_vRA8/refs/heads/master/v9/all-apps/NFS_server/NFSserver.sh
+              - chmod 755 NFSserver.sh
+              - ./NFSserver.sh ${input.sharePath}
+              - /usr/bin/vmtoolsd --cmd "info-set guestinfo.vmservice.bootstrap.condition True"
+              
