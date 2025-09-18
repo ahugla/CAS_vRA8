@@ -54,8 +54,8 @@ sudo systemctl start nfs-server
 #
 # test 
 # ----
-# mkdir localDir
-# chmod 777 localDir
-# mount -t nfs IP:/share   /localDir
+# sudo mkdir /localDir
+# sudo chmod 777 /localDir
+# sudo mount -t nfs [IP]:[/share]   /localDir
 
 
