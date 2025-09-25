@@ -4,17 +4,23 @@ outputs:
     value: |-
 
       ## VOTE APP APPLICATION
-      Full container based
+      Hybrid voting application based on containers and VM
 
                       
       ### Architecture
-                                
-      base on redis and nginx
-                                            
+      backend:  redis VM
+      frontend: nginx pods
+
                                             
       ### Credits
-      - https://www.broadcom.com       
-inputs: {}
+      - alexandre.hugla@broadcom.com       
+inputs:
+  NbReplicas:
+    type: integer
+    default: 2
+    minimum: 1
+    maximum: 10
+    title: Nombre de pods nginx (replicas)
 resources:
   Supervisor_Namespace_1:
     type: CCI.Supervisor.Namespace
@@ -27,8 +33,6 @@ resources:
       existing: true
   VM SVC:
     type: CCI.Supervisor.Resource
-    dependsOn:
-      - VM
     metadata:
       layoutPosition:
         - 0
@@ -85,8 +89,12 @@ resources:
     properties:
       wait:
         conditions:
-          - type: VirtualMachineCreated
+          - type: GuestBootstrap
             status: 'True'
+          - type: GuestBootstrap
+            status: 'False'
+            reason: Failure
+            indicatesFailure: true
       context: ${resource.Supervisor_Namespace_1.id}
       manifest:
         apiVersion: vmoperator.vmware.com/v1alpha3
@@ -98,7 +106,7 @@ resources:
             lb-vm-redis: vm-lb-selector
         spec:
           className: best-effort-small
-          imageName: vmi-c78caac515de5f728
+          imageName: vmi-e1fe611f0fe67eac3
           storageClass: cluster-wld01-01a-vsan-storage-policy
           powerState: PoweredOn
           network:
@@ -113,7 +121,7 @@ resources:
   Frontend:
     type: CCI.Supervisor.Resource
     dependsOn:
-      - VM SVC
+      - VM
     metadata:
       layoutPosition:
         - 1
@@ -126,7 +134,7 @@ resources:
         metadata:
           name: vote-frontend
         spec:
-          replicas: 2
+          replicas: ${input.NbReplicas}
           selector:
             matchLabels:
               app: vote-frontend
@@ -176,3 +184,4 @@ resources:
               - wget https://raw.githubusercontent.com/ahugla/CAS_vRA8/refs/heads/master/v9/all-apps/VoteApp/Mix%20Archi/install_redis_rocky-NOPASS.sh
               - chmod 755 install_redis_rocky-NOPASS.sh
               - ./install_redis_rocky-NOPASS.sh
+              - /usr/bin/vmtoolsd --cmd "info-set guestinfo.vmservice.bootstrap.condition True"
