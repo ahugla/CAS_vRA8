@@ -67,7 +67,7 @@ metadata:
   name: vote-frontend
   namespace: default
 spec:
-  replicas: 2
+  replicas: 5
   selector:
     matchLabels:
       app: vote-frontend
