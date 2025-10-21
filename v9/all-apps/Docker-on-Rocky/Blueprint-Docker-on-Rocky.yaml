@@ -105,7 +105,7 @@ resources:
             runcmd:
               - touch /etc/cloud/cloud-init.disabled
               - cd /tmp
-              - wget https://raw.githubusercontent.com/ahugla/CAS_vRA8/refs/heads/master/v9/all-apps/Rocky-Docker/install-docker.sh
+              - wget https://raw.githubusercontent.com/ahugla/CAS_vRA8/refs/heads/master/v9/all-apps/Docker-on-Rocky/install-docker.sh
               - chmod 755 install-docker.sh
               - ./install-docker.sh
               - /usr/bin/vmtoolsd --cmd "info-set guestinfo.vmservice.bootstrap.condition True"
