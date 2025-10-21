@@ -32,10 +32,10 @@ resources:
         apiVersion: vmoperator.vmware.com/v1alpha3
         kind: VirtualMachineService
         metadata:
-          name: lb-vm-linux
+          name: lb-vm-docker
         spec:
           selector:
-            lb-vm-linux: vm-lb-selector
+            lb-vm-docker: vm-lb-selector
           type: LoadBalancer
           ports:
             - name: ssh
@@ -66,8 +66,8 @@ resources:
         metadata:
           name: vm-docker
           labels:
-            vm-selector: vm-linux
-            lb-vm-linux: vm-lb-selector
+            vm-selector: vm-docker
+            lb-vm-docker: vm-lb-selector
         spec:
           className: best-effort-small
           imageName: vmi-2e854e3077ea65a5b
@@ -80,7 +80,7 @@ resources:
           bootstrap:
             cloudInit:
               rawCloudConfig:
-                name: vm-linux-bootstrap-secret
+                name: vm-docker-bootstrap-secret
                 key: user-data
   VM cloud-init:
     type: CCI.Supervisor.Resource
@@ -94,9 +94,9 @@ resources:
         apiVersion: v1
         kind: Secret
         metadata:
-          name: vm-linux-bootstrap-secret
+          name: vm-docker-bootstrap-secret
           labels:
-            vm-selector: vm-linux
+            vm-selector: vm-docker
         stringData:
           user-data: |
             #cloud-config
