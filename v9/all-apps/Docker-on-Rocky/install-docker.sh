@@ -34,11 +34,11 @@ dnf -y install device-mapper-persistent-data lvm2
 
 dnf config-manager --add-repo=https://download.docker.com/linux/centos/docker-ce.repo
 
-#dnf -y install docker-ce-cli
-dnf -y install docker-ce-cli-20.10.20-3.el8
+dnf -y install docker-ce-cli
+#dnf -y install docker-ce-cli-20.10.20-3.el8
 
-#dnf -y install docker-ce --allowerasing
-dnf -y install docker-ce-20.10.20-3.el8  --allowerasing
+dnf -y install docker-ce --allowerasing
+#dnf -y install docker-ce-20.10.20-3.el8  --allowerasing
 
 dnf -y install docker-compose-plugin
 
