@@ -4,7 +4,7 @@ metadata:
   namespace: demo-namespace-vkrcg
   name: vote-frontend
 spec:
-  replicas: 2
+  replicas: 3
   selector:
     matchLabels:
       app: vote-frontend
