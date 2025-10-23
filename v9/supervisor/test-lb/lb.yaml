@@ -1,0 +1,16 @@
+
+apiVersion: vmoperator.vmware.com/v1alpha3
+kind: VirtualMachineService
+metadata:
+  name: truc-lb
+  namespace: demo-namespace-vkrcg
+spec:
+  ports:
+    - name: truc
+      port: 4240
+      protocol: TCP
+      targetPort: 4240
+  selector:
+    vm-lb-selector: truc
+  type: LoadBalancer
+
