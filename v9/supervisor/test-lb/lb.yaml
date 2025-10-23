@@ -2,7 +2,8 @@
 apiVersion: vmoperator.vmware.com/v1alpha3
 kind: VirtualMachineService
 metadata:
-  name: truc-lb-no-namespace
+  name: truc-lb
+  namespace: demo-namespace-vkrcg
 spec:
   ports:
     - name: truc
