@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  namespace: demo-namespace-vkrcg
+  name: vm-redis-bootstrap-secret
+  labels:
+    vm-selector: vm-redis
+stringData:
+  user-data: |
+    #cloud-config
+    packages:
+      - wget
+    runcmd:
+      - touch /etc/cloud/cloud-init.disabled
+      - cd /tmp
+      - wget https://raw.githubusercontent.com/ahugla/CAS_vRA8/refs/heads/master/v9/all-apps/VoteApp/Mix%20Archi/install_redis_rocky-NOPASS.sh
+      - chmod 755 install_redis_rocky-NOPASS.sh
+      - ./install_redis_rocky-NOPASS.sh
+      - /usr/bin/vmtoolsd --cmd "info-set guestinfo.vmservice.bootstrap.condition True"

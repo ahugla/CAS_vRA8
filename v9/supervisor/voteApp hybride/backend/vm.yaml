@@ -1,0 +1,22 @@
+apiVersion: vmoperator.vmware.com/v1alpha3
+kind: VirtualMachine
+metadata:
+  namespace: demo-namespace-vkrcg
+  name: vm-redis
+  labels:
+    vm-selector: vm-redis
+    lb-vm-redis: vm-lb-selector
+spec:
+  className: best-effort-small
+  imageName: vmi-e1fe611f0fe67eac3
+  storageClass: cluster-wld01-01a-vsan-storage-policy
+  powerState: PoweredOn
+  network:
+    domainName: mydomain.fr
+    nameservers:
+      - 8.8.8.8
+  bootstrap:
+    cloudInit:
+      rawCloudConfig:
+        name: vm-redis-bootstrap-secret
+        key: user-data

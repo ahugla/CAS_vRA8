@@ -1,0 +1,30 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: demo-namespace-vkrcg
+  name: vote-frontend
+spec:
+  replicas: ${input.NbReplicas}
+  selector:
+    matchLabels:
+      app: vote-frontend
+  template:
+    metadata:
+      labels:
+        app: vote-frontend
+    spec:
+      containers:
+        - name: vote-frontend
+          image: alexfr75/vote-app-frontend:v1.0
+          resources: null
+            #requests:
+            #  cpu: 100
+            #  memory: 128Mi
+            #limits:
+            #  cpu: 250m
+            #  memory: 256Mi
+          ports:
+            - containerPort: 80
+          env:
+            - name: REDIS
+              value: lb-vm-redis
