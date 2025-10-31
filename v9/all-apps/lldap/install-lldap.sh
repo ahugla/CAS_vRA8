@@ -40,6 +40,8 @@ cd /data
 wget https://raw.githubusercontent.com/ahugla/CAS_vRA8/refs/heads/master/v9/all-apps/lldap/docker-compose.yaml --no-check-certificate
 
 
-
 # start lldap container
 docker compose up --detach
+
+
+
