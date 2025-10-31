@@ -1,8 +1,10 @@
 /bin/bash
 #
+#     
 #
-#
-#     install light ldap (lldap)
+#     Install light ldap (lldap) on docker
+#     ------------------------------------
+#     https://github.com/lldap/lldap?tab=readme-ov-file
 #
 #     usage :  Web interface sur port 17170 
 #              compte "admin"
@@ -14,11 +16,11 @@ jwt_secret=VMware1!
 ldap_user_pass=VMware1!
 
 
-cd /tmp
+cd /
 
 
-# install git
-dnf install git -f
+# install git et wget
+dnf install git wget -f
 
 
 # clone lldap repo
@@ -29,6 +31,7 @@ git clone https://github.com/lldap/lldap.git
 
 
 # get docker compose file
+wget https://raw.githubusercontent.com/ahugla/CAS_vRA8/refs/heads/master/v9/all-apps/lldap/docker-compose.yaml.txt
 
 
 # start lldap container
