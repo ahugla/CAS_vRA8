@@ -36,7 +36,7 @@ cp  lldap/lldap_config.docker_template.toml      /data/lldap_config.toml
 
 # get docker compose file
 # fixe les variables d'env notamment pour 'jwt_secret' et 'ldap_user_pass'
-wget https://raw.githubusercontent.com/ahugla/CAS_vRA8/refs/heads/master/v9/all-apps/lldap/docker-compose.yaml.txt --no-check-certificate
+wget https://raw.githubusercontent.com/ahugla/CAS_vRA8/refs/heads/master/v9/all-apps/lldap/docker-compose.yaml --no-check-certificate
 
 
 # start lldap container
