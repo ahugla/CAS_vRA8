@@ -20,7 +20,7 @@ cd /tmp
 
 
 # install git et wget
-dnf install git wget -f
+dnf install git wget -y
 
 
 # clone lldap repo
