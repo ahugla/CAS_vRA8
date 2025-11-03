@@ -28,7 +28,7 @@ sysctl --system
 # on desinstalle les precedentes versions
 dnf -y remove docker docker-common docker-selinux docker-engine docker-ce docker-ce-cli containerd.io docker-compose-plugin
 
-dnf update -y
+#dnf update -y
 
 dnf -y install device-mapper-persistent-data lvm2
 
