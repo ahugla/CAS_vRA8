@@ -67,17 +67,14 @@ resources:
               protocol: TCP
               port: 22
               targetPort: 22
-          ports:
             - name: web
               protocol: TCP
               port: 17170
               targetPort: 17170
-          ports:
             - name: ldap
               protocol: TCP
               port: 3890
               targetPort: 3890
-          ports:
             - name: ldaps
               protocol: TCP
               port: 6360
