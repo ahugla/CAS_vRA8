@@ -5,24 +5,25 @@ outputs:
 
       ## Light LDAP (LLDAP)
       
-      Running in VM
-      Based on docker engine
+      - Running in VM
+      - Based on docker engine
 
 
       ## CONNECTION WEB
 
-      https://[FQDN]:17170
+      https://${resource.VM_SVC.object.status.loadBalancer.ingress[0].ip}:17170
 
-        login   : "admin"
-        password: [default password]
+          login   : "admin"
+
+          password: [default password]
 
 
       ## Opened Ports
       
-      ssh:   22
-      web:   17170 
-      ldap:  3890
-      ldaps: 6360 
+      - ssh:   22
+      - web:   17170 
+      - ldap:  3890
+      - ldaps: 6360 
 
       ### Credits
       - https://www.broadcom.com      
@@ -33,7 +34,6 @@ inputs:
     type: string
     description: password for the admin account
     title: admin  password
-    pattern: '[a-z0-9A-Z@#$]+'
     encrypted: true
 resources:
   Supervisor_Namespace_1:
@@ -45,7 +45,7 @@ resources:
     properties:
       name: demo-namespace-vkrcg
       existing: true
-  VM SVC:
+  VM_SVC:
     type: CCI.Supervisor.Resource
     metadata:
       layoutPosition:
