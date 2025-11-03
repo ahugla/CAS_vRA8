@@ -4,28 +4,24 @@ outputs:
     value: |-
 
       ## Light LDAP (LLDAP)
-      
       - Running in VM
       - Based on docker engine
 
 
-      ## CONNECTION WEB
-
-      https://${resource.VM_SVC.object.status.loadBalancer.ingress[0].ip}:17170
+      ### CONNECTION WEB
+      - http://${resource.VM_SVC.object.status.loadBalancer.ingress[0].ip}:17170
 
           login   : "admin"
-
           password: [default password]
 
 
-      ## Opened Ports
-      
+      ### Opened Ports
       - ssh:   22
       - web:   17170 
       - ldap:  3890
       - ldaps: 6360 
 
-      ### Credits
+      ## Credits
       - https://www.broadcom.com      
 
 
