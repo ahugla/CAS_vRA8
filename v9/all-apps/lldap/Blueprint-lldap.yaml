@@ -1,0 +1,158 @@
+formatVersion: 2
+outputs:
+  __deploymentOverview:
+    value: |-
+
+      ## Light LDAP (LLDAP)
+      
+      Running in VM
+      Based on docker engine
+
+
+      ## CONNECTION WEB
+
+      https://[FQDN]:17170
+
+        login   : "admin"
+        password: [default password]
+
+
+      ## Opened Ports
+      
+      ssh:   22
+      web:   17170 
+      ldap:  3890
+      ldaps: 6360 
+
+      ### Credits
+      - https://www.broadcom.com      
+
+
+inputs:
+  adminPassword:
+    type: string
+    description: password for the admin account
+    title: admin  password
+    pattern: '[a-z0-9A-Z@#$]+'
+    encrypted: true
+resources:
+  Supervisor_Namespace_1:
+    type: CCI.Supervisor.Namespace
+    metadata:
+      layoutPosition:
+        - 0
+        - 0
+    properties:
+      name: demo-namespace-vkrcg
+      existing: true
+  VM SVC:
+    type: CCI.Supervisor.Resource
+    metadata:
+      layoutPosition:
+        - 0
+        - 0
+    properties:
+      context: ${resource.Supervisor_Namespace_1.id}
+      manifest:
+        apiVersion: vmoperator.vmware.com/v1alpha3
+        kind: VirtualMachineService
+        metadata:
+          name: lb-vm-lldap
+        spec:
+          selector:
+            lb-vm-lldap: vm-lb-selector
+          type: LoadBalancer
+          ports:
+            - name: ssh
+              protocol: TCP
+              port: 22
+              targetPort: 22
+          ports:
+            - name: web
+              protocol: TCP
+              port: 17170
+              targetPort: 17170
+          ports:
+            - name: ldap
+              protocol: TCP
+              port: 3890
+              targetPort: 3890
+          ports:
+            - name: ldaps
+              protocol: TCP
+              port: 6360
+              targetPort: 6360
+  VM:
+    type: CCI.Supervisor.Resource
+    dependsOn:
+      - VM cloud-init
+    metadata:
+      layoutPosition:
+        - 1
+        - 0
+    properties:
+      wait:
+        conditions:
+          - type: GuestBootstrap
+            status: 'True'
+          - type: GuestBootstrap
+            status: 'False'
+            reason: Failure
+            indicatesFailure: true
+      context: ${resource.Supervisor_Namespace_1.id}
+      manifest:
+        apiVersion: vmoperator.vmware.com/v1alpha3
+        kind: VirtualMachine
+        metadata:
+          name: vm-lldap
+          labels:
+            vm-selector: vm-lldap
+            lb-vm-lldap: vm-lb-selector
+        spec:
+          className: best-effort-small
+          imageName: vmi-2e854e3077ea65a5b
+          storageClass: cluster-wld01-01a-vsan-storage-policy
+          powerState: PoweredOn
+          network:
+            domainName: mydomain.fr
+            nameservers:
+              - 8.8.8.8
+          bootstrap:
+            cloudInit:
+              rawCloudConfig:
+                name: vm-lldap-bootstrap-secret
+                key: user-data
+  VM cloud-init:
+    type: CCI.Supervisor.Resource
+    metadata:
+      layoutPosition:
+        - 2
+        - 0
+    properties:
+      context: ${resource.Supervisor_Namespace_1.id}
+      manifest:
+        apiVersion: v1
+        kind: Secret
+        metadata:
+          name: vm-lldap-bootstrap-secret
+          labels:
+            vm-selector: vm-lldap
+        stringData:
+          user-data: |
+            #cloud-config
+            packages:
+              - wget
+            runcmd:
+              - touch /etc/cloud/cloud-init.disabled
+              - cd /tmp
+              - wget https://raw.githubusercontent.com/ahugla/CAS_vRA8/refs/heads/master/v9/all-apps/Docker-on-Rocky/install-docker.sh
+              - wget https://raw.githubusercontent.com/ahugla/CAS_vRA8/refs/heads/master/v9/all-apps/lldap/install-lldap.sh
+              - chmod 755 install-docker.sh
+              - chmod 755 install-lldap.sh
+              - ./install-docker.sh
+              - ./install-lldap.sh ${input.adminPassword}
+              - /usr/bin/vmtoolsd --cmd "info-set guestinfo.vmservice.bootstrap.condition True"
+
+
+
+

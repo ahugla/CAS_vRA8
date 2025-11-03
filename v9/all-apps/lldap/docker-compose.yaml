@@ -24,8 +24,8 @@ services:
       #- TZ=####/####   # UTC by default
       - LLDAP_JWT_SECRET=gjsf47js54
       - LLDAP_KEY_SEED="4525684"
-      - LLDAP_LDAP_BASE_DN=dc=example,dc=com
-      - LLDAP_LDAP_USER_PASS=VMware1!    # If the password contains '$', escape it (e.g. Pas$$word sets Pas$word)
+      - LLDAP_LDAP_BASE_DN=dc=frvmlab,dc=com
+      - LLDAP_LDAP_USER_PASS=AAAAAAAA    # If the password contains '$', escape it (e.g. Pas$$word sets Pas$word)
       # If using LDAPS, set enabled true and configure cert and key path
       # - LLDAP_LDAPS_OPTIONS__ENABLED=true
       # - LLDAP_LDAPS_OPTIONS__CERT_FILE=/path/to/certfile.crt
