@@ -9,10 +9,10 @@ outputs:
 
 
       ### CONNECTION WEB
-      - http://${resource.VM_SVC.object.status.loadBalancer.ingress[0].ip}:17170
+      http://${resource.VM_SVC.object.status.loadBalancer.ingress[0].ip}:17170
 
-          login   : "admin"
-          password: [default password]
+        login   : "admin"
+        password: [default password]
 
 
       ### Opened Ports
