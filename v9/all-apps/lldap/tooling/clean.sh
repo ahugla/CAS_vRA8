@@ -8,6 +8,10 @@ docker rm $(docker ps -qa)
 docker volume rm data_lldap_data
 
 
+# cd /data
+# docker compose up --detach
+
+
 
 
 
