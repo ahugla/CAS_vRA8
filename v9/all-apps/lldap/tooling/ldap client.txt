@@ -3,6 +3,6 @@ on rocky
 
 dnf install openldap-clients
 
-
-ldapsearch -x -b "dc=myfrlab,dc=com" -H ldap://10.1.11.8:3890  -D "cn=admin,ou=people,dc=myfrlab,dc=com" -W 
-ldapsearch -x -b "dc=example,dc=com" -H ldap://10.1.11.8:3890  -D "cn=admin,ou=people,dc=example,dc=com" -W 
+ 
+ldapsearch -x -b "dc=myfrlab,dc=com" -H ldap://10.1.11.8:3890  -D "cn=admin,ou=people,dc=myfrlab,dc=com" -W     ( “-W” in order to be prompted for the password)
+ldapsearch -x -b "dc=example,dc=com" -H ldap://10.1.11.8:3890  -D "cn=admin,ou=people,dc=example,dc=com" -W     ( “-W” in order to be prompted for the password)
