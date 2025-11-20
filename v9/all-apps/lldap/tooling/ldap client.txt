@@ -5,4 +5,14 @@ dnf install openldap-clients
 
  
 ldapsearch -x -b "dc=myfrlab,dc=com" -H ldap://10.1.11.8:3890  -D "cn=admin,ou=people,dc=myfrlab,dc=com" -W     ( “-W” in order to be prompted for the password)
-ldapsearch -x -b "dc=example,dc=com" -H ldap://10.1.11.8:3890  -D "cn=admin,ou=people,dc=example,dc=com" -W     ( “-W” in order to be prompted for the password)
+
+  -x : Trust any certificate 
+  -b : Specifies the base DN that should be used for the search.
+  -H : directory server
+  -D : bindDN, The DN to use to bind to the directory server when performing simple authentication
+  -W : in order to be prompted for the password
+
+
+
+pour voir les memberOf:
+ldapsearch -x -b "dc=myfrlab,dc=com" -H ldap://10.1.11.8:3890  -D "cn=admin,ou=people,dc=myfrlab,dc=com" -W   memberOf

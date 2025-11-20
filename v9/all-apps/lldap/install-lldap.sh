@@ -51,4 +51,18 @@ sed -i -e 's/AAAAAAAA/'"$ldap_user_pass"'/g'   /data/docker-compose.yaml
 docker compose up --detach
 
 
+# pause le temps que le container demarre
+sleep 10
+
+
+# restore lldap data from backup
+# si y a pas le users.db,  il repart comme si c etait une fresh install
+# il faut que le container ait demarré une fois pour creer le path "/var/lib/docker/volumes/data_lldap_data/_data/"
+docker stop $(docker ps -aqf "name=data-lldap-1")
+rm -f /var/lib/docker/volumes/data_lldap_data/_data/users.db
+cp /tmp/myBackup /var/lib/docker/volumes/data_lldap_data/_data/users.db  
+chown cloud-user:cloud-user  /var/lib/docker/volumes/data_lldap_data/_data/users.db  
+docker start $(docker ps -aqf "name=data-lldap-1")
+
+
 
