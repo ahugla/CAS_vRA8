@@ -25,12 +25,12 @@ outputs:
       - https://www.broadcom.com      
 
 
-inputs:
-  adminPassword:
-    type: string
-    description: password for the admin account
-    title: admin  password
-    encrypted: true
+inputs: {}
+  #adminPassword:
+  #  type: string
+  #  description: password for the admin account
+  #  title: admin  password
+  #  encrypted: true
 resources:
   Supervisor_Namespace_1:
     type: CCI.Supervisor.Namespace

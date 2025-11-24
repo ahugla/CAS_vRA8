@@ -65,8 +65,14 @@ rm -f /var/lib/docker/volumes/data_lldap_data/_data/users.db
 wget https://raw.githubusercontent.com/ahugla/CAS_vRA8/refs/heads/master/v9/all-apps/lldap/lldapBackup
 mv lldapBackup /var/lib/docker/volumes/data_lldap_data/_data/users.db  
 chown cloud-user:cloud-user  /var/lib/docker/volumes/data_lldap_data/_data/users.db  
+
+
+
+
 # restart container
 docker start $(docker ps -aqf "name=data-lldap-1")
+
+
 
 
 
