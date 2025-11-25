@@ -22,7 +22,7 @@ services:
       #- UID=####       # 1000 by default
       #- GID=####       # 1000 by default
       #- TZ=####/####   # UTC by default
-      - LLDAP_JWT_SECRET=gjsf47js54
+      - LLDAP_JWT_SECRET=B2Sm9Qy#Rs951g,u^FJjGrWmA0CpI-jA
       - LLDAP_KEY_SEED="4525684"
       - LLDAP_LDAP_BASE_DN=dc=frvmlab,dc=com
       - LLDAP_LDAP_USER_PASS=AAAAAAAA    # If the password contains '$', escape it (e.g. Pas$$word sets Pas$word)

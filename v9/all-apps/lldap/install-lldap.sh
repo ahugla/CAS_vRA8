@@ -1,4 +1,4 @@
-/bin/bash
+#!/bin/bash
 #
 #     
 #
@@ -15,7 +15,8 @@
 
 # Set parameters
 #jwt_secret=KKKKKK
-ldap_user_pass=$1   # adminPassword,  password for the 'admin' account on the web interface
+#ldap_user_pass=$1   # adminPassword,  password for the 'admin' account on the web interface
+# NOT USED BECAUSE PASSWORD IS RESTORED WITH DB
 
 
 cd /tmp
@@ -44,7 +45,8 @@ wget https://raw.githubusercontent.com/ahugla/CAS_vRA8/refs/heads/master/v9/all-
 
 # update “ldap_user_pass” (adminPassword) dans /data/lldap_config.toml
 # On passe par les variables d'environnement du docker compose file pour communiquer le password
-sed -i -e 's/AAAAAAAA/'"$ldap_user_pass"'/g'   /data/docker-compose.yaml
+#sed -i -e 's/AAAAAAAA/'"$ldap_user_pass"'/g'   /data/docker-compose.yaml
+# NOT USED BECAUSE PASSWORD IS RESTORED WITH DB
 
 
 # start lldap container
@@ -58,19 +60,20 @@ sleep 10
 # restore lldap data from backup
 # si y a pas le users.db,  il repart comme si c etait une fresh install
 # il faut que le container ait demarré une fois pour creer le path "/var/lib/docker/volumes/data_lldap_data/_data/"
-# stop and clean db
+# stop and delete db
 docker stop $(docker ps -aqf "name=data-lldap-1")
+docker rm $(docker ps -aqf "name=data-lldap-1")
 rm -f /var/lib/docker/volumes/data_lldap_data/_data/users.db
-# retrieve data
+# restore ldap content
 wget https://raw.githubusercontent.com/ahugla/CAS_vRA8/refs/heads/master/v9/all-apps/lldap/lldapBackup
 mv lldapBackup /var/lib/docker/volumes/data_lldap_data/_data/users.db  
 chown cloud-user:cloud-user  /var/lib/docker/volumes/data_lldap_data/_data/users.db  
 
 
+# start ldap container
+docker run -d -P --name lldap --restart always lldap/lldap:stable
 
 
-# restart container
-docker start $(docker ps -aqf "name=data-lldap-1")
 
 
 
