@@ -67,6 +67,6 @@ mv lldapBackup /var/lib/docker/volumes/data_lldap_data/_data/users.db
 chown cloud-user:cloud-user  /var/lib/docker/volumes/data_lldap_data/_data/users.db  
 # restart container
 docker start $(docker ps -aqf "name=data-lldap-1")
-#change restart policy on running container
+#change restart policy on running container to make ir reboot persistent
 docker update --restart=always data-lldap-1
 
