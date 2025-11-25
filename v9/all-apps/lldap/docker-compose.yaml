@@ -23,9 +23,9 @@ services:
       #- GID=####       # 1000 by default
       #- TZ=####/####   # UTC by default
       - LLDAP_JWT_SECRET=B2Sm9Qy#Rs951g,u^FJjGrWmA0CpI-jA
-      - LLDAP_KEY_SEED="4525684"
+      - LLDAP_KEY_SEED="RanD0m STR1ng"
       - LLDAP_LDAP_BASE_DN=dc=frvmlab,dc=com
-      - LLDAP_LDAP_USER_PASS=AAAAAAAA    # If the password contains '$', escape it (e.g. Pas$$word sets Pas$word)
+      - LLDAP_LDAP_USER_PASS=AAAAAAAA    # If the password contains '$', escape it (e.g. Pas$$word sets Pas$word) 
       # If using LDAPS, set enabled true and configure cert and key path
       # - LLDAP_LDAPS_OPTIONS__ENABLED=true
       # - LLDAP_LDAPS_OPTIONS__CERT_FILE=/path/to/certfile.crt
