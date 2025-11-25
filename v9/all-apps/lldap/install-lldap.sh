@@ -6,7 +6,8 @@
 #     ------------------------------------
 #     https://github.com/lldap/lldap?tab=readme-ov-file
 #
-#     usage: ./install-lldap.sh [adminPassword]
+#     usage: ./install-lldap.sh    
+#
 #
 #     Web access :  Web interface sur port 17170 
 #                   compte "admin" / "default password"
@@ -14,8 +15,8 @@
 
 
 # Set parameters
-#jwt_secret=KKKKKK
-ldap_user_pass="VMware1!"   # adminPassword,  password for the 'admin' account on the web interface
+ldap_user_pass="MyP4ssw0rd"   # adminPassword,  password for the 'admin' account on the web interface
+#Password will be remplaced durint the ldap DB restore
 
 
 cd /tmp
