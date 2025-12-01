@@ -143,7 +143,6 @@ resources:
               - chmod 755 install-docker.sh
               - chmod 755 install-lldap.sh
               - ./install-docker.sh
-              #- ./install-lldap.sh ${input.adminPassword}
               - ./install-lldap.sh 
               - /usr/bin/vmtoolsd --cmd "info-set guestinfo.vmservice.bootstrap.condition True"
 
