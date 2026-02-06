@@ -18,5 +18,5 @@ spec:
   bootstrap:
     cloudInit:
       rawCloudConfig:
-        name: vm-redis-bootstrap-secret
+        name: vm-redis-bootstrap-secret2
         key: user-data

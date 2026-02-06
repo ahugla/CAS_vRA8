@@ -2,7 +2,7 @@ apiVersion: v1
 kind: Secret
 metadata:
   namespace: demo-namespace-vkrcg
-  name: vm-redis-bootstrap-secret
+  name: vm-redis-bootstrap-secret2
   labels:
     vm-selector: vm-redis
 stringData:
