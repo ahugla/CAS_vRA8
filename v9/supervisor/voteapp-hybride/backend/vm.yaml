@@ -10,7 +10,8 @@ spec:
   className: best-effort-small
   imageName: vmi-90525bf378e8379dd
   storageClass: cluster-wld01-01a-vsan-storage-policy
-  powerState: PoweredOn
+  #powerState: PoweredOn
+  powerState: PoweredOff
   network:
     domainName: mydomain.fr
     nameservers:
