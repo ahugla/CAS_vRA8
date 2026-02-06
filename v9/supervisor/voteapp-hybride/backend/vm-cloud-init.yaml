@@ -11,10 +11,10 @@ stringData:
     packages:
       - wget
     runcmd:
-      - touch /etc/cloud/cloud-init.disabled
+      - #touch /etc/cloud/cloud-init.disabled
       - cd /tmp
-      - wget https://raw.githubusercontent.com/ahugla/CAS_vRA8/refs/heads/master/v9/all-apps/VoteApp/Mix%20Archi/install_redis_rocky-NOPASS.sh
-      - chmod 755 install_redis_rocky-NOPASS.sh
-      - ./install_redis_rocky-NOPASS.sh
-      - rm toto
-      - /usr/bin/vmtoolsd --cmd "info-set guestinfo.vmservice.bootstrap.condition True"
+      - #wget https://raw.githubusercontent.com/ahugla/CAS_vRA8/refs/heads/master/v9/all-apps/VoteApp/Mix%20Archi/install_redis_rocky-NOPASS.sh
+      - #chmod 755 install_redis_rocky-NOPASS.sh
+      - #./install_redis_rocky-NOPASS.sh
+      - touch /root/TOTO
+      - #/usr/bin/vmtoolsd --cmd "info-set guestinfo.vmservice.bootstrap.condition True"
