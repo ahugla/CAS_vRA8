@@ -1,0 +1,97 @@
+
+# EXEMPLE VOTE APP
+# FONCTIONNE DANS SUPERVISOR
+# AVEC REGISTRY PRIVATE HARBOR
+# DANS NS VCFA
+
+
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: vote-backend
+  namespace: ns-default-project-1-ndvqp
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: vote-backend
+  template:
+    metadata:
+      labels:
+        app: vote-backend
+    spec:
+      containers:
+      - name: vote-backend
+        image: harbor.vmwarelabfr.com/library/vote-app-backend:v1.0
+        env:
+        - name: ALLOW_EMPTY_PASSWORD
+          value: "yes"
+        ports:
+        - containerPort: 6379
+          name: redis
+      imagePullSecrets:
+      - name: harbor-credentials
+
+
+---
+
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: vote-backend
+  namespace: ns-default-project-1-ndvqp
+spec:
+  ports:
+  - port: 6379
+  selector:
+    app: vote-backend
+
+
+---
+
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: vote-frontend
+  namespace: ns-default-project-1-ndvqp 
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: vote-frontend
+  template:
+    metadata:
+      labels:
+        app: vote-frontend
+    spec:
+      containers:
+      - name: vote-frontend
+        image: harbor.vmwarelabfr.com/library/vote-app-frontend:v1.0
+        ports:
+        - containerPort: 80
+        env:
+        - name: REDIS
+          value: "vote-backend"
+      imagePullSecrets:
+      - name: harbor-credentials
+
+---
+
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: vote-frontend
+  namespace: ns-default-project-1-ndvqp
+spec:
+  type: LoadBalancer
+  ports:
+  - port: 80
+  selector:
+    app: vote-frontend
+
+
+
