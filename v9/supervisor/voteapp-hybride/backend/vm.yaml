@@ -8,7 +8,7 @@ metadata:
     lb-vm-redis: vm-lb-selector
 spec:
   className: best-effort-small
-  imageName: vmi-5d491209cc636977a
+  imageName: vmi-fe1add2c67b21e00f
   storageClass: vsan-default-storage-policy
   powerState: PoweredOn
   #powerState: PoweredOff
