@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  namespace: xbig-39r5b
+  namespace: voteapp
   name: vote-frontend
 spec:
   replicas: 2

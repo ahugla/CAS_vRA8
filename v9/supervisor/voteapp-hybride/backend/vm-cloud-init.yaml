@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: Secret
 metadata:
-  namespace: xbig-39r5b
+  namespace: voteapp
   name: vm-redis-bootstrap-secret
   labels:
     vm-selector: vm-redis

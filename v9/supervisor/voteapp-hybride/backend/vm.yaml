@@ -1,7 +1,7 @@
 apiVersion: vmoperator.vmware.com/v1alpha5
 kind: VirtualMachine
 metadata:
-  namespace: xbig-39r5b
+  namespace: voteapp
   name: vm-redis
   labels:
     vm-selector: vm-redis
