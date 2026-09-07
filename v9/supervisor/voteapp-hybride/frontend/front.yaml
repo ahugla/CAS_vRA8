@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: vote-frontend
-          image: alexfr75/vote-app-frontend:v1.0
+          image: harbor.labfr.com/voteapp/vote-app-frontend:v1.0
           ports:
             - containerPort: 80
           env:
