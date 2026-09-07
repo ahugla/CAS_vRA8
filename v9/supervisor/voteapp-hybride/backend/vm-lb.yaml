@@ -1,4 +1,4 @@
-apiVersion: vmoperator.vmware.com/v1alpha3
+apiVersion: vmoperator.vmware.com/v1alpha5
 kind: VirtualMachineService
 metadata:
   namespace: xbig-39r5b
