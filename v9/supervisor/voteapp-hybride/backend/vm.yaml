@@ -1,14 +1,14 @@
 apiVersion: vmoperator.vmware.com/v1alpha3
 kind: VirtualMachine
 metadata:
-  namespace: demo-namespace-vkrcg
+  namespace: svc-argocd-service-u3cph
   name: vm-redis
   labels:
     vm-selector: vm-redis
     lb-vm-redis: vm-lb-selector
 spec:
   className: best-effort-small
-  imageName: vmi-90525bf378e8379dd
+  imageName: vmi-132dbd33bb2a92adb
   storageClass: cluster-wld01-01a-vsan-storage-policy
   powerState: PoweredOn
   #powerState: PoweredOff

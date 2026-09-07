@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: Secret
 metadata:
-  namespace: demo-namespace-vkrcg
+  namespace: svc-argocd-service-u3cph
   name: vm-redis-bootstrap-secret2
   labels:
     vm-selector: vm-redis
