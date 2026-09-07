@@ -2,7 +2,7 @@ apiVersion: v1
 kind: Secret
 metadata:
   namespace: xbig-39r5b
-  name: vm-redis-bootstrap-secret2
+  name: vm-redis-bootstrap-secret
   labels:
     vm-selector: vm-redis
 stringData:
@@ -11,10 +11,10 @@ stringData:
     packages:
       - wget
     runcmd:
-      - #touch /etc/cloud/cloud-init.disabled
+      - touch /etc/cloud/cloud-init.disabled
       - cd /tmp
-      - #wget https://raw.githubusercontent.com/ahugla/CAS_vRA8/refs/heads/master/v9/all-apps/VoteApp/Mix%20Archi/install_redis_rocky-NOPASS.sh
-      - #chmod 755 install_redis_rocky-NOPASS.sh
-      - #./install_redis_rocky-NOPASS.sh
+      - wget https://raw.githubusercontent.com/ahugla/CAS_vRA8/refs/heads/master/v9/all-apps/VoteApp/Mix%20Archi/install_redis_rocky-NOPASS.sh
+      - chmod 755 install_redis_rocky-NOPASS.sh
+      - ./install_redis_rocky-NOPASS.sh
       - touch /root/TOTO
-      - #/usr/bin/vmtoolsd --cmd "info-set guestinfo.vmservice.bootstrap.condition True"
+      - /usr/bin/vmtoolsd --cmd "info-set guestinfo.vmservice.bootstrap.condition True"
