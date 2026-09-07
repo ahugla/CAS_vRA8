@@ -4,7 +4,7 @@ metadata:
   namespace: voteapp
   name: vote-frontend
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app: vote-frontend
