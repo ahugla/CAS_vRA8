@@ -9,11 +9,11 @@ metadata:
 spec:
   className: best-effort-small
   imageName: vmi-132dbd33bb2a92adb
-  storageClass: cluster-wld01-01a-vsan-storage-policy
+  storageClass: vsan-default-storage-policy
   powerState: PoweredOn
   #powerState: PoweredOff
   network:
-    domainName: mydomain.fr
+    domainName: labfr.com
     nameservers:
       - 8.8.8.8
   bootstrap:
