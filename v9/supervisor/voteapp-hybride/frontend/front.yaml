@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  namespace: svc-argocd-service-u3cph
+  namespace: xbig-39r5b
   name: vote-frontend
 spec:
   replicas: 1

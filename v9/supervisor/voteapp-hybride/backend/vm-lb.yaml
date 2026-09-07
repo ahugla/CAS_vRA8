@@ -1,7 +1,7 @@
 apiVersion: vmoperator.vmware.com/v1alpha3
 kind: VirtualMachineService
 metadata:
-  namespace: svc-argocd-service-u3cph
+  namespace: xbig-39r5b
   name: lb-vm-redis
 spec:
   selector:
