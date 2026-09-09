@@ -1,0 +1,15 @@
+
+- CANNOT use "default" namespace
+
+
+- be sure enough CPU/MEM/STO
+     CPU 200 m    200 millieme = 1 cinquieme de core
+     MEM 400 Mo  
+     STO 130 Go ?   
+ 
+
+- kubectl create ns boutique-online
+  kubectl config set-context --current --namespace=boutique-online
+  kubectl config get-contexts
+  kubectl apply -f file.yaml
+
