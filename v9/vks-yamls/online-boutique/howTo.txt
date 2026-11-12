@@ -8,8 +8,13 @@
      STO 130 Go ?   
  
 
-- kubectl create ns boutique-online
+- Deploiement 
+  -----------
+  kubectl create ns boutique-online
   kubectl config set-context --current --namespace=boutique-online
   kubectl config get-contexts
-  kubectl apply -f file.yaml
+  kubectl apply -f online-boutique.yaml
 
+
+  si message de "securité" c'est que le namespace a besoin 
+  "kubectl label --overwrite ns boutique-online pod-security.kubernetes.io/enforce=privileged"
